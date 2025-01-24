@@ -1,6 +1,6 @@
 # Development Log
 
-## SCRUM-46 sets up django backend, db connection
+## SCRUM-46 sets up django backend, db connection, documentation
 
 - create Python virtual environment (python -m venv venv)
 - activate venv (source venv/Scripts/activate)
@@ -8,7 +8,9 @@
 - create requirements file (pip freeze > requirements.txt)
 - set up Django backend (django-admin startproject backend .)
 
-### Local database set-up
+---
+
+**Local database set-up**
 
 - sign into postgreSQL as default postgres user (psql -U postgres)
 - create database (CREATE DATABASE database_name;)
@@ -16,6 +18,8 @@
 - grant privileges on new db to new user (GRANT ALL PRIVILEGES ON DATABASE database_name TO user_name;)
 - connect to new database with superuser account and create schema and authorize new account (CREATE SCHEMA schema_name AUTHORIZATION user_name;)
 - set search path (ALTER ROLE user_name IN DATABASE database_name SET search_path = 'schema_name';)
+
+---
 
 - migrate the database (python manage.py makemigrations, python manage.py migrate)
 - hide sensitive information in .env file, link it to settings.py using django-environ
