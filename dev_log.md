@@ -49,3 +49,12 @@
 - comment out strict mode on main.jsx
 - adjust some css for better display
 - check that frontend retrieves data from api which retrieves from db and displays on frontend without errors, use ctrl+shift+r if needed for hard reload
+
+## SCRUM-14 updates item schema for db incl. local django image saving
+
+- update item schema with more fields and constraints
+- list item categories
+- install Pillow (pip install Pillow)
+- create requirements.txt again
+- perform db migrations again (makemigrations, migrate)
+- update settings and urls for temp local django storage location for images
