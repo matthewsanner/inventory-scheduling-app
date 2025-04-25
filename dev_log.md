@@ -58,3 +58,15 @@
 - create requirements.txt again
 - perform db migrations again (makemigrations, migrate)
 - update settings and urls for temp local django storage location for images
+
+## SCRUM-68 creates basic frontend with navbar, routing, checks that backend, frontend, db are connected
+
+- install axios, react-router, react-icons, and @material-tailwind/react as dependencies, and @tailwindcss/vite, prettier, prettier-plugin-tailwindcss, and tailwindcss as dev dependencies
+- add tailwind to vite config
+- comment out all default css, can delete later
+- add tailwind css import to App.css
+- create simple navbar component with a couple links and simple items page
+- update serializer on backend to create the long category variable derived from matching the short category name in the model, and set it to return all fields
+- create the react routing setup in App.jsx, just handling home and items pages for now
+- create a couple sample items in the items table from the Django admin panel on the backend for testing purposes
+- check to make sure that the items page is properly returning all of the sample items with their name and long category
