@@ -70,3 +70,12 @@
 - create the react routing setup in App.jsx, just handling home and items pages for now
 - create a couple sample items in the items table from the Django admin panel on the backend for testing purposes
 - check to make sure that the items page is properly returning all of the sample items with their name and long category
+
+## SCRUM-15 replaces material-tailwind with flowbite, creates items table and pagination
+
+- uninstall @material-tailwind/react due to incompatibility with recent versions of Tailwind and/or React
+- remove all configuration details related to @material-tailwind/react
+- install flowbite-react as an alternative for basic components that is compatible (npx flowbite-react@latest init), this automatically takes care of config details as well
+- add Django Rest Framework (DRF) pagination settings to settings.py, using just 10 page intervals for now, need to increase later
+- create basic table to return all items, using Table components from Flowbite
+- paginate the API call and the table with controls using Pagination components from Flowbite
