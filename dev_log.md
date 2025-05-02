@@ -79,3 +79,9 @@
 - add Django Rest Framework (DRF) pagination settings to settings.py, using just 10 page intervals for now, need to increase later
 - create basic table to return all items, using Table components from Flowbite
 - paginate the API call and the table with controls using Pagination components from Flowbite
+
+## SCRUM-69 creates item detail page, links items table to item detail pages
+
+- create route to item detail pages
+- create item detail page that displays all information and handles items with no image or no description
+- make each table row on the items page link to the corresponding item

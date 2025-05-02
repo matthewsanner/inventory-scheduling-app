@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import axios from "axios";
 import {
   Card,
@@ -16,6 +17,7 @@ const Items = () => {
   const [items, setItems] = useState([]);
   const [pageCount, setPageCount] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
 
   const pageSize = 10; // update when page size increases for production
 
@@ -60,7 +62,10 @@ const Items = () => {
               </TableHead>
               <TableBody>
                 {items.map((item) => (
-                  <TableRow key={item.id}>
+                  <TableRow
+                    key={item.id}
+                    onClick={() => navigate(`/items/${item.id}`)}
+                    className="cursor-pointer hover:bg-gray-100 transition">
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.category_long}</TableCell>
                     <TableCell>{item.quantity}</TableCell>

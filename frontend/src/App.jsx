@@ -3,6 +3,7 @@ import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import Navbar from "./components/Navbar";
 import Items from "./pages/Items";
+import ItemDetail from "./pages/ItemDetail";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             element={<h1 className="text-2xl font-bold">Home</h1>}
           />
           <Route path="/items" element={<Items />} />
+          <Route path="/items/:id" element={<ItemDetail />} />
         </Routes>
       </div>
     </Router>
