@@ -66,7 +66,7 @@ class Item(models.Model):
   name = models.CharField(max_length=200)
   description = models.CharField(max_length=2000, blank=True)
   quantity = models.PositiveSmallIntegerField(default=1)
-  image = models.ImageField(upload_to='items/', blank=True, null=True)
+  image = models.URLField(blank=True, null=True)
   category = models.CharField(max_length=4, choices=CATEGORY_CHOICES, blank=True)
   color = models.CharField(max_length=50, blank=True)
   location = models.CharField(max_length=200, blank=True)

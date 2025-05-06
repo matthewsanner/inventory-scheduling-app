@@ -11,6 +11,7 @@ import {
   TableHeadCell,
   TableRow,
   Pagination,
+  Button,
 } from "flowbite-react";
 
 const Items = () => {
@@ -41,7 +42,12 @@ const Items = () => {
 
   return (
     <Card className="my-6 max-w-fit mx-auto p-4 shadow-lg rounded-lg">
-      <h2 className="text-3xl mb-4">Items</h2>
+      <div className="flex justify-between">
+        <h2 className="text-3xl mb-4">Items</h2>
+        <div className="flex justify-end mb-4">
+          <Button href="/items/new">Add New Item</Button>
+        </div>
+      </div>
 
       {items.length === 0 ? (
         <p>No items available</p>

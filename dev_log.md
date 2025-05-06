@@ -85,3 +85,13 @@
 - create route to item detail pages
 - create item detail page that displays all information and handles items with no image or no description
 - make each table row on the items page link to the corresponding item
+
+## SCRUM-16 creates interface for adding new items
+
+- fix backend item model to expect just a URL for the image instead of expecting an image upload, in the future we may want to change the frontend to an image upload that then uploads to AWS cloud or similar and then stores a URL in the database
+- add routing for new item creation
+- surface the categories from the item model using an api route with a category APIView for the new item form to get
+- fix item api routing to not use extend and instead just include the path, this exposes the APIView properly
+- set category_long to be read only in the items serializer so it's not required to create a new item
+- create the new item component with Flowbite form that gets the categories from the the new category endpoint and submits the new item data to the new item route, set name to be the only required field
+- add a create new item button to the items component that routes to the new item component

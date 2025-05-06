@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router";
 import Navbar from "./components/Navbar";
 import Items from "./pages/Items";
 import ItemDetail from "./pages/ItemDetail";
+import NewItem from "./pages/NewItem";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           />
           <Route path="/items" element={<Items />} />
           <Route path="/items/:id" element={<ItemDetail />} />
+          <Route path="/items/new" element={<NewItem />} />
         </Routes>
       </div>
     </Router>
