@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import axios from "axios";
 import {
   Card,
@@ -11,8 +11,9 @@ import {
   Checkbox,
 } from "flowbite-react";
 
-const NewItem = () => {
+const EditItem = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -27,15 +28,30 @@ const NewItem = () => {
   });
 
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch categories
     axios
       .get(`${import.meta.env.VITE_API_URL}items/categories/`)
       .then((response) => {
         setCategories(response.data);
       })
       .catch((error) => console.error("Error fetching categories:", error));
-  }, []);
+
+    // Fetch item data
+    axios
+      .get(`${import.meta.env.VITE_API_URL}items/${id}/`)
+      .then((response) => {
+        setFormData(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching item:", error);
+        alert("Failed to load item data.");
+        navigate("/items");
+      });
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,19 +72,27 @@ const NewItem = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post(`${import.meta.env.VITE_API_URL}items/`, formData)
+      .put(`${import.meta.env.VITE_API_URL}items/${id}/`, formData)
       .then(() => {
         navigate("/items");
       })
       .catch((error) => {
-        console.error("Error creating item:", error);
-        alert("Failed to create item.");
+        console.error("Error updating item:", error);
+        alert("Failed to update item.");
       });
   };
 
+  if (loading) {
+    return (
+      <Card className="my-6 max-w-xl mx-auto p-4 shadow-lg rounded-lg">
+        <p>Loading...</p>
+      </Card>
+    );
+  }
+
   return (
     <Card className="my-6 max-w-xl mx-auto p-4 shadow-lg rounded-lg">
-      <h2 className="text-3xl mb-4">Add New Item</h2>
+      <h2 className="text-3xl mb-4">Edit Item</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label htmlFor="name">Name</Label>
@@ -163,8 +187,13 @@ const NewItem = () => {
         </div>
 
         <div className="flex justify-between pt-4">
-          <Button type="submit">Add Item</Button>
-          <Button color="light" onClick={() => navigate("/items")}>
+          <Button type="submit" color="green" className="cursor-pointer">
+            Update Item
+          </Button>
+          <Button
+            color="light"
+            onClick={() => navigate("/items")}
+            className="cursor-pointer">
             Cancel
           </Button>
         </div>
@@ -173,4 +202,4 @@ const NewItem = () => {
   );
 };
 
-export default NewItem;
+export default EditItem;

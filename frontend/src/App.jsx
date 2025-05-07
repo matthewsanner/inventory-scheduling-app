@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Items from "./pages/Items";
 import ItemDetail from "./pages/ItemDetail";
 import NewItem from "./pages/NewItem";
+import EditItem from "./pages/EditItem";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/items" element={<Items />} />
           <Route path="/items/:id" element={<ItemDetail />} />
           <Route path="/items/new" element={<NewItem />} />
+          <Route path="/items/:id/edit" element={<EditItem />} />
         </Routes>
       </div>
     </Router>

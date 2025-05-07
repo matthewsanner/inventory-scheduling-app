@@ -95,3 +95,12 @@
 - set category_long to be read only in the items serializer so it's not required to create a new item
 - create the new item component with Flowbite form that gets the categories from the the new category endpoint and submits the new item data to the new item route, set name to be the only required field
 - add a create new item button to the items component that routes to the new item component
+
+## SCRUM-17 implement item editing functionality
+
+- create edit item page with form similar to new item form
+- add routing for item editing
+- make category field optional in both new and edit item forms by removing required attribute
+- add default ordering to Item model to display items in creation order
+- create and apply database migration for model changes
+- restart Django server to use new ordering configuration

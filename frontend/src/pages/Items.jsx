@@ -64,14 +64,14 @@ const Items = () => {
                   <TableHeadCell>Location</TableHeadCell>
                   <TableHeadCell>Checked Out</TableHeadCell>
                   <TableHeadCell>In Repair</TableHeadCell>
+                  <TableHeadCell>Actions</TableHeadCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {items.map((item) => (
                   <TableRow
                     key={item.id}
-                    onClick={() => navigate(`/items/${item.id}`)}
-                    className="cursor-pointer hover:bg-gray-100 transition">
+                    className="hover:bg-gray-100 transition">
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.category_long}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
@@ -82,6 +82,24 @@ const Items = () => {
                     </TableCell>
                     <TableCell>
                       <Checkbox checked={item.in_repair} disabled />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          size="xs"
+                          color="blue"
+                          className="cursor-pointer"
+                          onClick={() => navigate(`/items/${item.id}`)}>
+                          View
+                        </Button>
+                        <Button
+                          size="xs"
+                          color="green"
+                          className="cursor-pointer"
+                          onClick={() => navigate(`/items/${item.id}/edit`)}>
+                          Edit
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
