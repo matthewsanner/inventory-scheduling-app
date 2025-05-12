@@ -111,3 +111,26 @@
 - implement confirmation dialog using Flowbite Modal component with popup prop (optimized for confirmation dialogs), warning icon from react-icons, one button to delete, the other to not delete and remove modal
 - add delete functionality using axios DELETE request to the item endpoint
 - add navigation back to items list after successful deletion
+
+## SCRUM-19 implement item search and filtering options, improve items table UI
+
+- install django-filter package in backend (pip install django-filter)
+- add django-filter to INSTALLED_APPS in settings.py
+- update requirements.txt with new dependency
+- configure REST_FRAMEWORK settings to enable filtering backends (DjangoFilterBackend, SearchFilter, OrderingFilter)
+- create ItemFilter class in items/api/views.py to define filterable fields:
+  - name (case-insensitive contains)
+  - category (exact match)
+  - color (case-insensitive contains)
+  - location (case-insensitive contains)
+  - checked_out (boolean)
+  - in_repair (boolean)
+- add search_fields and ordering_fields to ItemViewSet
+- update frontend Items component:
+  - add search and filter form with responsive grid layout
+  - implement filter controls (search input, category dropdown, color/location filters, checkboxes)
+  - add clear filters button
+  - set max-width (1200px) for table and filter form
+  - center content and maintain horizontal scrolling for smaller screens
+- update frontend API call to include filter parameters
+- reset pagination when filters change
