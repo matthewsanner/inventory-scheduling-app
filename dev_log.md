@@ -104,3 +104,10 @@
 - add default ordering to Item model to display items in creation order
 - create and apply database migration for model changes
 - restart Django server to use new ordering configuration
+
+## SCRUM-18 add item deletion functionality
+
+- add delete button to item detail page using Flowbite Button component with red color
+- implement confirmation dialog using Flowbite Modal component with popup prop (optimized for confirmation dialogs), warning icon from react-icons, one button to delete, the other to not delete and remove modal
+- add delete functionality using axios DELETE request to the item endpoint
+- add navigation back to items list after successful deletion
