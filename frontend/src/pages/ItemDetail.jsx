@@ -76,9 +76,12 @@ const ItemDetail = () => {
           </ul>
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-4">
           <Button color="red" onClick={() => setShowDeleteModal(true)}>
             Delete Item
+          </Button>
+          <Button color="green" onClick={() => navigate(`/items/${id}/edit`)}>
+            Edit Item
           </Button>
           <Button href="/items">← Back to Items</Button>
         </div>

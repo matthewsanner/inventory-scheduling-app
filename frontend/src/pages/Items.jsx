@@ -236,13 +236,6 @@ const Items = () => {
                             onClick={() => navigate(`/items/${item.id}`)}>
                             View
                           </Button>
-                          <Button
-                            size="xs"
-                            color="green"
-                            className="cursor-pointer"
-                            onClick={() => navigate(`/items/${item.id}/edit`)}>
-                            Edit
-                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

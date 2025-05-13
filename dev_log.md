@@ -134,3 +134,4 @@
   - center content and maintain horizontal scrolling for smaller screens
 - update frontend API call to include filter parameters
 - reset pagination when filters change
+- move edit button to item detail page
