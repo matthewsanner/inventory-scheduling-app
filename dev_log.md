@@ -135,3 +135,4 @@
 - update frontend API call to include filter parameters
 - reset pagination when filters change
 - move edit button to item detail page
+- fix fetchItems dependency issue

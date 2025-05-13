@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import {
@@ -41,20 +41,23 @@ const Items = () => {
       .catch((error) => console.error("Error fetching categories:", error));
   };
 
-  const fetchItems = (page) => {
-    const params = new URLSearchParams({
-      page: page,
-      ...filters,
-    });
+  const fetchItems = useCallback(
+    (page) => {
+      const params = new URLSearchParams({
+        page: page,
+        ...filters,
+      });
 
-    axios
-      .get(`${import.meta.env.VITE_API_URL}items/?${params}`)
-      .then((response) => {
-        setItems(response.data.results);
-        setPageCount(Math.ceil(response.data.count / pageSize));
-      })
-      .catch((error) => console.error("Error fetching items:", error));
-  };
+      axios
+        .get(`${import.meta.env.VITE_API_URL}items/?${params}`)
+        .then((response) => {
+          setItems(response.data.results);
+          setPageCount(Math.ceil(response.data.count / pageSize));
+        })
+        .catch((error) => console.error("Error fetching items:", error));
+    },
+    [filters]
+  );
 
   useEffect(() => {
     fetchCategories();
@@ -62,7 +65,7 @@ const Items = () => {
 
   useEffect(() => {
     fetchItems(currentPage);
-  }, [currentPage, filters]);
+  }, [currentPage, filters, fetchItems]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
