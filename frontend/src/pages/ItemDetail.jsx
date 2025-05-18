@@ -1,20 +1,32 @@
 import { useParams, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Card, Button, Modal, ModalHeader, ModalBody } from "flowbite-react";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { Card, Button } from "flowbite-react";
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
+import DeleteItemModal from "../components/DeleteItemModal";
+import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
 
 const ItemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorKey, setErrorKey] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_URL}items/${id}/`)
-      .then((response) => setItem(response.data))
-      .catch((error) => console.error("Error fetching item:", error));
+      .then((response) => {
+        setItem(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching item:", error);
+        setErrorKey(ErrorKeys.LOAD_ITEM_FAILED);
+        setLoading(false);
+      });
   }, [id]);
 
   const handleDelete = () => {
@@ -23,11 +35,27 @@ const ItemDetail = () => {
       .then(() => {
         navigate("/items");
       })
-      .catch((error) => console.error("Error deleting item:", error));
+      .catch((error) => {
+        console.error("Error deleting item:", error);
+        setErrorKey(ErrorKeys.DELETE_ITEM_FAILED);
+      });
   };
 
-  if (!item) {
-    return <p className="text-center mt-10 text-gray-500">Loading item...</p>;
+  if (errorKey) {
+    const errorConfig =
+      ERROR_CONFIG[errorKey] || ERROR_CONFIG[ErrorKeys.GENERIC_ERROR];
+    const { message, onBack, backLabel } = errorConfig;
+    return (
+      <ErrorCard
+        message={message}
+        onBack={onBack(navigate, id)}
+        backLabel={backLabel}
+      />
+    );
+  }
+
+  if (loading) {
+    return <LoadingCard message="Loading item..." />;
   }
 
   return (
@@ -83,33 +111,18 @@ const ItemDetail = () => {
           <Button color="green" onClick={() => navigate(`/items/${id}/edit`)}>
             Edit Item
           </Button>
-          <Button href="/items">← Back to Items</Button>
+          <Button color="light" onClick={() => navigate("/items")}>
+            ← Back to Items
+          </Button>
         </div>
       </Card>
 
-      <Modal
-        show={showDeleteModal}
-        size="md"
+      <DeleteItemModal
+        open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        popup>
-        <ModalHeader />
-        <ModalBody>
-          <div className="text-center">
-            <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
-            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Are you sure you want to delete &ldquo;{item.name}&rdquo;?
-            </h3>
-            <div className="flex justify-center gap-4">
-              <Button color="red" onClick={handleDelete}>
-                Yes, I&apos;m sure
-              </Button>
-              <Button color="gray" onClick={() => setShowDeleteModal(false)}>
-                No, cancel
-              </Button>
-            </div>
-          </div>
-        </ModalBody>
-      </Modal>
+        onConfirm={handleDelete}
+        itemName={item.name}
+      />
     </>
   );
 };

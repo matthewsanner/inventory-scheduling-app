@@ -6,4 +6,9 @@ import flowbiteReact from "flowbite-react/plugin/vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), flowbiteReact()],
+  test: {
+    environment: "jsdom", // run tests in browser-like environment
+    globals: true,
+    setupFiles: "./src/setupTests.js",
+  },
 });

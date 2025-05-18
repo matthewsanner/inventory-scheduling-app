@@ -136,3 +136,17 @@
 - reset pagination when filters change
 - move edit button to item detail page
 - fix fetchItems dependency issue
+
+## SCRUM-47 improve error handling and write unit tests
+
+- create DeleteItemModal.jsx component to check if users are sure they want to delete item
+- create parameterized ErrorCard.jsx component to display when certain types of anticipated errors occur
+- create LoadingCard.jsx to display briefly before items or item details load
+- install react-error-boundary
+- create ErrorBoundary.jsx to handle unexpected errors by displaying ErrorCard and wrap app with it on App.jsx
+- create errormessages.js to centralized all ErrorCard error messages, redirects, and button text
+- implement the improved error handling and loading state on all pages as appropriate
+- install @testing-library/jest-dom, @testing-library/react, @testing-library/user-event, eslint-plugin-vitest, jsdom
+- create simple setupTest.js file to make jest-dom features available (it's compatible with Vitest), and link it into the vite.config.js which is set up to use JSDOM
+- create testUtils.js to hold reusable test mocks
+- create reasonably comprehensive tests for all pages and components using Vitest

@@ -10,6 +10,8 @@ import {
   Select,
   Checkbox,
 } from "flowbite-react";
+import ErrorCard from "../components/ErrorCard";
+import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
 
 const NewItem = () => {
   const navigate = useNavigate();
@@ -27,6 +29,9 @@ const NewItem = () => {
   });
 
   const [categories, setCategories] = useState([]);
+  const [errorKey, setErrorKey] = useState(null);
+  const [categoriesError, setCategoriesError] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     axios
@@ -34,7 +39,10 @@ const NewItem = () => {
       .then((response) => {
         setCategories(response.data);
       })
-      .catch((error) => console.error("Error fetching categories:", error));
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+        setCategoriesError(true);
+      });
   }, []);
 
   const handleChange = (e) => {
@@ -55,6 +63,17 @@ const NewItem = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const errors = {};
+    if (!formData.name.trim()) errors.name = "Name is required.";
+    if (!formData.quantity || formData.quantity < 1)
+      errors.quantity = "Quantity must be at least 1.";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
     axios
       .post(`${import.meta.env.VITE_API_URL}items/`, formData)
       .then(() => {
@@ -62,9 +81,22 @@ const NewItem = () => {
       })
       .catch((error) => {
         console.error("Error creating item:", error);
-        alert("Failed to create item.");
+        setErrorKey(ErrorKeys.CREATE_ITEM_FAILED);
       });
   };
+
+  if (errorKey) {
+    const errorConfig =
+      ERROR_CONFIG[errorKey] || ERROR_CONFIG[ErrorKeys.GENERIC_ERROR];
+    const { message, onBack, backLabel } = errorConfig;
+    return (
+      <ErrorCard
+        message={message}
+        onBack={onBack(navigate)}
+        backLabel={backLabel}
+      />
+    );
+  }
 
   return (
     <Card className="my-6 max-w-xl mx-auto p-4 shadow-lg rounded-lg">
@@ -77,8 +109,8 @@ const NewItem = () => {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            required
           />
+          {formErrors.name && <p className="text-red-500">{formErrors.name}</p>}
         </div>
         <div>
           <Label htmlFor="description">Description</Label>
@@ -106,7 +138,9 @@ const NewItem = () => {
             name="category"
             value={formData.category}
             onChange={handleChange}>
-            <option value="">Select a category</option>
+            <option value="">
+              {categoriesError ? "Categories unavailable" : "Select a category"}
+            </option>
             {categories.map((cat) => (
               <option key={cat.value} value={cat.value}>
                 {cat.label}
@@ -122,8 +156,10 @@ const NewItem = () => {
             type="number"
             value={formData.quantity}
             onChange={handleChange}
-            required
           />
+          {formErrors.quantity && (
+            <p className="text-red-500">{formErrors.quantity}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="color">Color</Label>

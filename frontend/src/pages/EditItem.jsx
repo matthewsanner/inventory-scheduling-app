@@ -10,6 +10,9 @@ import {
   Select,
   Checkbox,
 } from "flowbite-react";
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
+import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
 
 const EditItem = () => {
   const navigate = useNavigate();
@@ -29,6 +32,9 @@ const EditItem = () => {
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorKey, setErrorKey] = useState(null);
+  const [categoriesError, setCategoriesError] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     // Fetch categories
@@ -37,7 +43,10 @@ const EditItem = () => {
       .then((response) => {
         setCategories(response.data);
       })
-      .catch((error) => console.error("Error fetching categories:", error));
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+        setCategoriesError(true);
+      });
 
     // Fetch item data
     axios
@@ -48,10 +57,9 @@ const EditItem = () => {
       })
       .catch((error) => {
         console.error("Error fetching item:", error);
-        alert("Failed to load item data.");
-        navigate("/items");
+        setErrorKey(ErrorKeys.LOAD_ITEM_FAILED);
       });
-  }, [id, navigate]);
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,6 +79,17 @@ const EditItem = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const errors = {};
+    if (!formData.name.trim()) errors.name = "Name is required.";
+    if (!formData.quantity || formData.quantity < 1)
+      errors.quantity = "Quantity must be at least 1.";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
     axios
       .put(`${import.meta.env.VITE_API_URL}items/${id}/`, formData)
       .then(() => {
@@ -78,16 +97,25 @@ const EditItem = () => {
       })
       .catch((error) => {
         console.error("Error updating item:", error);
-        alert("Failed to update item.");
+        setErrorKey(ErrorKeys.UPDATE_ITEM_FAILED);
       });
   };
 
-  if (loading) {
+  if (errorKey) {
+    const errorConfig =
+      ERROR_CONFIG[errorKey] || ERROR_CONFIG[ErrorKeys.GENERIC_ERROR];
+    const { message, onBack, backLabel } = errorConfig;
     return (
-      <Card className="my-6 max-w-xl mx-auto p-4 shadow-lg rounded-lg">
-        <p>Loading...</p>
-      </Card>
+      <ErrorCard
+        message={message}
+        onBack={onBack(navigate, id)}
+        backLabel={backLabel}
+      />
     );
+  }
+
+  if (loading) {
+    return <LoadingCard message="Loading item..." />;
   }
 
   return (
@@ -101,8 +129,8 @@ const EditItem = () => {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            required
           />
+          {formErrors.name && <p className="text-red-500">{formErrors.name}</p>}
         </div>
         <div>
           <Label htmlFor="description">Description</Label>
@@ -129,8 +157,11 @@ const EditItem = () => {
             id="category"
             name="category"
             value={formData.category}
-            onChange={handleChange}>
-            <option value="">Select a category</option>
+            onChange={handleChange}
+            disabled={categoriesError || categories.length === 0}>
+            <option value="">
+              {categoriesError ? "Categories unavailable" : "Select a category"}
+            </option>
             {categories.map((cat) => (
               <option key={cat.value} value={cat.value}>
                 {cat.label}
@@ -146,8 +177,10 @@ const EditItem = () => {
             type="number"
             value={formData.quantity}
             onChange={handleChange}
-            required
           />
+          {formErrors.quantity && (
+            <p className="text-red-500">{formErrors.quantity}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="color">Color</Label>

@@ -16,12 +16,18 @@ import {
   Select,
   Label,
 } from "flowbite-react";
+import ErrorCard from "../components/ErrorCard";
+import LoadingCard from "../components/LoadingCard";
+import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
 
 const Items = () => {
   const [items, setItems] = useState([]);
   const [pageCount, setPageCount] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [errorKey, setErrorKey] = useState(null);
+  const [categoriesError, setCategoriesError] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false); // ← added loading state
   const [filters, setFilters] = useState({
     search: "",
     category: "",
@@ -32,17 +38,22 @@ const Items = () => {
   });
   const navigate = useNavigate();
 
-  const pageSize = 10; // update when page size increases for production
+  const pageSize = 10;
 
   const fetchCategories = () => {
     axios
       .get(`${import.meta.env.VITE_API_URL}items/categories/`)
       .then((response) => setCategories(response.data))
-      .catch((error) => console.error("Error fetching categories:", error));
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+        setCategoriesError(true);
+      });
   };
 
   const fetchItems = useCallback(
     (page) => {
+      setLoading(true);
+      setErrorKey(null);
       const params = new URLSearchParams({
         page: page,
         ...filters,
@@ -54,7 +65,11 @@ const Items = () => {
           setItems(response.data.results);
           setPageCount(Math.ceil(response.data.count / pageSize));
         })
-        .catch((error) => console.error("Error fetching items:", error));
+        .catch((error) => {
+          console.error("Error fetching items:", error);
+          setErrorKey(ErrorKeys.LOAD_ITEMS_FAILED);
+        })
+        .finally(() => setLoading(false)); // ← stop loading
     },
     [filters]
   );
@@ -77,7 +92,7 @@ const Items = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
@@ -91,6 +106,9 @@ const Items = () => {
     });
     setCurrentPage(1);
   };
+
+  const currentErrorConfig =
+    ERROR_CONFIG[errorKey] || ERROR_CONFIG[ErrorKeys.GENERIC_ERROR];
 
   return (
     <Card className="my-6 w-full max-w-[95%] md:max-w-[90%] lg:max-w-[85%] mx-auto p-2 md:p-4 shadow-lg rounded-lg">
@@ -119,14 +137,19 @@ const Items = () => {
             <Select
               id="category"
               name="category"
+              data-testid="category-select"
               value={filters.category}
-              onChange={handleFilterChange}>
-              <option value="">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
+              onChange={handleFilterChange}
+              disabled={categoriesError}>
+              <option value="">
+                {categoriesError ? "Categories unavailable" : "All Categories"}
+              </option>
+              {!categoriesError &&
+                categories.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
             </Select>
           </div>
           <div>
@@ -177,7 +200,15 @@ const Items = () => {
         </div>
       </div>
 
-      {items.length === 0 ? (
+      {errorKey ? (
+        <ErrorCard
+          message={currentErrorConfig.message}
+          onBack={currentErrorConfig.onBack(navigate)}
+          backLabel={currentErrorConfig.backLabel}
+        />
+      ) : loading ? (
+        <LoadingCard message="Loading items..." />
+      ) : items.length === 0 ? (
         <p>No items available</p>
       ) : (
         <>
@@ -193,14 +224,15 @@ const Items = () => {
                     <TableHeadCell>Location</TableHeadCell>
                     <TableHeadCell>Checked Out</TableHeadCell>
                     <TableHeadCell>In Repair</TableHeadCell>
-                    <TableHeadCell>Actions</TableHeadCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody data-testid="items-table">
                   {items.map((item) => (
                     <TableRow
                       key={item.id}
-                      className="hover:bg-gray-100 transition">
+                      data-testid={`item-row-${item.id}`}
+                      onClick={() => navigate(`/items/${item.id}`)}
+                      className="hover:bg-gray-100 transition cursor-pointer">
                       <TableCell
                         className="font-medium truncate"
                         title={item.name}>
@@ -228,17 +260,6 @@ const Items = () => {
                       <TableCell>
                         <div className="flex justify-center">
                           <Checkbox checked={item.in_repair} disabled />
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2 justify-center">
-                          <Button
-                            size="xs"
-                            color="blue"
-                            className="cursor-pointer"
-                            onClick={() => navigate(`/items/${item.id}`)}>
-                            View
-                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
