@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import axios from "axios";
 import {
   Card,
   Button,
@@ -12,6 +11,7 @@ import {
 } from "flowbite-react";
 import ErrorCard from "../components/ErrorCard";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
+import { getCategories, createItem } from "../services/NewItemService";
 
 const NewItem = () => {
   const navigate = useNavigate();
@@ -34,8 +34,7 @@ const NewItem = () => {
   const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_URL}items/categories/`)
+    getCategories()
       .then((response) => {
         setCategories(response.data);
       })
@@ -74,8 +73,7 @@ const NewItem = () => {
       return;
     }
 
-    axios
-      .post(`${import.meta.env.VITE_API_URL}items/`, formData)
+    createItem(formData)
       .then(() => {
         navigate("/items");
       })
@@ -197,7 +195,6 @@ const NewItem = () => {
           />
           <Label htmlFor="in_repair">In Repair</Label>
         </div>
-
         <div className="flex justify-between pt-4">
           <Button type="submit">Add Item</Button>
           <Button color="light" onClick={() => navigate("/items")}>

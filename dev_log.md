@@ -150,3 +150,4 @@
 - create simple setupTest.js file to make jest-dom features available (it's compatible with Vitest), and link it into the vite.config.js which is set up to use JSDOM
 - create testUtils.js to hold reusable test mocks
 - create reasonably comprehensive tests for all pages and components using Vitest
+- refactor API service out of the main frontend pages for separation of concerns and readability

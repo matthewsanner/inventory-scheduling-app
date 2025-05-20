@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
-import axios from "axios";
 import {
   Card,
   Checkbox,
@@ -19,6 +18,7 @@ import {
 import ErrorCard from "../components/ErrorCard";
 import LoadingCard from "../components/LoadingCard";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
+import { getItems, getCategories } from "../services/itemsService";
 
 const Items = () => {
   const [items, setItems] = useState([]);
@@ -27,7 +27,7 @@ const Items = () => {
   const [errorKey, setErrorKey] = useState(null);
   const [categoriesError, setCategoriesError] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(false); // ← added loading state
+  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     category: "",
@@ -36,40 +36,36 @@ const Items = () => {
     checked_out: "",
     in_repair: "",
   });
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const pageSize = 10;
 
-  const fetchCategories = () => {
-    axios
-      .get(`${import.meta.env.VITE_API_URL}items/categories/`)
-      .then((response) => setCategories(response.data))
-      .catch((error) => {
-        console.error("Error fetching categories:", error);
-        setCategoriesError(true);
-      });
+  const fetchCategories = async () => {
+    const { data, errorKey } = await getCategories();
+    if (data) {
+      setCategories(data);
+    } else {
+      setCategoriesError(true);
+      console.error("Error fetching categories:", errorKey);
+    }
   };
 
   const fetchItems = useCallback(
-    (page) => {
+    async (page) => {
       setLoading(true);
       setErrorKey(null);
-      const params = new URLSearchParams({
-        page: page,
-        ...filters,
-      });
-
-      axios
-        .get(`${import.meta.env.VITE_API_URL}items/?${params}`)
-        .then((response) => {
-          setItems(response.data.results);
-          setPageCount(Math.ceil(response.data.count / pageSize));
-        })
-        .catch((error) => {
-          console.error("Error fetching items:", error);
-          setErrorKey(ErrorKeys.LOAD_ITEMS_FAILED);
-        })
-        .finally(() => setLoading(false)); // ← stop loading
+      const {
+        data,
+        pageCount: count,
+        errorKey: err,
+      } = await getItems(page, filters, pageSize);
+      if (data) {
+        setItems(data);
+        setPageCount(count);
+      } else {
+        setErrorKey(err);
+      }
+      setLoading(false);
     },
     [filters]
   );
@@ -82,9 +78,7 @@ const Items = () => {
     fetchItems(currentPage);
   }, [currentPage, filters, fetchItems]);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const handlePageChange = (page) => setCurrentPage(page);
 
   const handleFilterChange = (e) => {
     const { name, value, type, checked } = e.target;

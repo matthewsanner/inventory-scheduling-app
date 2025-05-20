@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Card, Button } from "flowbite-react";
 import LoadingCard from "../components/LoadingCard";
 import ErrorCard from "../components/ErrorCard";
 import DeleteItemModal from "../components/DeleteItemModal";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
+import { getItem, deleteItem } from "../services/ItemDetailService";
 
 const ItemDetail = () => {
   const { id } = useParams();
@@ -16,8 +16,7 @@ const ItemDetail = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_URL}items/${id}/`)
+    getItem(id)
       .then((response) => {
         setItem(response.data);
         setLoading(false);
@@ -30,8 +29,7 @@ const ItemDetail = () => {
   }, [id]);
 
   const handleDelete = () => {
-    axios
-      .delete(`${import.meta.env.VITE_API_URL}items/${id}/`)
+    deleteItem(id)
       .then(() => {
         navigate("/items");
       })

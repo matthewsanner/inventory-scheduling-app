@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
-import axios from "axios";
 import {
   Card,
   Button,
@@ -13,6 +12,11 @@ import {
 import LoadingCard from "../components/LoadingCard";
 import ErrorCard from "../components/ErrorCard";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
+import {
+  fetchCategories,
+  fetchItemById,
+  updateItem,
+} from "../services/EditItemService";
 
 const EditItem = () => {
   const navigate = useNavigate();
@@ -37,9 +41,7 @@ const EditItem = () => {
   const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
-    // Fetch categories
-    axios
-      .get(`${import.meta.env.VITE_API_URL}items/categories/`)
+    fetchCategories()
       .then((response) => {
         setCategories(response.data);
       })
@@ -48,9 +50,7 @@ const EditItem = () => {
         setCategoriesError(true);
       });
 
-    // Fetch item data
-    axios
-      .get(`${import.meta.env.VITE_API_URL}items/${id}/`)
+    fetchItemById(id)
       .then((response) => {
         setFormData(response.data);
         setLoading(false);
@@ -90,8 +90,7 @@ const EditItem = () => {
       return;
     }
 
-    axios
-      .put(`${import.meta.env.VITE_API_URL}items/${id}/`, formData)
+    updateItem(id, formData)
       .then(() => {
         navigate("/items");
       })
