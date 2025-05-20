@@ -151,3 +151,5 @@
 - create testUtils.js to hold reusable test mocks
 - create reasonably comprehensive tests for all pages and components using Vitest
 - refactor API service out of the main frontend pages for separation of concerns and readability
+- install pytest and pytest-django on backend
+- create comprehensive backend tests with pytest including edge cases
