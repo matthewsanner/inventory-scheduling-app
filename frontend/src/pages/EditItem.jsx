@@ -219,7 +219,7 @@ const EditItem = () => {
         </div>
 
         <div className="flex justify-between pt-4">
-          <Button type="submit" color="green" className="cursor-pointer">
+          <Button type="submit" color="green">
             Update Item
           </Button>
           <Button

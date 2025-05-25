@@ -159,3 +159,20 @@
 
 - install pytest and pytest-django on backend
 - create comprehensive backend tests with pytest including edge cases
+
+## SCRUM-71 containerizes app with Docker
+
+- create docker-compose.yml with services for db, frontend, backend, frontend-tests, and backend-tests, set test profile for testing services so they don't run automatically on docker compose up
+- create Makefile to streamline docker compose commands
+- create .dockerignore files for frontend and backend
+- create Dockerfile for frontend and backend
+- create sample_data.json to fill container database with some sample testing data
+- create start.sh and wait-for-postgres.sh to make sure backend waits for the database to be ready before initializing
+- install dj-database-url so we can use DATABASE_URL from docker-compose.yml in settings.py db settings
+- update settings.py CORS_ALLOWED_ORIGINS to include 127.0.0.1
+- change package.json dev command to add --host so Vite listens inside the container
+- change package.json test command to add run so it runs the tests and stops and shuts down instead of continuing to listen
+- remove flowbite-react/plugin/vite from plugins because it is not a valid import
+- add box.png to public folder so that test images set in the db will load on frontend
+- remove cursor-pointer tailwind class from wherever it was and add that in as a css rule for all buttons instead
+- update gitignore to ignore .vite cache
