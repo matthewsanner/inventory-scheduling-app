@@ -49,3 +49,130 @@
 - comment out strict mode on main.jsx
 - adjust some css for better display
 - check that frontend retrieves data from api which retrieves from db and displays on frontend without errors, use ctrl+shift+r if needed for hard reload
+
+## SCRUM-14 updates item schema for db incl. local django image saving
+
+- update item schema with more fields and constraints
+- list item categories
+- install Pillow (pip install Pillow)
+- create requirements.txt again
+- perform db migrations again (makemigrations, migrate)
+- update settings and urls for temp local django storage location for images
+
+## SCRUM-68 creates basic frontend with navbar, routing, checks that backend, frontend, db are connected
+
+- install axios, react-router, react-icons, and @material-tailwind/react as dependencies, and @tailwindcss/vite, prettier, prettier-plugin-tailwindcss, and tailwindcss as dev dependencies
+- add tailwind to vite config
+- comment out all default css, can delete later
+- add tailwind css import to App.css
+- create simple navbar component with a couple links and simple items page
+- update serializer on backend to create the long category variable derived from matching the short category name in the model, and set it to return all fields
+- create the react routing setup in App.jsx, just handling home and items pages for now
+- create a couple sample items in the items table from the Django admin panel on the backend for testing purposes
+- check to make sure that the items page is properly returning all of the sample items with their name and long category
+
+## SCRUM-15 replaces material-tailwind with flowbite, creates items table and pagination
+
+- uninstall @material-tailwind/react due to incompatibility with recent versions of Tailwind and/or React
+- remove all configuration details related to @material-tailwind/react
+- install flowbite-react as an alternative for basic components that is compatible (npx flowbite-react@latest init), this automatically takes care of config details as well
+- add Django Rest Framework (DRF) pagination settings to settings.py, using just 10 page intervals for now, need to increase later
+- create basic table to return all items, using Table components from Flowbite
+- paginate the API call and the table with controls using Pagination components from Flowbite
+
+## SCRUM-69 creates item detail page, links items table to item detail pages
+
+- create route to item detail pages
+- create item detail page that displays all information and handles items with no image or no description
+- make each table row on the items page link to the corresponding item
+
+## SCRUM-16 creates interface for adding new items
+
+- fix backend item model to expect just a URL for the image instead of expecting an image upload, in the future we may want to change the frontend to an image upload that then uploads to AWS cloud or similar and then stores a URL in the database
+- add routing for new item creation
+- surface the categories from the item model using an api route with a category APIView for the new item form to get
+- fix item api routing to not use extend and instead just include the path, this exposes the APIView properly
+- set category_long to be read only in the items serializer so it's not required to create a new item
+- create the new item component with Flowbite form that gets the categories from the the new category endpoint and submits the new item data to the new item route, set name to be the only required field
+- add a create new item button to the items component that routes to the new item component
+
+## SCRUM-17 implement item editing functionality
+
+- create edit item page with form similar to new item form
+- add routing for item editing
+- make category field optional in both new and edit item forms by removing required attribute
+- add default ordering to Item model to display items in creation order
+- create and apply database migration for model changes
+- restart Django server to use new ordering configuration
+
+## SCRUM-18 add item deletion functionality
+
+- add delete button to item detail page using Flowbite Button component with red color
+- implement confirmation dialog using Flowbite Modal component with popup prop (optimized for confirmation dialogs), warning icon from react-icons, one button to delete, the other to not delete and remove modal
+- add delete functionality using axios DELETE request to the item endpoint
+- add navigation back to items list after successful deletion
+
+## SCRUM-19 implement item search and filtering options, improve items table UI
+
+- install django-filter package in backend (pip install django-filter)
+- add django-filter to INSTALLED_APPS in settings.py
+- update requirements.txt with new dependency
+- configure REST_FRAMEWORK settings to enable filtering backends (DjangoFilterBackend, SearchFilter, OrderingFilter)
+- create ItemFilter class in items/api/views.py to define filterable fields:
+  - name (case-insensitive contains)
+  - category (exact match)
+  - color (case-insensitive contains)
+  - location (case-insensitive contains)
+  - checked_out (boolean)
+  - in_repair (boolean)
+- add search_fields and ordering_fields to ItemViewSet
+- update frontend Items component:
+  - add search and filter form with responsive grid layout
+  - implement filter controls (search input, category dropdown, color/location filters, checkboxes)
+  - add clear filters button
+  - set max-width (1200px) for table and filter form
+  - center content and maintain horizontal scrolling for smaller screens
+- update frontend API call to include filter parameters
+- reset pagination when filters change
+- move edit button to item detail page
+- fix fetchItems dependency issue
+
+## SCRUM-47 improve error handling and write unit tests
+
+- create DeleteItemModal.jsx component to check if users are sure they want to delete item
+- create parameterized ErrorCard.jsx component to display when certain types of anticipated errors occur
+- create LoadingCard.jsx to display briefly before items or item details load
+- install react-error-boundary
+- create ErrorBoundary.jsx to handle unexpected errors by displaying ErrorCard and wrap app with it on App.jsx
+- create errormessages.js to centralized all ErrorCard error messages, redirects, and button text
+- implement the improved error handling and loading state on all pages as appropriate
+- install @testing-library/jest-dom, @testing-library/react, @testing-library/user-event, eslint-plugin-vitest, jsdom
+- create simple setupTest.js file to make jest-dom features available (it's compatible with Vitest), and link it into the vite.config.js which is set up to use JSDOM
+- create testUtils.js to hold reusable test mocks
+- create reasonably comprehensive tests for all pages and components using Vitest
+
+## SCRUM-47 refactor API services out of frontend pages
+
+- refactor API service out of the main frontend pages for separation of concerns and readability
+
+## SCRUM-47 creates backend tests with pytest
+
+- install pytest and pytest-django on backend
+- create comprehensive backend tests with pytest including edge cases
+
+## SCRUM-71 containerizes app with Docker
+
+- create docker-compose.yml with services for db, frontend, backend, frontend-tests, and backend-tests, set test profile for testing services so they don't run automatically on docker compose up
+- create Makefile to streamline docker compose commands
+- create .dockerignore files for frontend and backend
+- create Dockerfile for frontend and backend
+- create sample_data.json to fill container database with some sample testing data
+- create start.sh and wait-for-postgres.sh to make sure backend waits for the database to be ready before initializing
+- install dj-database-url so we can use DATABASE_URL from docker-compose.yml in settings.py db settings
+- update settings.py CORS_ALLOWED_ORIGINS to include 127.0.0.1
+- change package.json dev command to add --host so Vite listens inside the container
+- change package.json test command to add run so it runs the tests and stops and shuts down instead of continuing to listen
+- remove flowbite-react/plugin/vite from plugins because it is not a valid import
+- add box.png to public folder so that test images set in the db will load on frontend
+- remove cursor-pointer tailwind class from wherever it was and add that in as a css rule for all buttons instead
+- update gitignore to ignore .vite cache
