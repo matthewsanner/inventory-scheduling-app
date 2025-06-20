@@ -1,6 +1,6 @@
 # Inventory Scheduling App
 
-A Django-based web application for managing and scheduling inventory for entertainment productions, packaged with Docker for easy testing
+A Django-based web application for managing and scheduling inventory for entertainment productions, packaged with Docker for easy installation and testing
 
 ## Requirements
 
