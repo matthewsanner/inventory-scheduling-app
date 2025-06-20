@@ -4,7 +4,7 @@ A Django-based web application for managing and scheduling inventory for enterta
 
 ## Requirements
 
-**1.** Docker Desktop
+**1.** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 **2.** Any modern web browser
 
