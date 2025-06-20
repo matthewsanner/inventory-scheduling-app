@@ -1,6 +1,12 @@
 # Inventory Scheduling App
 
-A Django-based web application for managing and scheduling inventory for entertainment productions
+A Django-based web application for managing and scheduling inventory for entertainment productions, packaged with Docker for easy testing
+
+## Requirements
+
+**1.** Docker Desktop
+
+**2.** Any modern web browser
 
 ## Installation
 
@@ -16,52 +22,26 @@ git clone https://github.com/matthewsanner/inventory-scheduling-app.git
 cd inventory-scheduling-app
 ```
 
-**3.** Create a Python virtual environment:
+**3.** Use simple Make command to start containers:
 
 ```bash
-python -m venv venv
+make up
 ```
 
-**4.** Activate the virtual environment:
-On Windows:
+## Using the App
+
+**1.** View/use the app at [http://localhost:5173/](http://localhost:5173/)
+
+Note: The Home page is currently just a placeholder, navigate to the Items page for the current content.
+
+**2.** Use Make command to run frontend and backend tests:
 
 ```bash
-venv\Scripts\activate
+make test
 ```
 
-On macOS/Linux:
+**3.** When you are done, use Make command to shut down and remove containers
 
-```bash
-source venv/bin/activate
 ```
-
-**5.** Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-**6.** Create, set-up your PostgreSQL database:
-Refer to the dev log's first commit 'Local database set-up' section for more details on how to do this
-
-**7.** Update .env file with your sensitive info including database info, make sure .gitignore is set to ignore all sensitive and unnecessary files
-
-**8.** Generate new Django secret key from terminal and add that to your .env:
-
-```bash
-from django.core.management.utils import get_random_secret_key
-print(get_random_secret_key())
-```
-
-**9.** Run migrations:
-
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-**10.** Run the development server, watch for db related errors, check that server test page works:
-
-```bash
-python manage.py runserver
+make down
 ```
