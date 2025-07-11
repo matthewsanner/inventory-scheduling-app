@@ -13,4 +13,4 @@ RUN chmod +x /backend/wait-for-postgres.sh
 
 EXPOSE 8000
 
-CMD ["/backend/wait-for-postgres.sh", "sh", "start.sh"]
+CMD ["/backend/wait-for-postgres.sh", "/backend/start.sh"]

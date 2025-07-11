@@ -50,7 +50,9 @@
 - adjust some css for better display
 - check that frontend retrieves data from api which retrieves from db and displays on frontend without errors, use ctrl+shift+r if needed for hard reload
 
-## SCRUM-14 updates item schema for db incl. local django image saving
+## SCRUM-4 Create and Manage Inventory Items
+
+### SCRUM-14 updates item schema for db incl. local django image saving
 
 - update item schema with more fields and constraints
 - list item categories
@@ -59,7 +61,7 @@
 - perform db migrations again (makemigrations, migrate)
 - update settings and urls for temp local django storage location for images
 
-## SCRUM-68 creates basic frontend with navbar, routing, checks that backend, frontend, db are connected
+### SCRUM-68 creates basic frontend with navbar, routing, checks that backend, frontend, db are connected
 
 - install axios, react-router, react-icons, and @material-tailwind/react as dependencies, and @tailwindcss/vite, prettier, prettier-plugin-tailwindcss, and tailwindcss as dev dependencies
 - add tailwind to vite config
@@ -71,7 +73,7 @@
 - create a couple sample items in the items table from the Django admin panel on the backend for testing purposes
 - check to make sure that the items page is properly returning all of the sample items with their name and long category
 
-## SCRUM-15 replaces material-tailwind with flowbite, creates items table and pagination
+### SCRUM-15 replaces material-tailwind with flowbite, creates items table and pagination
 
 - uninstall @material-tailwind/react due to incompatibility with recent versions of Tailwind and/or React
 - remove all configuration details related to @material-tailwind/react
@@ -80,13 +82,13 @@
 - create basic table to return all items, using Table components from Flowbite
 - paginate the API call and the table with controls using Pagination components from Flowbite
 
-## SCRUM-69 creates item detail page, links items table to item detail pages
+### SCRUM-69 creates item detail page, links items table to item detail pages
 
 - create route to item detail pages
 - create item detail page that displays all information and handles items with no image or no description
 - make each table row on the items page link to the corresponding item
 
-## SCRUM-16 creates interface for adding new items
+### SCRUM-16 creates interface for adding new items
 
 - fix backend item model to expect just a URL for the image instead of expecting an image upload, in the future we may want to change the frontend to an image upload that then uploads to AWS cloud or similar and then stores a URL in the database
 - add routing for new item creation
@@ -96,7 +98,7 @@
 - create the new item component with Flowbite form that gets the categories from the the new category endpoint and submits the new item data to the new item route, set name to be the only required field
 - add a create new item button to the items component that routes to the new item component
 
-## SCRUM-17 implement item editing functionality
+### SCRUM-17 implement item editing functionality
 
 - create edit item page with form similar to new item form
 - add routing for item editing
@@ -105,14 +107,14 @@
 - create and apply database migration for model changes
 - restart Django server to use new ordering configuration
 
-## SCRUM-18 add item deletion functionality
+### SCRUM-18 add item deletion functionality
 
 - add delete button to item detail page using Flowbite Button component with red color
 - implement confirmation dialog using Flowbite Modal component with popup prop (optimized for confirmation dialogs), warning icon from react-icons, one button to delete, the other to not delete and remove modal
 - add delete functionality using axios DELETE request to the item endpoint
 - add navigation back to items list after successful deletion
 
-## SCRUM-19 implement item search and filtering options, improve items table UI
+### SCRUM-19 implement item search and filtering options, improve items table UI
 
 - install django-filter package in backend (pip install django-filter)
 - add django-filter to INSTALLED_APPS in settings.py
@@ -137,7 +139,7 @@
 - move edit button to item detail page
 - fix fetchItems dependency issue
 
-## SCRUM-47 improve error handling and write unit tests
+### SCRUM-47 improve error handling and write unit tests
 
 - create DeleteItemModal.jsx component to check if users are sure they want to delete item
 - create parameterized ErrorCard.jsx component to display when certain types of anticipated errors occur
@@ -151,16 +153,16 @@
 - create testUtils.js to hold reusable test mocks
 - create reasonably comprehensive tests for all pages and components using Vitest
 
-## SCRUM-47 refactor API services out of frontend pages
+### SCRUM-47 refactor API services out of frontend pages
 
 - refactor API service out of the main frontend pages for separation of concerns and readability
 
-## SCRUM-47 creates backend tests with pytest
+### SCRUM-47 creates backend tests with pytest
 
 - install pytest and pytest-django on backend
 - create comprehensive backend tests with pytest including edge cases
 
-## SCRUM-71 containerizes app with Docker
+### SCRUM-71 containerizes app with Docker
 
 - create docker-compose.yml with services for db, frontend, backend, frontend-tests, and backend-tests, set test profile for testing services so they don't run automatically on docker compose up
 - create Makefile to streamline docker compose commands
@@ -176,3 +178,14 @@
 - add box.png to public folder so that test images set in the db will load on frontend
 - remove cursor-pointer tailwind class from wherever it was and add that in as a css rule for all buttons instead
 - update gitignore to ignore .vite cache
+
+## SCRUM-5 Enable User Authentication
+
+### SCRUM-21 implement role-based access
+
+- install djangorestframework_simplejwt on backend
+- add 'rest_framework.authtoken' to INSTALLED APPS in settings.py
+- add 'rest_framework_simplejwt.authentication.JWTAuthentication' to DEFAULT_AUTHENTICATION_CLASSES in REST_FRAMEWORK in settings.py
+- add token and token refresh paths to core/api/urls.py
+- create permissions.py with isManagerOrStaffReadOnly class that checks for authentication and authorization per the class
+- in items/api/views.py assign that permission class to ItemViewSet and CategoryChoicesView
