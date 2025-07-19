@@ -18,8 +18,8 @@ services:
       - ./backend:/backend
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgres://myuser:mypassword@db:5432/mydb
+    env_file:
+      - .env
     depends_on:
       - db
 
@@ -30,6 +30,8 @@ services:
       - node_modules:/frontend/node_modules
     ports:
       - "5173:5173"
+    env_file:
+      - .env
 
   backend-tests:
     profiles: ["test"]

@@ -189,3 +189,12 @@
 - add token and token refresh paths to core/api/urls.py
 - create permissions.py with isManagerOrStaffReadOnly class that checks for authentication and authorization per the class
 - in items/api/views.py assign that permission class to ItemViewSet and CategoryChoicesView
+- fixed issue with shell script line endings, added a .gitattributes file to enforce LF endings for .sh files since the Docker container expects Unix-style line endings
+
+### SCRUM-20 fixes env vars issue with docker container
+
+- creates new .env.example file that has some default env vars for full demo/testing inside the Docker container for frontend and backend in the root directory
+- adds code in the Makefile to copy the .env.example file to .env if it doesn't already exist when making the Docker packages
+- adds the .env file to the docker-compose.yml frontend and backend services
+- cleaned up .dockerignore files, added notes to old .env.example files for frontend and backend, these could still be relevant for local instances
+- added creation of Django superuser to the backend start.sh for backend admin access
