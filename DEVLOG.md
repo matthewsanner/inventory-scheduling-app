@@ -208,3 +208,7 @@
 ### SCRUM-20 sets up automated tests w/ GitHub Actions
 
 - creates the test.yml file to set up automated tests using the Docker testing containers
+
+### SCRUM-20 fixes .env file creation
+
+- in the Makefile, fixes the .env file creation from the .env.example files if no .env exists
