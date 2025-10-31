@@ -18,7 +18,7 @@ import {
 import ErrorCard from "../components/ErrorCard";
 import LoadingCard from "../components/LoadingCard";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
-import { getItems, getCategories } from "../services/itemsService";
+import { getItems, getCategories } from "../services/ItemsService";
 
 const Items = () => {
   const [items, setItems] = useState([]);

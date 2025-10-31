@@ -221,3 +221,7 @@
 
 - alter the Makefile test commands to return failure if either the backend or frontend tests fail
 - reverse casing issue to test automated test failure response
+
+### SCRUM-20 refixes casing issue
+
+- refixes casing issue in Items.jsx since automated tests are returning failure properly now
