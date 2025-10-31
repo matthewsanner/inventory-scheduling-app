@@ -199,8 +199,12 @@
 - cleaned up .dockerignore files, added notes to old .env.example files for frontend and backend, these could still be relevant for local instances
 - added creation of Django superuser to the backend start.sh for backend admin access
 
-# SCRUM-20 fixes up env files, adds superuser to permissions
+### SCRUM-20 fixes up env files, adds superuser to permissions
 
 - gets rid of local install envs
 - separates out frontend, backend, db container envs
 - adds superusers to permissions structure
+
+### SCRUM-20 sets up automated tests w/ GitHub Actions
+
+- creates the test.yml file to set up automated tests using the Docker testing containers
