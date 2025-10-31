@@ -216,3 +216,8 @@
 ### SCRUM-20 fixes casing issue
 
 - fix casing in Items.jsx that may have caused an automated test failure
+
+### SCRUM-20 alters test commands to fail
+
+- alter the Makefile test commands to return failure if either the backend or frontend tests fail
+- reverse casing issue to test automated test failure response

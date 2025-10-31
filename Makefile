@@ -13,5 +13,5 @@ down:
 	docker compose down
 
 test: ensure-env
-	-docker compose run --rm backend-tests
-	-docker compose run --rm frontend-tests
+	docker compose run --rm backend-tests || exit 1
+	docker compose run --rm frontend-tests || exit 1
