@@ -3,10 +3,8 @@ services:
     image: postgres:17
     container_name: inventory-db
     restart: always
-    environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydb
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
@@ -19,7 +17,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - ./backend/.env
     depends_on:
       - db
 
@@ -31,7 +29,7 @@ services:
     ports:
       - "5173:5173"
     env_file:
-      - .env
+      - ./frontend/.env
 
   backend-tests:
     profiles: ["test"]
@@ -39,8 +37,8 @@ services:
     command: pytest
     volumes:
       - ./backend:/backend
-    environment:
-      - DATABASE_URL=postgres://myuser:mypassword@db:5432/mydb
+    env_file:
+      - .env
     depends_on:
       - db
 
@@ -51,6 +49,8 @@ services:
     volumes:
       - ./frontend:/frontend
       - node_modules:/frontend/node_modules
+    env_file:
+      - .env
 
 volumes:
   pgdata:

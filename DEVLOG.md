@@ -198,3 +198,9 @@
 - adds the .env file to the docker-compose.yml frontend and backend services
 - cleaned up .dockerignore files, added notes to old .env.example files for frontend and backend, these could still be relevant for local instances
 - added creation of Django superuser to the backend start.sh for backend admin access
+
+# SCRUM-20 fixes up env files, adds superuser to permissions
+
+- gets rid of local install envs
+- separates out frontend, backend, db container envs
+- adds superusers to permissions structure
