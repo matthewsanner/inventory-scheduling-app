@@ -193,22 +193,26 @@
 
 ### SCRUM-20 fixes env vars issue with docker container
 
-- creates new .env.example file that has some default env vars for full demo/testing inside the Docker container for frontend and backend in the root directory
-- adds code in the Makefile to copy the .env.example file to .env if it doesn't already exist when making the Docker packages
-- adds the .env file to the docker-compose.yml frontend and backend services
-- cleaned up .dockerignore files, added notes to old .env.example files for frontend and backend, these could still be relevant for local instances
-- added creation of Django superuser to the backend start.sh for backend admin access
+- create new .env.example file that has some default env vars for full demo/testing inside the Docker container for frontend and backend in the root directory
+- add code in the Makefile to copy the .env.example file to .env if it doesn't already exist when making the Docker packages
+- add the .env file to the docker-compose.yml frontend and backend services
+- clean up .dockerignore files, added notes to old .env.example files for frontend and backend, these could still be relevant for local instances
+- add creation of Django superuser to the backend start.sh for backend admin access
 
 ### SCRUM-20 fixes up env files, adds superuser to permissions
 
-- gets rid of local install envs
-- separates out frontend, backend, db container envs
-- adds superusers to permissions structure
+- get rid of local install envs
+- separate out frontend, backend, db container envs
+- add superusers to permissions structure
 
 ### SCRUM-20 sets up automated tests w/ GitHub Actions
 
-- creates the test.yml file to set up automated tests using the Docker testing containers
+- create the test.yml file to set up automated tests using the Docker testing containers
 
 ### SCRUM-20 fixes .env file creation
 
-- in the Makefile, fixes the .env file creation from the .env.example files if no .env exists
+- in the Makefile, fix the .env file creation from the .env.example files if no .env exists
+
+### SCRUM-20 fixes casing issue
+
+- fix casing in Items.jsx that may have caused an automated test failure
