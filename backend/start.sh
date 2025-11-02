@@ -1,6 +1,6 @@
 #!/bin/sh
 
-python manage.py migrate
+python manage.py migrate --noinput
 
 # Check if any Items exist before loading sample data
 if [ "$(python manage.py shell -c 'from items.models import Item; print(Item.objects.exists())')" = "False" ]; then

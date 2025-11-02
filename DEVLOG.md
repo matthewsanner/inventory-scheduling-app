@@ -241,3 +241,10 @@
 - create simple login page
 - update navbar with login/logout and user acknowledgment
 - add frontend and backend tests for new features/processes
+
+### SCRUM-73 Data migration for persistent groups
+
+- adds core to installed apps in settings.py
+- creates data migration for core that creates Manager and Staff groups to be created on new installs
+- apply core migrations
+- adjust start.sh with a --noinput flag on migrations for safety since it's being used in CI/CD
