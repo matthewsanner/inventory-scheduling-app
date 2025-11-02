@@ -26,10 +26,10 @@ class ItemViewSet(ModelViewSet):
     filterset_class = ItemFilter
     search_fields = ['name', 'description', 'color', 'location']
     ordering_fields = ['name', 'category', 'quantity', 'color', 'location']
-    # permission_classes = [IsManagerOrStaffReadOnly]
+    permission_classes = [IsManagerOrStaffReadOnly]
 
 class CategoryChoicesView(APIView):
-    # permission_classes = [IsManagerOrStaffReadOnly]
+    permission_classes = [IsManagerOrStaffReadOnly]
     
     def get(self, request, *args, **kwargs):
         categories = [{"value": c[0], "label": c[1]} for c in Item.CATEGORY_CHOICES]

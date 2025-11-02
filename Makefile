@@ -13,5 +13,19 @@ down:
 	docker compose down
 
 test: ensure-env
-	docker compose run --rm backend-tests || exit 1
-	docker compose run --rm frontend-tests || exit 1
+	@set -e; \
+	EXIT_CODE=0; \
+	echo "Running backend tests..."; \
+	docker compose run --rm backend-tests || EXIT_CODE=$$?; \
+	echo "Running frontend tests..."; \
+	docker compose run --rm frontend-tests || EXIT_CODE=$$?; \
+	if [ $$EXIT_CODE -ne 0 ]; then \
+		echo "Some tests failed."; \
+	else \
+		echo "All tests passed."; \
+	fi; \
+	exit $$EXIT_CODE
+
+
+dev: ensure-env
+	docker compose up

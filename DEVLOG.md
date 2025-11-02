@@ -225,3 +225,19 @@
 ### SCRUM-20 refixes casing issue
 
 - refixes casing issue in Items.jsx since automated tests are returning failure properly now
+
+### SCRUM-20 user login/logout, authorization endpoints
+
+- update docker-compose.yml to allow frontend to watch for changes and automatically rebuild in development
+- update Makefile test commands to actually allow frontend and backend tests to always run with the "make test" command, regardless if one fails, then return overall fail/success
+- create user serializer to define what user information gets exposed to the frontend, adds derived fields to so role booleans can easily be used in frontend to show or hide elements based on group authorization
+- revamp authorization endpoints to include login, logout, refresh, and auth check
+- create core views.py which defines what the new auth endpoints do
+- create AuthContext.jsx to keep track of user login state and provide auth data to UI
+- create AuthService.js to make auth API requests and manage tokens
+- create axiosConfig.js to define interceptors to always add JWT token to requests, and to handle token refresh on 401 Unauthorized error
+- add axiosConfig to main.jsx
+- add AuthProvider (from AuthContext) and login route to routing on App.jsx
+- create simple login page
+- update navbar with login/logout and user acknowledgment
+- add frontend and backend tests for new features/processes
