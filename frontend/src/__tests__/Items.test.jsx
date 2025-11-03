@@ -1,12 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import axios from "axios";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate } from "react-router";
 import Items from "../pages/Items";
 import { mockCategories, mockItems } from "./testUtils";
+import { getCategories, getItems } from "../services/ItemsService";
 
-vi.mock("axios");
+// Mock service module
+vi.mock("../services/ItemsService", () => ({
+  getCategories: vi.fn(),
+  getItems: vi.fn(),
+}));
 
 // Mock useNavigate from react-router
 vi.mock("react-router", async () => {
@@ -19,96 +23,6 @@ vi.mock("react-router", async () => {
 
 const mockNavigate = vi.fn();
 
-const baseMockGet = (url) => {
-  if (url.includes("categories")) {
-    return Promise.resolve({ data: mockCategories });
-  }
-  if (url.includes("items")) {
-    return Promise.resolve({ data: mockItems });
-  }
-  return Promise.reject(new Error("Unknown API endpoint: " + url));
-};
-
-const mockEmptyItemsGet = (url) => {
-  if (url.includes("categories")) {
-    return Promise.resolve({ data: mockCategories });
-  }
-  if (url.includes("items")) {
-    return Promise.resolve({ data: { count: 0, results: [] } });
-  }
-  return Promise.reject(new Error("Unknown API endpoint: " + url));
-};
-
-const mockFilteredItemsGet = (url) => {
-  if (url.endsWith("categories/")) {
-    return Promise.resolve({ data: mockCategories });
-  }
-  if (url.includes("search=Dress")) {
-    return Promise.resolve({
-      data: {
-        count: 1,
-        results: [mockItems.results[0]],
-      },
-    });
-  }
-  if (url.includes("category=COS")) {
-    return Promise.resolve({
-      data: {
-        count: 1,
-        results: [mockItems.results[0]],
-      },
-    });
-  }
-  if (url.includes("items")) {
-    return Promise.resolve({ data: mockItems });
-  }
-  return Promise.reject(new Error("Unknown API endpoint: " + url));
-};
-
-const mockPaginatedGet = (url) => {
-  if (url.includes("categories")) {
-    return Promise.resolve({ data: mockCategories });
-  }
-  if (url.includes("page=1") || !url.includes("page=")) {
-    // Default to page 1 if no page param
-    return Promise.resolve({
-      data: {
-        count: 20,
-        results: Array.from({ length: 10 }, (_, i) => ({
-          id: i + 1,
-          name: `Item ${i + 1}`,
-          category: "COS",
-          category_long: "Costumes",
-          quantity: 1,
-          color: "Red",
-          location: "Shelf A",
-          checked_out: false,
-          in_repair: false,
-        })),
-      },
-    });
-  }
-  if (url.includes("page=2")) {
-    return Promise.resolve({
-      data: {
-        count: 20,
-        results: Array.from({ length: 10 }, (_, i) => ({
-          id: i + 11,
-          name: `Item ${i + 11}`,
-          category: "WIG",
-          category_long: "Wigs",
-          quantity: 2,
-          color: "Blonde",
-          location: "Shelf B",
-          checked_out: false,
-          in_repair: false,
-        })),
-      },
-    });
-  }
-  return Promise.reject(new Error("Unknown API endpoint: " + url));
-};
-
 const renderItemsPage = () =>
   render(
     <MemoryRouter>
@@ -120,7 +34,8 @@ describe("Items Page", () => {
   const user = userEvent.setup();
 
   beforeEach(() => {
-    axios.get.mockImplementation(baseMockGet);
+    getCategories.mockResolvedValue({ data: mockCategories });
+    getItems.mockResolvedValue({ data: mockItems.results, pageCount: 1 });
     useNavigate.mockReturnValue(mockNavigate);
   });
 
@@ -156,7 +71,7 @@ describe("Items Page", () => {
   });
 
   it("displays 'No items available' message when there are no items", async () => {
-    axios.get.mockImplementation(mockEmptyItemsGet);
+    getItems.mockResolvedValueOnce({ data: [], pageCount: 0 });
     renderItemsPage();
     await waitFor(() => {
       expect(screen.getByText("No items available")).toBeInTheDocument();
@@ -164,11 +79,20 @@ describe("Items Page", () => {
   });
 
   it("applies the search filter and updates the table", async () => {
-    axios.get.mockImplementation(mockFilteredItemsGet);
+    // Initial load with all items
+    getItems.mockResolvedValueOnce({ data: mockItems.results, pageCount: 1 });
+
     renderItemsPage();
 
     await waitFor(() => {
       expect(screen.getByText("80s Wig")).toBeInTheDocument();
+    });
+
+    // Mock filtered results for all calls after search is applied
+    // (user.type triggers multiple calls as each character is typed)
+    getItems.mockResolvedValue({
+      data: [mockItems.results[0]],
+      pageCount: 1,
     });
 
     const searchInput = screen.getByPlaceholderText("Search items...");
@@ -177,18 +101,26 @@ describe("Items Page", () => {
     await waitFor(() => {
       const table = screen.getByTestId("items-table");
       expect(within(table).getByText("Fancy Dress")).toBeInTheDocument();
+      // Ensure non-matching item is removed from the table
+      expect(screen.queryByText("80s Wig")).not.toBeInTheDocument();
     });
-
-    expect(screen.queryByText("80s Wig")).not.toBeInTheDocument();
   });
 
   it("applies category filter and updates the table", async () => {
-    axios.get.mockImplementation(mockFilteredItemsGet);
+    // Initial load with all items
+    getItems.mockResolvedValueOnce({ data: mockItems.results, pageCount: 1 });
+
     renderItemsPage();
 
     // Wait for initial items
     await waitFor(() => {
       expect(screen.getByText("80s Wig")).toBeInTheDocument();
+    });
+
+    // Mock filtered results when category is selected
+    getItems.mockResolvedValue({
+      data: [mockItems.results[0]],
+      pageCount: 1,
     });
 
     const categorySelect = screen.getByTestId("category-select");
@@ -197,14 +129,34 @@ describe("Items Page", () => {
     await waitFor(() => {
       const table = screen.getByTestId("items-table");
       expect(within(table).getByText("Fancy Dress")).toBeInTheDocument();
+      // Ensure non-matching item is not in the table
+      expect(screen.queryByText("80s Wig")).not.toBeInTheDocument();
     });
-
-    // Ensure non-matching item is not in the table
-    expect(screen.queryByText("80s Wig")).not.toBeInTheDocument();
   });
 
   it("fetches and displays next page of items when Next button or page number is clicked", async () => {
-    axios.get.mockImplementation(mockPaginatedGet);
+    const page1Items = Array.from({ length: 10 }, (_, i) => ({
+      id: i + 1,
+      name: `Item ${i + 1}`,
+      category: "COS",
+      category_long: "Costumes",
+      quantity: 1,
+      color: "Red",
+      location: "Shelf A",
+    }));
+
+    const page2Items = Array.from({ length: 10 }, (_, i) => ({
+      id: i + 11,
+      name: `Item ${i + 11}`,
+      category: "WIG",
+      category_long: "Wigs",
+      quantity: 2,
+      color: "Blonde",
+      location: "Shelf B",
+    }));
+
+    // Initial load with page 1 items
+    getItems.mockResolvedValueOnce({ data: page1Items, pageCount: 2 });
 
     renderItemsPage();
 
@@ -213,6 +165,9 @@ describe("Items Page", () => {
       expect(screen.getByText("Item 1")).toBeInTheDocument();
       expect(screen.getByText("Item 10")).toBeInTheDocument();
     });
+
+    // Mock page 2 items
+    getItems.mockResolvedValueOnce({ data: page2Items, pageCount: 2 });
 
     // Click Next button in pagination
     const nextButton = screen.getByRole("button", { name: /next/i });
@@ -227,6 +182,9 @@ describe("Items Page", () => {
     // Assert page 1 items are gone
     expect(screen.queryByText("Item 1")).not.toBeInTheDocument();
 
+    // Mock page 1 items again
+    getItems.mockResolvedValueOnce({ data: page1Items, pageCount: 2 });
+
     // Click on page number 1 button
     const page1Button = screen.getByRole("button", { name: "1" });
     await user.click(page1Button);
@@ -237,20 +195,22 @@ describe("Items Page", () => {
       expect(screen.getByText("Item 7")).toBeInTheDocument();
     });
 
-    // Confirm page 1 items are gone
+    // Confirm page 2 items are gone
     expect(screen.queryByText("Item 14")).not.toBeInTheDocument();
   });
 
-  it("renders loading spinner when loading is true", () => {
-    // Mock axios.get to return unresolved promises so loading stays true
-    axios.get.mockImplementation(() => new Promise(() => {}));
+  it("renders loading spinner when loading is true", async () => {
+    // Mock getItems to return unresolved promise so loading stays true
+    getItems.mockImplementation(() => new Promise(() => {}));
 
     renderItemsPage();
 
-    // Expect spinner and loading text to show up
-    expect(screen.getByText(/loading items/i)).toBeInTheDocument();
-    // Flowbite spinner component uses role="status" for accessibility
-    expect(screen.getByRole("status")).toBeInTheDocument();
+    await waitFor(() => {
+      // Expect spinner and loading text to show up
+      expect(screen.getByText(/loading items/i)).toBeInTheDocument();
+      // Flowbite spinner component uses role="status" for accessibility
+      expect(screen.getByRole("status")).toBeInTheDocument();
+    });
   });
 
   it("navigates to item detail page when a table row is clicked", async () => {
@@ -272,14 +232,13 @@ describe("Items Page", () => {
   });
 
   it("displays error message when API call fails", async () => {
-    axios.get.mockImplementation((url) => {
-      if (url.includes("categories")) {
-        return Promise.resolve({ data: mockCategories });
-      }
-      if (url.includes("items")) {
-        return Promise.reject(new Error("Network Error"));
-      }
-      return Promise.reject(new Error("Unknown endpoint"));
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    getItems.mockResolvedValueOnce({
+      errorKey: "LOAD_ITEMS_FAILED",
+      error: new Error("Network Error"),
     });
 
     renderItemsPage();
@@ -287,18 +246,20 @@ describe("Items Page", () => {
     await waitFor(() => {
       expect(screen.getByText(/failed to load items/i)).toBeInTheDocument();
     });
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("disables category select and shows fallback text if categories fetch fails", async () => {
-    axios.get.mockImplementation((url) => {
-      if (url.includes("categories")) {
-        return Promise.reject(new Error("Categories fetch failed"));
-      }
-      if (url.includes("items")) {
-        return Promise.resolve({ data: mockItems });
-      }
-      return Promise.reject(new Error("Unknown API endpoint: " + url));
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    getCategories.mockResolvedValueOnce({
+      errorKey: "LOAD_CATEGORIES_FAILED",
+      error: new Error("Categories fetch failed"),
     });
+    getItems.mockResolvedValueOnce({ data: mockItems.results, pageCount: 1 });
 
     renderItemsPage();
 
@@ -312,16 +273,25 @@ describe("Items Page", () => {
     expect(
       within(categorySelect).getByText("Categories unavailable")
     ).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("clears search input via clear button and resets item table", async () => {
-    axios.get.mockImplementation(mockFilteredItemsGet);
+    // Initial load with all items
+    getItems.mockResolvedValueOnce({ data: mockItems.results, pageCount: 1 });
 
     renderItemsPage();
 
     // Wait for initial unfiltered data (80s Wig present)
     await waitFor(() => {
       expect(screen.getByText("80s Wig")).toBeInTheDocument();
+    });
+
+    // Mock filtered results when search is applied
+    getItems.mockResolvedValueOnce({
+      data: [mockItems.results[0]],
+      pageCount: 1,
     });
 
     const searchInput = screen.getByPlaceholderText("Search items...");
@@ -331,6 +301,9 @@ describe("Items Page", () => {
     await waitFor(() => {
       expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
     });
+
+    // Mock unfiltered results when clear is clicked
+    getItems.mockResolvedValueOnce({ data: mockItems.results, pageCount: 1 });
 
     // Find and click the Clear button
     const clearButton = screen.getByRole("button", { name: /clear filters/i });
@@ -344,7 +317,29 @@ describe("Items Page", () => {
   });
 
   it("disables pagination buttons appropriately", async () => {
-    axios.get.mockImplementation(mockPaginatedGet);
+    const page1Items = Array.from({ length: 10 }, (_, i) => ({
+      id: i + 1,
+      name: `Item ${i + 1}`,
+      category: "COS",
+      category_long: "Costumes",
+      quantity: 1,
+      color: "Red",
+      location: "Shelf A",
+    }));
+
+    const page2Items = Array.from({ length: 10 }, (_, i) => ({
+      id: i + 11,
+      name: `Item ${i + 11}`,
+      category: "WIG",
+      category_long: "Wigs",
+      quantity: 2,
+      color: "Blonde",
+      location: "Shelf B",
+    }));
+
+    // Initial load with page 1 items
+    getItems.mockResolvedValueOnce({ data: page1Items, pageCount: 2 });
+
     renderItemsPage();
 
     await waitFor(() => {
@@ -357,6 +352,9 @@ describe("Items Page", () => {
     // On first page: previous disabled, next enabled
     expect(prevButton).toBeDisabled();
     expect(nextButton).toBeEnabled();
+
+    // Mock page 2 items
+    getItems.mockResolvedValueOnce({ data: page2Items, pageCount: 2 });
 
     await user.click(nextButton);
 

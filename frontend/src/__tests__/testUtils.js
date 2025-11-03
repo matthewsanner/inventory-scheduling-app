@@ -11,8 +11,6 @@ export const mockFormData = {
   quantity: "5",
   color: "Red",
   location: "Shelf A",
-  checked_out: false,
-  in_repair: false,
 };
 
 export const mockItem = {
@@ -25,8 +23,6 @@ export const mockItem = {
   quantity: 5,
   color: "Red",
   location: "Shelf A",
-  checked_out: false,
-  in_repair: false,
 };
 
 export const mockItems = {
@@ -42,8 +38,6 @@ export const mockItems = {
       quantity: 5,
       color: "Red",
       location: "Shelf A",
-      checked_out: false,
-      in_repair: false,
     },
     {
       id: 2,
@@ -55,8 +49,6 @@ export const mockItems = {
       quantity: 2,
       color: "Blonde",
       location: "Shelf B",
-      checked_out: true,
-      in_repair: false,
     },
   ],
 };

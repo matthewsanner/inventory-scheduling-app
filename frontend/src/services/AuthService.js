@@ -96,3 +96,41 @@ export const refreshToken = async () => {
   }
 };
 
+export const register = async (username, password, email, firstName, lastName) => {
+  try {
+    const response = await axios.post(`${API_URL}auth/register/`, {
+      username,
+      password,
+      email,
+      first_name: firstName || '',
+      last_name: lastName || '',
+    });
+    
+    return { data: response.data };
+  } catch (error) {
+    if (error.response?.status === 400) {
+      // Handle validation errors
+      const errorData = error.response.data;
+      let errorMessage = "Registration failed";
+      
+      if (typeof errorData === 'object') {
+        // Format Django REST framework validation errors
+        const errors = [];
+        for (const [field, messages] of Object.entries(errorData)) {
+          if (Array.isArray(messages)) {
+            errors.push(`${field}: ${messages.join(', ')}`);
+          } else {
+            errors.push(`${field}: ${messages}`);
+          }
+        }
+        errorMessage = errors.join('. ');
+      } else if (typeof errorData === 'string') {
+        errorMessage = errorData;
+      }
+      
+      return { error: errorMessage };
+    }
+    return { error: error.response?.data?.detail || "Registration failed" };
+  }
+};
+

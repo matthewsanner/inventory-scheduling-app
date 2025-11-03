@@ -78,8 +78,6 @@ class TestItemModel:
         assert item.category == "ACC"
         assert item.color == "Red"
         assert item.location == "Shelf A1"
-        assert not item.checked_out
-        assert not item.in_repair
 
     def test_item_str_representation(self, sample_item):
         assert str(sample_item) == f"Name: {sample_item.name}"
@@ -97,8 +95,6 @@ class TestItemSerializer:
         assert data['category_long'] == sample_item.get_category_display()
         assert data['color'] == sample_item.color
         assert data['location'] == sample_item.location
-        assert data['checked_out'] == sample_item.checked_out
-        assert data['in_repair'] == sample_item.in_repair
 
     def test_deserialize_item(self):
         data = {
@@ -150,8 +146,6 @@ class TestItemAPI:
         assert Item.objects.count() == 1
         item = Item.objects.first()
         assert item.name == data['name']
-        assert item.checked_out is False
-        assert item.in_repair is False
 
     def test_retrieve_item(self, authenticated_staff_client, sample_item):
         url = reverse('item-detail', kwargs={'pk': sample_item.pk})

@@ -1,10 +1,10 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserRegistrationSerializer
 
 User = get_user_model()
 
@@ -43,4 +43,24 @@ def logout(request):
     # This endpoint provides a way for the client to confirm logout
     # If blacklisting was implemented, this endpoint would revoke the refresh token
     return Response({'detail': 'Successfully logged out.'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register(request):
+    # Registration endpoint - allows anyone to create an account
+    serializer = UserRegistrationSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        user = serializer.save()
+        # Return user data (excluding sensitive information)
+        user_serializer = UserSerializer(user)
+        return Response(
+            {
+                'detail': 'User created successfully. A superuser must assign groups to grant access.',
+                'user': user_serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

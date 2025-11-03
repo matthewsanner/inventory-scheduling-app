@@ -8,12 +8,22 @@ import * as AuthService from "../services/AuthService";
 
 vi.mock("../services/AuthService");
 
-// Mock useNavigate from react-router
+// Mock useNavigate and useLocation from react-router
+const mockNavigate = vi.fn();
+const mockLocation = {
+  pathname: "/login",
+  state: null,
+  key: "",
+  search: "",
+  hash: "",
+};
+
 vi.mock("react-router", async () => {
   const actual = await vi.importActual("react-router");
   return {
     ...actual,
-    useNavigate: vi.fn(() => vi.fn()),
+    useNavigate: vi.fn(() => mockNavigate),
+    useLocation: vi.fn(() => mockLocation),
   };
 });
 
@@ -31,6 +41,7 @@ describe("Login", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    mockLocation.state = null; // Reset location state
     // Mock getCurrentUser to resolve immediately for tests that don't set a token
     vi.mocked(AuthService.getCurrentUser).mockResolvedValue({
       error: "Not authenticated",
@@ -194,7 +205,7 @@ describe("Login", () => {
     );
   });
 
-  it("requires username and password fields", async () => {
+  it("shows error message when required fields are missing", async () => {
     const user = userEvent.setup();
     renderLogin();
 
@@ -205,13 +216,64 @@ describe("Login", () => {
     });
 
     const submitButton = screen.getByRole("button", { name: /Sign In/i });
-
     await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Please fill out all required fields/i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("shows error message if an unexpected error occurs", async () => {
+    const user = userEvent.setup();
+    vi.mocked(AuthService.login).mockRejectedValue(new Error("Network error"));
+
+    renderLogin();
 
     const usernameInput = screen.getByPlaceholderText(/Username/i);
     const passwordInput = screen.getByPlaceholderText(/Password/i);
+    const submitButton = screen.getByRole("button", { name: /Sign In/i });
 
-    expect(usernameInput).toBeInvalid();
-    expect(passwordInput).toBeInvalid();
+    await user.type(usernameInput, "testuser");
+    await user.type(passwordInput, "testpass123");
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/An unexpected error occured during login/i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("shows link to register page", async () => {
+    renderLogin();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", { name: /Sign up/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /Sign up/i }).getAttribute("href")
+      ).toBe("/register");
+    });
+  });
+
+  it("displays success message from registration redirect", async () => {
+    // Update mock location state to include success message
+    mockLocation.state = {
+      message: "Account created successfully! Please sign in.",
+    };
+
+    renderLogin();
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Account created successfully! Please sign in./i)
+      ).toBeInTheDocument();
+    });
+
+    // Reset mock location state for other tests
+    mockLocation.state = null;
   });
 });

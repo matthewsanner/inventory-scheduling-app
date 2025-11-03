@@ -1,12 +1,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import axios from "axios";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate, useParams } from "react-router";
 import EditItem from "../pages/EditItem";
 import { mockCategories, mockItem } from "./testUtils";
+import {
+  fetchCategories,
+  fetchItemById,
+  updateItem,
+} from "../services/EditItemService";
 
-vi.mock("axios");
+// Mock service module
+vi.mock("../services/EditItemService", () => ({
+  fetchCategories: vi.fn(),
+  fetchItemById: vi.fn(),
+  updateItem: vi.fn(),
+}));
 
 // Mock useNavigate and useParams from react-router
 vi.mock("react-router", async () => {
@@ -19,90 +28,86 @@ vi.mock("react-router", async () => {
 });
 
 const mockNavigate = vi.fn();
+const user = userEvent.setup();
 
-const mockCategoryFailure = () => {
-  axios.get.mockImplementation((url) => {
-    if (url.includes("categories")) {
-      return Promise.reject(new Error("Failed to fetch categories"));
-    }
-    if (url.includes("items/1")) {
-      return Promise.resolve({ data: mockItem });
-    }
-    return Promise.reject(new Error("Invalid URL"));
-  });
-};
+// const mockCategoryFailure = () => {
+//   axios.get.mockImplementation((url) => {
+//     if (url.includes("categories")) {
+//       return Promise.reject(new Error("Failed to fetch categories"));
+//     }
+//     if (url.includes("items/1")) {
+//       return Promise.resolve({ data: mockItem });
+//     }
+//     return Promise.reject(new Error("Invalid URL"));
+//   });
+// };
 
-const renderEditItemPage = () =>
+const renderEditItemPage = async () => {
   render(
     <MemoryRouter>
       <EditItem />
     </MemoryRouter>
   );
+};
 
 describe("EditItem Page", () => {
-  const user = userEvent.setup();
-
   beforeEach(() => {
     useNavigate.mockReturnValue(mockNavigate);
     useParams.mockReturnValue({ id: "1" });
-    // Mock both API calls that happen on component mount
-    axios.get.mockImplementation((url) => {
-      if (url.includes("categories")) {
-        return Promise.resolve({ data: mockCategories });
-      }
-      if (url.includes("items/1")) {
-        return Promise.resolve({ data: mockItem });
-      }
-      return Promise.reject(new Error("Invalid URL"));
-    });
+    fetchCategories.mockResolvedValue({ data: mockCategories });
+    fetchItemById.mockResolvedValue({ data: mockItem });
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("renders loading spinner when loading is true", () => {
-    axios.get.mockImplementation(() => new Promise(() => {}));
-    renderEditItemPage();
+  it("renders loading spinner initially", async () => {
+    fetchItemById.mockImplementation(
+      () => new Promise(() => {}) // pending
+    );
 
-    // Expect spinner and loading text to show up
+    render(
+      <MemoryRouter>
+        <EditItem />
+      </MemoryRouter>
+    );
+
     expect(screen.getByText(/loading item/i)).toBeInTheDocument();
-    // Flowbite spinner component uses role="status" for accessibility
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
   it("fetches and displays item data in the form", async () => {
     renderEditItemPage();
 
-    await waitFor(() => {
-      expect(screen.getByText("Edit Item")).toBeInTheDocument();
-    });
+    const heading = await screen.findByRole("heading", { name: /Edit Item/i });
+    expect(heading).toBeInTheDocument();
+
+    expect(fetchCategories).toHaveBeenCalled();
+    expect(fetchItemById).toHaveBeenCalledWith("1");
 
     // Check if form fields are populated with item data
-    expect(screen.getByLabelText("Name")).toHaveValue(mockItem.name);
-    expect(screen.getByLabelText("Description")).toHaveValue(
-      mockItem.description
-    );
-    expect(screen.getByLabelText("Image URL")).toHaveValue(mockItem.image);
-    expect(screen.getByLabelText("Category")).toHaveValue(mockItem.category);
-    expect(screen.getByLabelText("Quantity")).toHaveValue(mockItem.quantity);
-    expect(screen.getByLabelText("Color")).toHaveValue(mockItem.color);
-    expect(screen.getByLabelText("Location")).toHaveValue(mockItem.location);
-    expect(screen.getByLabelText("Checked Out")).not.toBeChecked();
-    expect(screen.getByLabelText("In Repair")).not.toBeChecked();
-
-    // Verify API calls
-    expect(axios.get).toHaveBeenCalledWith(
-      expect.stringContaining("categories")
-    );
-    expect(axios.get).toHaveBeenCalledWith(expect.stringContaining("items/1"));
+    const nameInput = await screen.findByLabelText("Name");
+    expect(nameInput).toHaveValue(mockItem.name);
+    const descriptionInput = await screen.findByLabelText("Description");
+    expect(descriptionInput).toHaveValue(mockItem.description);
+    const imageInput = await screen.findByLabelText("Image URL");
+    expect(imageInput).toHaveValue(mockItem.image);
+    const categorySelect = await screen.findByLabelText("Category");
+    expect(categorySelect).toHaveValue(mockItem.category);
+    const quantityInput = await screen.findByLabelText("Quantity");
+    expect(quantityInput).toHaveValue(mockItem.quantity);
+    const colorInput = await screen.findByLabelText("Color");
+    expect(colorInput).toHaveValue(mockItem.color);
+    const locationInput = await screen.findByLabelText("Location");
+    expect(locationInput).toHaveValue(mockItem.location);
   });
 
   it("fetches and displays category options in the select dropdown", async () => {
     renderEditItemPage();
 
-    await waitFor(() => {
-      const categorySelect = screen.getByLabelText("Category");
+    await waitFor(async () => {
+      const categorySelect = await screen.findByLabelText("Category");
       expect(categorySelect).toBeInTheDocument();
 
       // Check for default option
@@ -117,17 +122,43 @@ describe("EditItem Page", () => {
   it("handles form input changes correctly", async () => {
     renderEditItemPage();
 
-    await waitFor(() => {
-      expect(screen.getByText("Edit Item")).toBeInTheDocument();
+    // Get form inputs - await all findByLabelText calls
+    const nameInput = await screen.findByLabelText("Name");
+    const descriptionInput = await screen.findByLabelText("Description");
+    const quantityInput = await screen.findByLabelText("Quantity");
+    const categorySelect = await screen.findByLabelText("Category");
+
+    // Test input changes
+    await user.clear(nameInput);
+    await user.type(nameInput, "Updated Name");
+    await user.clear(descriptionInput);
+    await user.type(descriptionInput, "Updated description");
+    await user.clear(quantityInput);
+    await user.type(quantityInput, "10");
+    await user.selectOptions(categorySelect, "COS");
+
+    // Verify input values
+    expect(nameInput.value).toBe("Updated Name");
+    expect(descriptionInput.value).toBe("Updated description");
+    expect(Number(quantityInput.value)).toBe(10);
+    expect(categorySelect.value).toBe("COS");
+  });
+
+  it("handles successful form submission", async () => {
+    // Use a delayed promise to allow testing the disabled state
+    let resolveUpdate;
+    const updatePromise = new Promise((resolve) => {
+      resolveUpdate = resolve;
     });
+    updateItem.mockReturnValueOnce(updatePromise);
 
-    // Get form inputs
-    const nameInput = screen.getByLabelText("Name");
-    const descriptionInput = screen.getByLabelText("Description");
-    const quantityInput = screen.getByLabelText("Quantity");
-    const checkedOutCheckbox = screen.getByLabelText("Checked Out");
+    renderEditItemPage();
 
-    // Test text input changes
+    // Update some fields - await all findByLabelText calls
+    const nameInput = await screen.findByLabelText("Name");
+    const descriptionInput = await screen.findByLabelText("Description");
+    const quantityInput = await screen.findByLabelText("Quantity");
+
     await user.clear(nameInput);
     await user.type(nameInput, "Updated Name");
     await user.clear(descriptionInput);
@@ -135,42 +166,26 @@ describe("EditItem Page", () => {
     await user.clear(quantityInput);
     await user.type(quantityInput, "10");
 
-    // Test checkbox changes
-    await user.click(checkedOutCheckbox);
+    // Submit the form
+    const submitButton = await screen.findByRole("button", {
+      name: "Update Item",
+    });
+    await user.click(submitButton);
 
-    // Verify input values
-    expect(nameInput.value).toBe("Updated Name");
-    expect(descriptionInput.value).toBe("Updated description");
-    expect(quantityInput.value).toBe("10");
-    expect(checkedOutCheckbox.checked).toBe(true);
-  });
-
-  it("handles successful form submission", async () => {
-    renderEditItemPage();
-    axios.put.mockResolvedValueOnce({});
-
+    // Wait for button to become disabled on submit
     await waitFor(() => {
-      expect(screen.getByText("Edit Item")).toBeInTheDocument();
+      expect(submitButton).toBeDisabled();
     });
 
-    // Update some fields
-    await user.clear(screen.getByLabelText("Name"));
-    await user.type(screen.getByLabelText("Name"), "Updated Name");
-    await user.clear(screen.getByLabelText("Description"));
-    await user.type(
-      screen.getByLabelText("Description"),
-      "Updated description"
-    );
-
-    // Submit the form
-    const submitButton = screen.getByRole("button", { name: "Update Item" });
-    await user.click(submitButton);
+    // Resolve the promise to complete the submission
+    resolveUpdate({});
 
     // Wait for and verify API call
     await waitFor(() => {
-      expect(axios.put).toHaveBeenCalledWith(
-        expect.stringContaining("items/1/"),
+      expect(updateItem).toHaveBeenCalledWith(
+        "1",
         expect.objectContaining({
+          quantity: "10", // HTML input values are strings
           name: "Updated Name",
           description: "Updated description",
         })
@@ -179,17 +194,17 @@ describe("EditItem Page", () => {
     });
   });
 
-  it("handles form submission error", async () => {
+  it("handles form submission error and shows ErrorCard", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    updateItem.mockRejectedValueOnce(new Error("Update failed"));
     renderEditItemPage();
-    const mockError = new Error("Failed to update item");
-    axios.put.mockRejectedValueOnce(mockError);
 
-    await waitFor(() => {
-      expect(screen.getByText("Edit Item")).toBeInTheDocument();
+    // Submit the form without changes - wait for button to be available
+    const submitButton = await screen.findByRole("button", {
+      name: "Update Item",
     });
-
-    // Submit the form without changes
-    const submitButton = screen.getByRole("button", { name: "Update Item" });
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -199,6 +214,13 @@ describe("EditItem Page", () => {
         )
       ).toBeInTheDocument();
     });
+
+    const backButton = screen.getByRole("button", { name: /back/i });
+    await user.click(backButton);
+    // UPDATE_ITEM_FAILED navigates to /items/{id} (back to item details)
+    expect(mockNavigate).toHaveBeenCalledWith("/items/1");
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("shows ErrorCard and allows navigating back when fetching item data fails", async () => {
@@ -206,16 +228,8 @@ describe("EditItem Page", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    // Mock axios.get to fail fetching the item but succeed fetching categories
-    axios.get.mockImplementation((url) => {
-      if (url.includes("categories")) {
-        return Promise.resolve({ data: mockCategories });
-      }
-      if (url.includes("items/1")) {
-        return Promise.reject(new Error("Failed to fetch item"));
-      }
-      return Promise.reject(new Error("Invalid URL"));
-    });
+    fetchCategories.mockResolvedValueOnce({ data: mockCategories });
+    fetchItemById.mockRejectedValueOnce(new Error("Failed to fetch item"));
 
     renderEditItemPage();
 
@@ -236,18 +250,13 @@ describe("EditItem Page", () => {
     await user.click(backButton);
 
     expect(mockNavigate).toHaveBeenCalledWith("/items");
-
     consoleErrorSpy.mockRestore();
   });
 
   it("navigates back to items page when Cancel is clicked", async () => {
     renderEditItemPage();
 
-    await waitFor(() => {
-      expect(screen.getByText("Edit Item")).toBeInTheDocument();
-    });
-
-    const cancelButton = screen.getByRole("button", { name: "Cancel" });
+    const cancelButton = await screen.findByRole("button", { name: "Cancel" });
     await user.click(cancelButton);
 
     expect(mockNavigate).toHaveBeenCalledWith("/items");
@@ -257,9 +266,11 @@ describe("EditItem Page", () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});
+    fetchCategories.mockRejectedValueOnce(
+      new Error("Failed to fetch categories")
+    );
+    fetchItemById.mockResolvedValueOnce({ data: mockItem });
 
-    // Mock the categories fetch to fail
-    mockCategoryFailure();
     renderEditItemPage();
 
     await waitFor(() => {
@@ -273,42 +284,89 @@ describe("EditItem Page", () => {
   });
 
   it("disables category select and shows message when fetching categories fails", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
     // Mock categories fetch failure but allow item fetch
-    mockCategoryFailure();
+    fetchCategories.mockRejectedValueOnce(
+      new Error("Failed to fetch categories")
+    );
+    fetchItemById.mockResolvedValueOnce({ data: mockItem });
+
     renderEditItemPage();
 
-    await waitFor(() => {
-      expect(screen.getByText("Edit Item")).toBeInTheDocument();
-    });
-
-    const categorySelect = screen.getByLabelText("Category");
-
-    // Should be disabled
+    const categorySelect = await screen.findByLabelText("Category");
     expect(categorySelect).toBeDisabled();
-
-    // Should show "Categories unavailable"
     expect(screen.getByText("Categories unavailable")).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("prevents form submission if required fields are empty", async () => {
     renderEditItemPage();
 
-    await waitFor(() => {
-      expect(screen.getByText("Edit Item")).toBeInTheDocument();
-    });
-
-    const nameInput = screen.getByLabelText(/name/i);
+    const nameInput = await screen.findByLabelText("Name");
     await user.clear(nameInput);
 
-    const quantityInput = screen.getByLabelText(/quantity/i);
+    const quantityInput = await screen.findByLabelText("Quantity");
     await user.clear(quantityInput);
 
-    const submitButton = screen.getByRole("button", { name: /update item/i });
+    const submitButton = await screen.findByRole("button", {
+      name: "Update Item",
+    });
     await user.click(submitButton);
 
     expect(await screen.findByText(/name is required/i)).toBeInTheDocument();
     expect(
       await screen.findByText(/quantity must be at least 1/i)
     ).toBeInTheDocument();
+  });
+
+  it("resets previous errors and shows loading state during submission", async () => {
+    fetchCategories.mockResolvedValue({ data: mockCategories });
+    fetchItemById.mockResolvedValueOnce({ data: mockItem });
+
+    // Use a delayed promise to allow testing the loading state
+    let resolveUpdate;
+    const updatePromise = new Promise((resolve) => {
+      resolveUpdate = resolve;
+    });
+    updateItem.mockReturnValueOnce(updatePromise);
+
+    render(
+      <MemoryRouter>
+        <EditItem />
+      </MemoryRouter>
+    );
+
+    const nameInput = await screen.findByLabelText("Name");
+    const submitButton = await screen.findByRole("button", {
+      name: "Update Item",
+    });
+
+    // First submit with empty name to cause validation error
+    await user.clear(nameInput);
+    await user.click(submitButton);
+    expect(await screen.findByText(/name is required/i)).toBeInTheDocument();
+
+    // Now fill in name and resubmit
+    await user.type(nameInput, "Updated Box");
+    await user.click(submitButton);
+
+    // Should reset errors and show loading state
+    await waitFor(() => {
+      const updatingButton = screen.getByRole("button", {
+        name: /updating item/i,
+      });
+      expect(updatingButton).toBeInTheDocument();
+    });
+
+    // Resolve the promise to complete the submission
+    resolveUpdate({});
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/items");
+    });
   });
 });

@@ -43,15 +43,32 @@ describe("Navbar", () => {
     });
   });
 
-  it("shows Sign In button when not authenticated", async () => {
+  it("shows Sign In and Sign Up buttons when not authenticated", async () => {
     renderNavbar();
     await waitFor(() => {
       expect(
         screen.getByRole("button", { name: /Sign In/i })
       ).toBeInTheDocument();
       expect(
+        screen.getByRole("button", { name: /Sign Up/i })
+      ).toBeInTheDocument();
+      expect(
         screen.queryByRole("button", { name: /Sign Out/i })
       ).not.toBeInTheDocument();
+    });
+  });
+
+  it("has correct links for Sign Up and Sign In buttons when not authenticated", async () => {
+    renderNavbar();
+    await waitFor(() => {
+      const signUpLink = screen
+        .getByRole("button", { name: /Sign Up/i })
+        .closest("a");
+      const signInLink = screen
+        .getByRole("button", { name: /Sign In/i })
+        .closest("a");
+      expect(signUpLink?.getAttribute("href")).toBe("/register");
+      expect(signInLink?.getAttribute("href")).toBe("/login");
     });
   });
 

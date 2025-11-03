@@ -244,7 +244,21 @@
 
 ### SCRUM-73 Data migration for persistent groups
 
-- adds core to installed apps in settings.py
-- creates data migration for core that creates Manager and Staff groups to be created on new installs
+- add core to installed apps in settings.py
+- create data migration for core that creates Manager and Staff groups to be created on new installs
 - apply core migrations
 - adjust start.sh with a --noinput flag on migrations for safety since it's being used in CI/CD
+
+### SCRUM-74 Implements user registration, removes checked in, in repair
+
+- add user registration serializer
+- add user registration auth route
+- create user registration endpoint
+- create registration page and connect it to navbar when no user authenticated
+- create register function in AuthService.js to create the API request for user registration
+- create redirect from successful registration to login page which displays a success message and prompts to log in
+- remove checked in and in repair fields from all files, frontend and backend, tests, mock data, and seed data, later going to handle check in/out from item bookings, may add back an in repair feature later that can handle quantities
+- adjusted some error links to actually take you back to the previous relevant page
+- add frontend and backend tests for new features
+- update various test files to mock services instead of mocking with axios
+- improve test coverage generally and test consistency across tests

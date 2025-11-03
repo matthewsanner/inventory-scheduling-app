@@ -41,11 +41,18 @@ const Navbar = () => {
             </Button>
           </div>
         ) : (
-          <Link to="/login">
-            <Button size="sm" color="light" className="text-blue-900">
-              Sign In
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/register">
+              <Button size="sm" color="light" className="text-blue-900">
+                Sign Up
+              </Button>
+            </Link>
+            <Link to="/login">
+              <Button size="sm" color="light" className="text-blue-900">
+                Sign In
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
     </nav>

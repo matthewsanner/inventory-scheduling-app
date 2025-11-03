@@ -7,7 +7,6 @@ import {
   TextInput,
   Textarea,
   Select,
-  Checkbox,
 } from "flowbite-react";
 import ErrorCard from "../components/ErrorCard";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
@@ -24,24 +23,26 @@ const NewItem = () => {
     quantity: 1,
     color: "",
     location: "",
-    checked_out: false,
-    in_repair: false,
   });
 
   const [categories, setCategories] = useState([]);
   const [errorKey, setErrorKey] = useState(null);
   const [categoriesError, setCategoriesError] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    getCategories()
-      .then((response) => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getCategories();
         setCategories(response.data);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching categories:", error);
         setCategoriesError(true);
-      });
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   const handleChange = (e) => {
@@ -52,16 +53,10 @@ const NewItem = () => {
     }));
   };
 
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: checked,
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormErrors({});
+    setErrorKey(null);
 
     const errors = {};
     if (!formData.name.trim()) errors.name = "Name is required.";
@@ -73,14 +68,16 @@ const NewItem = () => {
       return;
     }
 
-    createItem(formData)
-      .then(() => {
-        navigate("/items");
-      })
-      .catch((error) => {
-        console.error("Error creating item:", error);
-        setErrorKey(ErrorKeys.CREATE_ITEM_FAILED);
-      });
+    setSubmitting(true);
+    try {
+      await createItem(formData);
+      navigate("/items");
+    } catch (error) {
+      console.error("Error creating item:", error);
+      setErrorKey(ErrorKeys.CREATE_ITEM_FAILED);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (errorKey) {
@@ -107,6 +104,7 @@ const NewItem = () => {
             name="name"
             value={formData.name}
             onChange={handleChange}
+            disabled={submitting}
           />
           {formErrors.name && <p className="text-red-500">{formErrors.name}</p>}
         </div>
@@ -117,16 +115,18 @@ const NewItem = () => {
             name="description"
             value={formData.description}
             onChange={handleChange}
+            disabled={submitting}
           />
         </div>
         <div>
           <Label htmlFor="image">Image URL</Label>
           <TextInput
-            type="url"
+            // type="url"
             id="image"
             name="image"
             value={formData.image}
             onChange={handleChange}
+            disabled={submitting}
           />
         </div>
         <div>
@@ -135,7 +135,8 @@ const NewItem = () => {
             id="category"
             name="category"
             value={formData.category}
-            onChange={handleChange}>
+            onChange={handleChange}
+            disabled={submitting}>
             <option value="">
               {categoriesError ? "Categories unavailable" : "Select a category"}
             </option>
@@ -154,6 +155,7 @@ const NewItem = () => {
             type="number"
             value={formData.quantity}
             onChange={handleChange}
+            disabled={submitting}
           />
           {formErrors.quantity && (
             <p className="text-red-500">{formErrors.quantity}</p>
@@ -166,6 +168,7 @@ const NewItem = () => {
             name="color"
             value={formData.color}
             onChange={handleChange}
+            disabled={submitting}
           />
         </div>
         <div>
@@ -175,28 +178,13 @@ const NewItem = () => {
             name="location"
             value={formData.location}
             onChange={handleChange}
+            disabled={submitting}
           />
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="checked_out"
-            name="checked_out"
-            checked={formData.checked_out}
-            onChange={handleCheckboxChange}
-          />
-          <Label htmlFor="checked_out">Checked Out</Label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="in_repair"
-            name="in_repair"
-            checked={formData.in_repair}
-            onChange={handleCheckboxChange}
-          />
-          <Label htmlFor="in_repair">In Repair</Label>
         </div>
         <div className="flex justify-between pt-4">
-          <Button type="submit">Add Item</Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Adding item..." : "Add Item"}
+          </Button>
           <Button color="light" onClick={() => navigate("/items")}>
             Cancel
           </Button>

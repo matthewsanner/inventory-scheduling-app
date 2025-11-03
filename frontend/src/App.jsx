@@ -7,6 +7,7 @@ import ItemDetail from "./pages/ItemDetail";
 import NewItem from "./pages/NewItem";
 import EditItem from "./pages/EditItem";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
                 element={<h1 className="text-2xl font-bold">Home</h1>}
               />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/items" element={<Items />} />
               <Route path="/items/:id" element={<ItemDetail />} />
               <Route path="/items/new" element={<NewItem />} />

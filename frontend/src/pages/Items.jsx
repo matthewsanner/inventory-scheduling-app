@@ -33,8 +33,6 @@ const Items = () => {
     category: "",
     color: "",
     location: "",
-    checked_out: "",
-    in_repair: "",
   });
 
   const navigate = useNavigate();
@@ -95,8 +93,6 @@ const Items = () => {
       category: "",
       color: "",
       location: "",
-      checked_out: "",
-      in_repair: "",
     });
     setCurrentPage(1);
   };
@@ -166,26 +162,6 @@ const Items = () => {
               onChange={handleFilterChange}
             />
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="checked_out"
-                name="checked_out"
-                checked={filters.checked_out}
-                onChange={handleFilterChange}
-              />
-              <Label htmlFor="checked_out">Checked Out</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="in_repair"
-                name="in_repair"
-                checked={filters.in_repair}
-                onChange={handleFilterChange}
-              />
-              <Label htmlFor="in_repair">In Repair</Label>
-            </div>
-          </div>
           <div className="flex items-end justify-end">
             <Button color="gray" onClick={handleClearFilters}>
               Clear Filters
@@ -216,8 +192,6 @@ const Items = () => {
                     <TableHeadCell>Quantity</TableHeadCell>
                     <TableHeadCell>Color</TableHeadCell>
                     <TableHeadCell>Location</TableHeadCell>
-                    <TableHeadCell>Checked Out</TableHeadCell>
-                    <TableHeadCell>In Repair</TableHeadCell>
                   </TableRow>
                 </TableHead>
                 <TableBody data-testid="items-table">
@@ -245,16 +219,6 @@ const Items = () => {
                       </TableCell>
                       <TableCell className="truncate" title={item.location}>
                         {item.location}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-center">
-                          <Checkbox checked={item.checked_out} disabled />
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-center">
-                          <Checkbox checked={item.in_repair} disabled />
-                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

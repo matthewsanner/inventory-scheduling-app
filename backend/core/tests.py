@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
-from .api.serializers import UserSerializer
+from .api.serializers import UserSerializer, UserRegistrationSerializer
 from .permissions import IsManagerOrStaffReadOnly
 from rest_framework.permissions import SAFE_METHODS
 
@@ -81,6 +81,79 @@ class TestUserSerializer:
         assert data['groups'] == []
         assert data['is_manager'] is False
         assert data['is_staff'] is False
+
+@pytest.mark.django_db
+class TestUserRegistrationSerializer:
+    def test_serialize_registration_data(self):
+        # Test that serializer validates correct registration data
+        data = {
+            'username': 'reguser',
+            'password': 'testpass123',
+            'email': 'reg@example.com',
+            'first_name': 'Reg',
+            'last_name': 'User'
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        assert serializer.is_valid()
+
+    def test_registration_missing_required_fields(self):
+        # Test that serializer rejects missing required fields
+        data = {
+            'username': 'incomplete'
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        assert not serializer.is_valid()
+        assert 'password' in serializer.errors
+        assert 'email' in serializer.errors
+
+    def test_registration_password_too_short(self):
+        # Test that serializer enforces minimum password length
+        data = {
+            'username': 'shortpass',
+            'password': 'short',
+            'email': 'short@example.com'
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        assert not serializer.is_valid()
+        assert 'password' in serializer.errors
+
+    def test_registration_create_user(self):
+        # Test that serializer creates user with correct permissions
+        data = {
+            'username': 'newreguser',
+            'password': 'testpass123',
+            'email': 'newreg@example.com',
+            'first_name': 'New',
+            'last_name': 'Reg'
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        assert serializer.is_valid()
+        
+        user = serializer.save()
+        assert user.username == 'newreguser'
+        assert user.email == 'newreg@example.com'
+        assert user.first_name == 'New'
+        assert user.last_name == 'Reg'
+        assert user.is_active is True
+        assert user.is_staff is False
+        assert user.is_superuser is False
+        assert user.groups.count() == 0
+        # Verify password was hashed
+        assert user.check_password('testpass123')
+
+    def test_registration_optional_fields(self):
+        # Test that first_name and last_name are optional
+        data = {
+            'username': 'optionaluser',
+            'password': 'testpass123',
+            'email': 'optional@example.com'
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        assert serializer.is_valid()
+        
+        user = serializer.save()
+        assert user.first_name == ''
+        assert user.last_name == ''
 
 @pytest.mark.django_db
 class TestAuthenticationAPI:
@@ -164,6 +237,101 @@ class TestAuthenticationAPI:
 
         assert response.status_code == status.HTTP_200_OK
         assert 'access' in response.data
+
+    def test_register_success(self, api_client):
+        # Test successful user registration
+        url = reverse('register')
+        data = {
+            'username': 'newuser',
+            'password': 'testpass123',
+            'email': 'newuser@example.com',
+            'first_name': 'New',
+            'last_name': 'User'
+        }
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert 'detail' in response.data
+        assert 'user' in response.data
+        assert response.data['user']['username'] == 'newuser'
+        assert response.data['user']['email'] == 'newuser@example.com'
+        assert response.data['user']['first_name'] == 'New'
+        assert response.data['user']['last_name'] == 'User'
+        
+        # Verify user was created in database
+        user = User.objects.get(username='newuser')
+        assert user.email == 'newuser@example.com'
+        assert user.is_active is True
+        assert user.is_staff is False
+        assert user.is_superuser is False
+        assert user.groups.count() == 0
+
+    def test_register_minimal_data(self, api_client):
+        # Test registration with only required fields
+        url = reverse('register')
+        data = {
+            'username': 'minimaluser',
+            'password': 'testpass123',
+            'email': 'minimal@example.com'
+        }
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_201_CREATED
+        user = User.objects.get(username='minimaluser')
+        assert user.first_name == ''
+        assert user.last_name == ''
+
+    def test_register_missing_required_fields(self, api_client):
+        # Test registration with missing required fields
+        url = reverse('register')
+        data = {
+            'username': 'incomplete'
+        }
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'password' in response.data
+        assert 'email' in response.data
+
+    def test_register_password_too_short(self, api_client):
+        # Test registration with password less than 8 characters
+        url = reverse('register')
+        data = {
+            'username': 'shortpass',
+            'password': 'short',
+            'email': 'short@example.com'
+        }
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'password' in response.data
+
+    def test_register_duplicate_username(self, api_client, regular_user):
+        # Test registration with existing username
+        url = reverse('register')
+        data = {
+            'username': 'regular',  # This user already exists
+            'password': 'testpass123',
+            'email': 'different@example.com'
+        }
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'username' in response.data
+
+    def test_register_unauthenticated_access(self, api_client):
+        # Test that registration endpoint is accessible without authentication
+        url = reverse('register')
+        data = {
+            'username': 'publicuser',
+            'password': 'testpass123',
+            'email': 'public@example.com'
+        }
+        # No authentication credentials
+        response = api_client.post(url, data, format='json')
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert User.objects.filter(username='publicuser').exists()
 
 @pytest.mark.django_db
 class TestPermissions:

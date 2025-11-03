@@ -7,7 +7,6 @@ import {
   TextInput,
   Textarea,
   Select,
-  Checkbox,
 } from "flowbite-react";
 import LoadingCard from "../components/LoadingCard";
 import ErrorCard from "../components/ErrorCard";
@@ -30,35 +29,38 @@ const EditItem = () => {
     quantity: 1,
     color: "",
     location: "",
-    checked_out: false,
-    in_repair: false,
   });
 
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [errorKey, setErrorKey] = useState(null);
   const [categoriesError, setCategoriesError] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchCategories()
-      .then((response) => {
-        setCategories(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching categories:", error);
-        setCategoriesError(true);
-      });
-
-    fetchItemById(id)
-      .then((response) => {
-        setFormData(response.data);
+    const loadData = async () => {
+      try {
+        const [categoryResponse, itemResponse] = await Promise.all([
+          fetchCategories(),
+          fetchItemById(id),
+        ]);
+        setCategories(categoryResponse.data);
+        setFormData(itemResponse.data);
+      } catch (error) {
+        console.error("Error loading data:", error);
+        if (error.message.includes("categories")) {
+          console.error("Error fetching categories:", error);
+          setCategoriesError(true);
+        } else {
+          console.error("Error fetching item:", error);
+          setErrorKey(ErrorKeys.LOAD_ITEM_FAILED);
+        }
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching item:", error);
-        setErrorKey(ErrorKeys.LOAD_ITEM_FAILED);
-      });
+      }
+    };
+    loadData();
   }, [id]);
 
   const handleChange = (e) => {
@@ -69,16 +71,10 @@ const EditItem = () => {
     }));
   };
 
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: checked,
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormErrors({});
+    setErrorKey(null);
 
     const errors = {};
     if (!formData.name.trim()) errors.name = "Name is required.";
@@ -90,14 +86,16 @@ const EditItem = () => {
       return;
     }
 
-    updateItem(id, formData)
-      .then(() => {
-        navigate("/items");
-      })
-      .catch((error) => {
-        console.error("Error updating item:", error);
-        setErrorKey(ErrorKeys.UPDATE_ITEM_FAILED);
-      });
+    setSubmitting(true);
+    try {
+      await updateItem(id, formData);
+      navigate("/items");
+    } catch (error) {
+      console.error("Error updating item:", error);
+      setErrorKey(ErrorKeys.UPDATE_ITEM_FAILED);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (errorKey) {
@@ -128,6 +126,7 @@ const EditItem = () => {
             name="name"
             value={formData.name}
             onChange={handleChange}
+            disabled={submitting}
           />
           {formErrors.name && <p className="text-red-500">{formErrors.name}</p>}
         </div>
@@ -138,16 +137,18 @@ const EditItem = () => {
             name="description"
             value={formData.description}
             onChange={handleChange}
+            disabled={submitting}
           />
         </div>
         <div>
           <Label htmlFor="image">Image URL</Label>
           <TextInput
-            type="url"
+            // type="url"
             id="image"
             name="image"
             value={formData.image}
             onChange={handleChange}
+            disabled={submitting}
           />
         </div>
         <div>
@@ -157,7 +158,7 @@ const EditItem = () => {
             name="category"
             value={formData.category}
             onChange={handleChange}
-            disabled={categoriesError || categories.length === 0}>
+            disabled={submitting || categoriesError || categories.length === 0}>
             <option value="">
               {categoriesError ? "Categories unavailable" : "Select a category"}
             </option>
@@ -176,6 +177,7 @@ const EditItem = () => {
             type="number"
             value={formData.quantity}
             onChange={handleChange}
+            disabled={submitting}
           />
           {formErrors.quantity && (
             <p className="text-red-500">{formErrors.quantity}</p>
@@ -188,6 +190,7 @@ const EditItem = () => {
             name="color"
             value={formData.color}
             onChange={handleChange}
+            disabled={submitting}
           />
         </div>
         <div>
@@ -197,30 +200,13 @@ const EditItem = () => {
             name="location"
             value={formData.location}
             onChange={handleChange}
+            disabled={submitting}
           />
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="checked_out"
-            name="checked_out"
-            checked={formData.checked_out}
-            onChange={handleCheckboxChange}
-          />
-          <Label htmlFor="checked_out">Checked Out</Label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="in_repair"
-            name="in_repair"
-            checked={formData.in_repair}
-            onChange={handleCheckboxChange}
-          />
-          <Label htmlFor="in_repair">In Repair</Label>
         </div>
 
         <div className="flex justify-between pt-4">
-          <Button type="submit" color="green">
-            Update Item
+          <Button type="submit" color="green" disabled={submitting}>
+            {submitting ? "Updating item..." : "Update Item"}
           </Button>
           <Button
             color="light"

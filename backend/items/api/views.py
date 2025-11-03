@@ -13,12 +13,10 @@ class ItemFilter(filters.FilterSet):
     category = filters.CharFilter()
     color = filters.CharFilter(lookup_expr='icontains')
     location = filters.CharFilter(lookup_expr='icontains')
-    checked_out = filters.BooleanFilter()
-    in_repair = filters.BooleanFilter()
 
     class Meta:
         model = Item
-        fields = ['name', 'category', 'color', 'location', 'checked_out', 'in_repair']
+        fields = ['name', 'category', 'color', 'location']
 
 class ItemViewSet(ModelViewSet):
     queryset = Item.objects.all()
