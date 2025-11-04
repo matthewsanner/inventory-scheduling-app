@@ -66,12 +66,10 @@ class Item(models.Model):
   name = models.CharField(max_length=200)
   description = models.CharField(max_length=2000, blank=True)
   quantity = models.PositiveSmallIntegerField(default=1)
-  image = models.URLField(blank=True, null=True)
+  image = models.CharField(blank=True, null=True, default="/box.png") # may want to change this later
   category = models.CharField(max_length=4, choices=CATEGORY_CHOICES, blank=True)
   color = models.CharField(max_length=50, blank=True)
   location = models.CharField(max_length=200, blank=True)
-  checked_out = models.BooleanField(default=False)
-  in_repair = models.BooleanField(default=False)
 
   def __str__(self):
     return f"Name: {self.name}"

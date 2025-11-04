@@ -21,17 +21,17 @@ export const ERROR_CONFIG = {
   [ErrorKeys.UPDATE_ITEM_FAILED]: {
     message: "Failed to update item. Please check your input and try again.",
     onBack: (navigate, id) => () => navigate(`/items/${id}`),
-    backLabel: "← Back to Edit Item",
+    backLabel: "← Back to Item Details",
   },
   [ErrorKeys.CREATE_ITEM_FAILED]: {
     message: "Failed to create item. Please try again later.",
-    onBack: (navigate) => () => navigate("/items/new"),
-    backLabel: "← Back to Add New Item",
+    onBack: (navigate) => () => navigate("/items"),
+    backLabel: "← Back to Items",
   },
   [ErrorKeys.DELETE_ITEM_FAILED]: {
     message: "Failed to delete item. Please try again later.",
-    onBack: (navigate, id) => () => navigate(`/items/${id}`),
-    backLabel: "← Back to Item Detail",
+    onBack: (navigate, id) => () => navigate(`/items`),
+    backLabel: "← Back to Items",
   },
   [ErrorKeys.GENERIC_ERROR]: {
     message: "Something went wrong. Please try again.",

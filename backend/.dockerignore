@@ -8,6 +8,4 @@ __pycache__/
 .git
 .gitignore
 .vscode/
-Dockerfile
-docker-compose.yml
 *.log

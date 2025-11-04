@@ -1,0 +1,26 @@
+name: Run Tests
+
+on:
+  push:
+    branches: ["*"] # Run on all branches
+  pull_request:
+    branches: ["*"] # Also run on all PRs
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run tests using Makefile
+        run: |
+          make test
+
+      - name: Clean up containers
+        if: always()
+        run: docker compose down

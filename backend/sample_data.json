@@ -3,15 +3,13 @@
     "model": "items.item",
     "pk": 1,
     "fields": {
-      "name": "Red Velvet Cape",
+      "name": "Velvet Cape",
       "description": "A flowing red velvet cape for theatrical productions.",
-      "quantity": 1,
+      "quantity": 2,
       "image": "/box.png",
       "category": "CAP",
       "color": "Red",
-      "location": "Storage Room A",
-      "checked_out": false,
-      "in_repair": false
+      "location": "Storage Room A"
     }
   },
   {
@@ -20,13 +18,11 @@
     "fields": {
       "name": "Gold Crown",
       "description": "A sparkling golden crown with imitation jewels.",
-      "quantity": 1,
+      "quantity": 3,
       "image": "/box.png",
       "category": "CRO",
       "color": "Gold",
-      "location": "Prop Closet",
-      "checked_out": true,
-      "in_repair": false
+      "location": "Prop Closet"
     }
   },
   {
@@ -35,43 +31,37 @@
     "fields": {
       "name": "Steampunk Goggles",
       "description": "Bronze goggles with tinted lenses.",
-      "quantity": 1,
+      "quantity": 4,
       "image": "/box.png",
       "category": "STE",
       "color": "Bronze",
-      "location": "Workshop",
-      "checked_out": false,
-      "in_repair": true
+      "location": "Workshop"
     }
   },
   {
     "model": "items.item",
     "pk": 4,
     "fields": {
-      "name": "Black Opera Cape",
+      "name": "Opera Cape",
       "description": "Classic black opera cape with satin lining.",
-      "quantity": 1,
+      "quantity": 2,
       "image": "/box.png",
       "category": "CAP",
       "color": "Black",
-      "location": "Main Office",
-      "checked_out": false,
-      "in_repair": false
+      "location": "Main Office"
     }
   },
   {
     "model": "items.item",
     "pk": 5,
     "fields": {
-      "name": "Green Feather Headdress",
+      "name": "Feather Headdress",
       "description": "Tall green feathered headdress for performances.",
-      "quantity": 1,
+      "quantity": 2,
       "image": "/box.png",
       "category": "HEA",
       "color": "Green",
-      "location": "Costume Storage",
-      "checked_out": true,
-      "in_repair": false
+      "location": "Costume Storage"
     }
   },
   {
@@ -84,9 +74,7 @@
       "image": "/box.png",
       "category": "LED",
       "color": "White",
-      "location": "Prop Closet",
-      "checked_out": false,
-      "in_repair": false
+      "location": "Prop Closet"
     }
   },
   {
@@ -99,9 +87,7 @@
       "image": "/box.png",
       "category": "TWE",
       "color": "Black",
-      "location": "Wardrobe Rack",
-      "checked_out": false,
-      "in_repair": true
+      "location": "Wardrobe Rack"
     }
   },
   {
@@ -114,9 +100,7 @@
       "image": "/box.png",
       "category": "TUT",
       "color": "Blue",
-      "location": "Storage Room B",
-      "checked_out": false,
-      "in_repair": false
+      "location": "Storage Room B"
     }
   },
   {
@@ -129,9 +113,7 @@
       "image": "/box.png",
       "category": "STI",
       "color": "Red",
-      "location": "Workshop",
-      "checked_out": false,
-      "in_repair": false
+      "location": "Workshop"
     }
   },
   {
@@ -144,9 +126,7 @@
       "image": "/box.png",
       "category": "PRO",
       "color": "White",
-      "location": "Decor Closet",
-      "checked_out": false,
-      "in_repair": false
+      "location": "Decor Closet"
     }
   },
   {
@@ -159,9 +139,7 @@
       "image": "/box.png",
       "category": "HAT",
       "color": "Black",
-      "location": "Headwear Shelf",
-      "checked_out": true,
-      "in_repair": false
+      "location": "Headwear Shelf"
     }
   },
   {
@@ -174,9 +152,7 @@
       "image": "/box.png",
       "category": "SIG",
       "color": "Multi",
-      "location": "Control Room",
-      "checked_out": false,
-      "in_repair": false
+      "location": "Control Room"
     }
   },
   {
@@ -189,9 +165,7 @@
       "image": "/box.png",
       "category": "GLO",
       "color": "White",
-      "location": "Accessories Drawer",
-      "checked_out": false,
-      "in_repair": false
+      "location": "Accessories Drawer"
     }
   },
   {
@@ -204,24 +178,20 @@
       "image": "/box.png",
       "category": "WIG",
       "color": "Rainbow",
-      "location": "Wig Rack",
-      "checked_out": true,
-      "in_repair": false
+      "location": "Wig Rack"
     }
   },
   {
     "model": "items.item",
     "pk": 15,
     "fields": {
-      "name": "Black Sequin Shrug",
+      "name": "Sequin Shrug",
       "description": "Short sequin shrug jacket.",
       "quantity": 1,
       "image": "/box.png",
       "category": "SHR",
       "color": "Black",
-      "location": "Rack 3",
-      "checked_out": false,
-      "in_repair": false
+      "location": "Rack 3"
     }
   }
 ]

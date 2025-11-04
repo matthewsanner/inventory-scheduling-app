@@ -91,14 +91,6 @@ const ItemDetail = () => {
               <strong className="block font-semibold">Location:</strong>
               {item.location}
             </li>
-            <li>
-              <strong className="block font-semibold">Checked Out:</strong>
-              {item.checked_out ? "Yes" : "No"}
-            </li>
-            <li>
-              <strong className="block font-semibold">In Repair:</strong>
-              {item.in_repair ? "Yes" : "No"}
-            </li>
           </ul>
         </div>
 

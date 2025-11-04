@@ -1,12 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import axios from "axios";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate } from "react-router";
 import NewItem from "../pages/NewItem";
 import { mockCategories, mockFormData } from "./testUtils";
+import { getCategories, createItem } from "../services/NewItemService";
 
-vi.mock("axios");
+// Mock service module
+vi.mock("../services/NewItemService", () => ({
+  getCategories: vi.fn(),
+  createItem: vi.fn(),
+}));
 
 // Mock useNavigate from react-router
 vi.mock("react-router", async () => {
@@ -18,6 +22,7 @@ vi.mock("react-router", async () => {
 });
 
 const mockNavigate = vi.fn();
+const user = userEvent.setup();
 
 const renderNewItemPage = async () => {
   render(
@@ -32,11 +37,9 @@ const renderNewItemPage = async () => {
 };
 
 describe("NewItem Page", () => {
-  const user = userEvent.setup();
-
   beforeEach(() => {
-    axios.get.mockResolvedValue({ data: mockCategories });
     useNavigate.mockReturnValue(mockNavigate);
+    getCategories.mockResolvedValue({ data: mockCategories });
   });
 
   afterEach(() => {
@@ -55,8 +58,6 @@ describe("NewItem Page", () => {
     expect(screen.getByLabelText("Quantity")).toBeInTheDocument();
     expect(screen.getByLabelText("Color")).toBeInTheDocument();
     expect(screen.getByLabelText("Location")).toBeInTheDocument();
-    expect(screen.getByLabelText("Checked Out")).toBeInTheDocument();
-    expect(screen.getByLabelText("In Repair")).toBeInTheDocument();
   });
 
   it("fetches and displays category options in the select dropdown", async () => {
@@ -70,9 +71,7 @@ describe("NewItem Page", () => {
       expect(screen.getByText("Wigs")).toBeInTheDocument();
     });
 
-    expect(axios.get).toHaveBeenCalledWith(
-      expect.stringContaining("items/categories/")
-    );
+    expect(getCategories).toHaveBeenCalledTimes(1);
   });
 
   it("handles form input changes correctly", async () => {
@@ -84,8 +83,7 @@ describe("NewItem Page", () => {
     const quantityInput = screen.getByLabelText("Quantity");
     const colorInput = screen.getByLabelText("Color");
     const locationInput = screen.getByLabelText("Location");
-    const checkedOutCheckbox = screen.getByLabelText("Checked Out");
-    const inRepairCheckbox = screen.getByLabelText("In Repair");
+    const categorySelect = screen.getByLabelText("Category");
 
     await user.type(nameInput, mockFormData.name);
     await user.type(descriptionInput, mockFormData.description);
@@ -94,8 +92,7 @@ describe("NewItem Page", () => {
     await user.type(quantityInput, mockFormData.quantity.toString());
     await user.type(colorInput, mockFormData.color);
     await user.type(locationInput, mockFormData.location);
-    await user.click(checkedOutCheckbox);
-    await user.click(inRepairCheckbox);
+    await user.selectOptions(categorySelect, mockFormData.category);
 
     expect(nameInput.value).toBe(mockFormData.name);
     expect(descriptionInput.value).toBe(mockFormData.description);
@@ -103,13 +100,12 @@ describe("NewItem Page", () => {
     expect(quantityInput.value).toBe(mockFormData.quantity);
     expect(colorInput.value).toBe(mockFormData.color);
     expect(locationInput.value).toBe(mockFormData.location);
-    expect(checkedOutCheckbox.checked).toBe(true);
-    expect(inRepairCheckbox.checked).toBe(true);
+    expect(categorySelect.value).toBe(mockFormData.category);
   });
 
   it("submits the form successfully and navigates to items page", async () => {
     renderNewItemPage();
-    axios.post.mockResolvedValueOnce({});
+    createItem.mockResolvedValueOnce({});
 
     await user.type(screen.getByLabelText("Name"), mockFormData.name);
     await user.type(
@@ -124,24 +120,16 @@ describe("NewItem Page", () => {
     await user.clear(screen.getByLabelText("Quantity"));
     await user.type(
       screen.getByLabelText("Quantity"),
-      mockFormData.quantity.toString()
+      String(mockFormData.quantity)
     );
     await user.type(screen.getByLabelText("Color"), mockFormData.color);
     await user.type(screen.getByLabelText("Location"), mockFormData.location);
-
-    if (mockFormData.checked_out) {
-      await user.click(screen.getByLabelText("Checked Out"));
-    }
-    if (mockFormData.in_repair) {
-      await user.click(screen.getByLabelText("In Repair"));
-    }
 
     const submitButton = screen.getByRole("button", { name: "Add Item" });
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith(
-        expect.stringContaining("items/"),
+      expect(createItem).toHaveBeenCalledWith(
         expect.objectContaining({
           name: mockFormData.name,
           description: mockFormData.description,
@@ -150,8 +138,6 @@ describe("NewItem Page", () => {
           quantity: mockFormData.quantity,
           color: mockFormData.color,
           location: mockFormData.location,
-          checked_out: mockFormData.checked_out,
-          in_repair: mockFormData.in_repair,
         })
       );
     });
@@ -159,10 +145,12 @@ describe("NewItem Page", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/items");
   });
 
-  it("handles form submission error and navigates back to add new item page on button click", async () => {
+  it("handles form submission error and shows ErrorCard", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    createItem.mockRejectedValueOnce(new Error("API error"));
     renderNewItemPage();
-    const mockError = new Error("Failed to create item");
-    axios.post.mockRejectedValueOnce(mockError);
 
     await user.type(screen.getByLabelText("Name"), mockFormData.name);
     await user.click(screen.getByRole("button", { name: "Add Item" }));
@@ -174,11 +162,13 @@ describe("NewItem Page", () => {
     });
 
     const backButton = screen.getByRole("button", {
-      name: "← Back to Add New Item",
+      name: "← Back to Items",
     });
     await user.click(backButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith("/items/new");
+    expect(mockNavigate).toHaveBeenCalledWith("/items");
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("navigates back to items page when Cancel is clicked", async () => {
@@ -190,55 +180,74 @@ describe("NewItem Page", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/items");
   });
 
-  it("renders form even if fetching categories fails", async () => {
-    axios.get.mockRejectedValueOnce(new Error("Network error"));
+  it("renders fallback text when fetching categories fails", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    getCategories.mockRejectedValueOnce(new Error("Network error"));
 
     renderNewItemPage();
 
-    // Check Name input exists immediately
-    expect(screen.getByLabelText("Name")).toBeInTheDocument();
-
-    // Wait for category select to render after effect runs
     await waitFor(() => {
       expect(screen.getByLabelText("Category")).toBeInTheDocument();
+      expect(screen.getByText("Categories unavailable")).toBeInTheDocument();
     });
 
-    // Assert that the Select has the fallback option
-    expect(screen.getByText("Categories unavailable")).toBeInTheDocument();
-  });
-
-  it("toggles checkboxes correctly", async () => {
-    renderNewItemPage();
-
-    const checkedOutCheckbox = screen.getByLabelText("Checked Out");
-    const inRepairCheckbox = screen.getByLabelText("In Repair");
-
-    await user.click(checkedOutCheckbox);
-    await user.click(inRepairCheckbox);
-
-    expect(checkedOutCheckbox.checked).toBe(true);
-    expect(inRepairCheckbox.checked).toBe(true);
+    consoleErrorSpy.mockRestore();
   });
 
   it("prevents form submission if required fields are empty", async () => {
     renderNewItemPage();
 
-    await waitFor(() => {
-      expect(screen.getByText("Add New Item")).toBeInTheDocument();
-    });
-
-    const nameInput = screen.getByLabelText(/name/i);
+    const nameInput = screen.getByLabelText("Name");
     await user.clear(nameInput);
 
-    const quantityInput = screen.getByLabelText(/quantity/i);
+    const quantityInput = screen.getByLabelText("Quantity");
     await user.clear(quantityInput);
 
-    const submitButton = screen.getByRole("button", { name: /add item/i });
+    const submitButton = screen.getByRole("button", { name: "Add Item" });
     await user.click(submitButton);
 
     expect(await screen.findByText(/name is required/i)).toBeInTheDocument();
     expect(
       await screen.findByText(/quantity must be at least 1/i)
     ).toBeInTheDocument();
+  });
+
+  it("resets previous errors and shows loading state during submission", async () => {
+    // Use a delayed promise to allow testing the loading state
+    let resolveCreate;
+    const createPromise = new Promise((resolve) => {
+      resolveCreate = resolve;
+    });
+    createItem.mockReturnValueOnce(createPromise);
+
+    renderNewItemPage();
+
+    const nameInput = screen.getByLabelText("Name");
+    const submitButton = screen.getByRole("button", { name: "Add Item" });
+
+    // First submit without name, causes validation errors
+    await user.click(submitButton);
+    expect(await screen.findByText(/name is required/i)).toBeInTheDocument();
+
+    // Now fill and resubmit
+    await user.type(nameInput, "Box");
+    await user.click(submitButton);
+
+    // Should reset errors and show loading state
+    await waitFor(() => {
+      const updatedButton = screen.getByRole("button", {
+        name: /adding item/i,
+      });
+      expect(updatedButton).toHaveTextContent(/adding item/i);
+    });
+
+    // Resolve the promise to complete the submission
+    resolveCreate({});
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/items");
+    });
   });
 });

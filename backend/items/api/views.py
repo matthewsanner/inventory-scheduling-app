@@ -5,18 +5,18 @@ from rest_framework import status
 from django_filters import rest_framework as filters
 from ..models import Item
 from .serializers import ItemSerializer
+from core.permissions import IsManagerOrStaffReadOnly
+from rest_framework.permissions import IsAuthenticated
 
 class ItemFilter(filters.FilterSet):
     name = filters.CharFilter(lookup_expr='icontains')
     category = filters.CharFilter()
     color = filters.CharFilter(lookup_expr='icontains')
     location = filters.CharFilter(lookup_expr='icontains')
-    checked_out = filters.BooleanFilter()
-    in_repair = filters.BooleanFilter()
 
     class Meta:
         model = Item
-        fields = ['name', 'category', 'color', 'location', 'checked_out', 'in_repair']
+        fields = ['name', 'category', 'color', 'location']
 
 class ItemViewSet(ModelViewSet):
     queryset = Item.objects.all()
@@ -24,8 +24,11 @@ class ItemViewSet(ModelViewSet):
     filterset_class = ItemFilter
     search_fields = ['name', 'description', 'color', 'location']
     ordering_fields = ['name', 'category', 'quantity', 'color', 'location']
+    permission_classes = [IsManagerOrStaffReadOnly]
 
 class CategoryChoicesView(APIView):
+    permission_classes = [IsManagerOrStaffReadOnly]
+    
     def get(self, request, *args, **kwargs):
         categories = [{"value": c[0], "label": c[1]} for c in Item.CATEGORY_CHOICES]
         return Response(categories, status=status.HTTP_200_OK)

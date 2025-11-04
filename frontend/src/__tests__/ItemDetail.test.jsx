@@ -1,12 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import axios from "axios";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate, useParams } from "react-router";
 import ItemDetail from "../pages/ItemDetail";
 import { mockItem } from "./testUtils";
+import { getItem, deleteItem } from "../services/ItemDetailService";
 
-vi.mock("axios");
+// Mock service module
+vi.mock("../services/ItemDetailService", () => ({
+  getItem: vi.fn(),
+  deleteItem: vi.fn(),
+}));
 
 // Mock useNavigate and useParams from react-router
 vi.mock("react-router", async () => {
@@ -43,21 +47,23 @@ describe("ItemDetail Page", () => {
   beforeEach(() => {
     useNavigate.mockReturnValue(mockNavigate);
     useParams.mockReturnValue({ id: "1" });
-    axios.get.mockResolvedValue({ data: mockItem });
+    getItem.mockResolvedValue({ data: mockItem });
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("renders loading spinner when loading is true", () => {
-    axios.get.mockImplementation(() => new Promise(() => {}));
+  it("renders loading spinner when loading is true", async () => {
+    getItem.mockImplementation(() => new Promise(() => {}));
     renderItemDetailPage();
 
-    // Expect spinner and loading text to show up
-    expect(screen.getByText(/loading item/i)).toBeInTheDocument();
-    // Flowbite spinner component uses role="status" for accessibility
-    expect(screen.getByRole("status")).toBeInTheDocument();
+    await waitFor(() => {
+      // Expect spinner and loading text to show up
+      expect(screen.getByText(/loading item/i)).toBeInTheDocument();
+      // Flowbite spinner component uses role="status" for accessibility
+      expect(screen.getByRole("status")).toBeInTheDocument();
+    });
   });
 
   it("fetches and displays item details", async () => {
@@ -72,16 +78,10 @@ describe("ItemDetail Page", () => {
       expect(screen.getByText("5")).toBeInTheDocument();
       expect(screen.getByText("Red")).toBeInTheDocument();
       expect(screen.getByText("Shelf A")).toBeInTheDocument();
-      // Checked Out
-      const checkedOutRow = screen.getByText("Checked Out:").closest("li");
-      expect(within(checkedOutRow).getByText("No")).toBeInTheDocument();
-      // In Repair
-      const inRepairRow = screen.getByText("In Repair:").closest("li");
-      expect(within(inRepairRow).getByText("No")).toBeInTheDocument();
     });
 
     // Verify API call
-    expect(axios.get).toHaveBeenCalledWith(expect.stringContaining("items/1/"));
+    expect(getItem).toHaveBeenCalledWith("1");
   });
 
   it("displays item image when available", async () => {
@@ -106,7 +106,7 @@ describe("ItemDetail Page", () => {
 
   it('displays "No description available" when description is empty', async () => {
     const itemWithoutDesc = { ...mockItem, description: "" };
-    axios.get.mockResolvedValueOnce({ data: itemWithoutDesc });
+    getItem.mockResolvedValueOnce({ data: itemWithoutDesc });
 
     renderItemDetailPage();
 
@@ -119,7 +119,7 @@ describe("ItemDetail Page", () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    axios.get.mockRejectedValueOnce(new Error("Failed to fetch"));
+    getItem.mockRejectedValueOnce(new Error("Failed to fetch"));
 
     renderItemDetailPage();
 
@@ -184,7 +184,7 @@ describe("ItemDetail Page", () => {
   });
 
   it("deletes item and navigates to items page when confirmed", async () => {
-    axios.delete.mockResolvedValueOnce({});
+    deleteItem.mockResolvedValueOnce({});
     renderItemDetailPage();
 
     await waitFor(() => {
@@ -196,9 +196,7 @@ describe("ItemDetail Page", () => {
     await user.click(screen.getByRole("button", { name: "Yes, I'm sure" }));
 
     await waitFor(() => {
-      expect(axios.delete).toHaveBeenCalledWith(
-        expect.stringContaining("items/1/")
-      );
+      expect(deleteItem).toHaveBeenCalledWith("1");
       expect(mockNavigate).toHaveBeenCalledWith("/items");
     });
   });
@@ -207,7 +205,7 @@ describe("ItemDetail Page", () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    axios.delete.mockRejectedValueOnce(new Error("Failed to delete"));
+    deleteItem.mockRejectedValueOnce(new Error("Failed to delete"));
 
     renderItemDetailPage();
 

@@ -1,7 +1,7 @@
 import { Card, Button } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { useNavigate } from "react-router";
-import { ERROR_CONFIG, ErrorKeys } from "../constants/errorMessages"; // adjust path as needed
+import { ERROR_CONFIG, ErrorKeys } from "../constants/errorMessages";
 
 const ErrorCard = ({ message, onBack, backLabel }) => {
   const navigate = useNavigate();
