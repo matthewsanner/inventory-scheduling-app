@@ -262,3 +262,7 @@
 - add frontend and backend tests for new features
 - update various test files to mock services instead of mocking with axios
 - improve test coverage generally and test consistency across tests
+
+### SCRUM-74 Adds minimums to quantity selectors
+
+- Add minimum of 1 to quantity selectors

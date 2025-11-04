@@ -178,6 +178,7 @@ const EditItem = () => {
             value={formData.quantity}
             onChange={handleChange}
             disabled={submitting}
+            min={1}
           />
           {formErrors.quantity && (
             <p className="text-red-500">{formErrors.quantity}</p>
