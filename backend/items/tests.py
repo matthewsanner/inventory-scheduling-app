@@ -79,6 +79,18 @@ class TestItemModel:
         assert item.color == "Red"
         assert item.location == "Shelf A1"
 
+    def test_create_item_minimal_fields(self):
+        item = Item.objects.create(
+            name="Minimal Item",
+            quantity=1
+        )
+        assert item.name == "Minimal Item"
+        assert item.quantity == 1
+        assert item.description == ""
+        assert item.category == ""
+        assert item.color == ""
+        assert item.location == ""
+
     def test_item_str_representation(self, sample_item):
         assert str(sample_item) == f"Name: {sample_item.name}"
 
@@ -121,6 +133,20 @@ class TestItemSerializer:
         assert 'name' in serializer.errors
         assert 'quantity' in serializer.errors
 
+    def test_serializer_optional_fields(self):
+        data = {
+            'name': 'Item Without Optional Fields',
+            'quantity': 1
+        }
+        serializer = ItemSerializer(data=data)
+        assert serializer.is_valid()
+        item = serializer.save()
+        assert item.name == data['name']
+        assert item.description == ""
+        assert item.category == ""
+        assert item.color == ""
+        assert item.location == ""
+
 @pytest.mark.django_db
 class TestItemAPI:
     def test_list_items(self, authenticated_staff_client, sample_item):
@@ -146,12 +172,36 @@ class TestItemAPI:
         assert Item.objects.count() == 1
         item = Item.objects.first()
         assert item.name == data['name']
+        assert item.description == data['description']
+        assert item.category == data['category']
+        assert item.color == data['color']
+        assert item.location == data['location']
+
+    def test_create_item_minimal_fields(self, authenticated_manager_client):
+        url = reverse('item-list')
+        data = {
+            'name': 'Minimal API Item',
+            'quantity': 1
+        }
+        response = authenticated_manager_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_201_CREATED
+        item = Item.objects.first()
+        assert item.name == data['name']
+        assert item.quantity == data['quantity']
+        assert item.description == ""
+        assert item.category == ""
+        assert item.color == ""
+        assert item.location == ""
 
     def test_retrieve_item(self, authenticated_staff_client, sample_item):
         url = reverse('item-detail', kwargs={'pk': sample_item.pk})
         response = authenticated_staff_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data['name'] == sample_item.name
+        assert response.data['description'] == sample_item.description
+        assert response.data['category'] == sample_item.category
+        assert response.data['color'] == sample_item.color
+        assert response.data['location'] == sample_item.location
 
     def test_retrieve_nonexistent_item(self, authenticated_staff_client):
         url = reverse('item-detail', kwargs={'pk': 999})
@@ -165,6 +215,26 @@ class TestItemAPI:
         assert response.status_code == status.HTTP_200_OK
         sample_item.refresh_from_db()
         assert sample_item.name == 'Updated Name'
+
+    def test_update_item_full(self, authenticated_manager_client, sample_item):
+        url = reverse('item-detail', kwargs={'pk': sample_item.pk})
+        data = {
+            'name': 'Fully Updated Item',
+            'description': 'Updated Description',
+            'quantity': 5,
+            'category': 'APP',
+            'color': 'Blue',
+            'location': 'Updated Location'
+        }
+        response = authenticated_manager_client.put(url, data, format='json')
+        assert response.status_code == status.HTTP_200_OK
+        sample_item.refresh_from_db()
+        assert sample_item.name == data['name']
+        assert sample_item.description == data['description']
+        assert sample_item.quantity == data['quantity']
+        assert sample_item.category == data['category']
+        assert sample_item.color == data['color']
+        assert sample_item.location == data['location']
 
     def test_update_nonexistent_item(self, authenticated_manager_client):
         url = reverse('item-detail', kwargs={'pk': 999})
@@ -230,4 +300,30 @@ class TestItemAPI:
         assert response.data['count'] == 15
 
         assert len(response.data['results']) == settings.REST_FRAMEWORK['PAGE_SIZE']
+
+    def test_staff_cannot_create_item(self, authenticated_staff_client):
+        url = reverse('item-list')
+        data = {
+            'name': 'Unauthorized Item',
+            'quantity': 1,
+            'category': 'ACC'
+        }
+        response = authenticated_staff_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_staff_cannot_update_item(self, authenticated_staff_client, sample_item):
+        url = reverse('item-detail', kwargs={'pk': sample_item.pk})
+        data = {'name': 'Unauthorized Update'}
+        response = authenticated_staff_client.patch(url, data, format='json')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_staff_cannot_delete_item(self, authenticated_staff_client, sample_item):
+        url = reverse('item-detail', kwargs={'pk': sample_item.pk})
+        response = authenticated_staff_client.delete(url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_unauthenticated_cannot_access_items(self, api_client):
+        url = reverse('item-list')
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 

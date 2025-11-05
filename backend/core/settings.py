@@ -57,6 +57,7 @@ INSTALLED_APPS = [
 
     'core',
     'items',
+    'events',
 ]
 
 CORS_ALLOWED_ORIGINS = [

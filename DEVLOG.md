@@ -266,3 +266,31 @@
 ### SCRUM-74 Adds minimums to quantity selectors
 
 - Add minimum of 1 to quantity selectors
+
+## SCRUM-8 Create events
+
+### SCRUM-30 creates event model and API
+
+- set up new Event model with fields: name, start_datetime, end_datetime, optional location, and optional notes
+- add serializer, viewset, and URL routing for events, following similar structure as the existing items API
+- make and apply migrations inside the backend Docker container for events "app"
+- confirm CRUD routes working through manual API tests
+- write backend unit tests for event endpoints, serializer, model, etc.
+- update backend unit tests for items to match coverage on events
+- suppress pytest deprecation warning for a known compatibility issue between Django and DRF, not a problem for the app right now
+
+### SCRUM-31 implements backend event filtering and search
+
+### SCRUM-75 adds backend permissions for events
+
+### SCRUM-76 creates events page and API service
+
+### SCRUM-77 implements frontend event search and filter
+
+### SCRUM-78 creates event details page
+
+### SCRUM-79 creates new event form
+
+### SCRUM-80 creates edit event form
+
+### SCRUM-81 implements event deletion with confirmation modal
