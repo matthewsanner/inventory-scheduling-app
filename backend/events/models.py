@@ -11,4 +11,4 @@ class Event(models.Model):
     return f"Name: {self.name}"
 
   class Meta:
-    ordering = ['id']
+    ordering = ['start_datetime']

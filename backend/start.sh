@@ -10,6 +10,14 @@ else
   echo "Sample data already present, skipping."
 fi
 
+# Check if any Events exist before loading sample event data
+if [ "$(python manage.py shell -c 'from events.models import Event; print(Event.objects.exists())')" = "False" ]; then
+  echo "Loading sample event data..."
+  python manage.py loaddata sample_data.json
+else
+  echo "Sample event data already present, skipping."
+fi
+
 # Automatically create superuser if it doesn't exist
 echo "Checking for superuser..."
 python manage.py shell -c "

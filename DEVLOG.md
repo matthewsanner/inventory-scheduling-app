@@ -289,6 +289,20 @@
 
 ### SCRUM-76 creates events page and API service
 
+- create EventsService.js in frontend/src/services following the same pattern as ItemsService.js, with getEvents function that handles pagination, filtering, and error handling
+- create Events.jsx page component in frontend/src/pages that mirrors the Items page structure but tailored for the Event model, includes table displaying event name, start date, end date, and location with formatted datetime display in local time, entries displayed in ascending order of event start date
+- add search, location, and date filter inputs to the events page, with clear filters functionality
+- add pagination controls using Flowbite Pagination component matching the items page style
+- add error handling using ErrorCard and LoadingCard components consistent with other pages
+- add events route to App.jsx routing configuration
+- add Events link to Navbar component
+- add LOAD_EVENTS_FAILED error key to errorMessages.js with appropriate error message and navigation
+- add mock events data to testUtils.js for testing purposes including mockEvent and mockEvents exports
+- create comprehensive Events.test.jsx test file covering all functionality including fetching and displaying events, filtering, pagination, navigation, error handling, loading states, and edge cases
+- verify that events page displays properly and integrates with the existing backend events API
+- fix an issue in axiosConfig.js that was causing an infinite loop of token refresh attempts anytime app loaded with invalid or expired token
+- adds ASCII art logo to Home page so that it has something on it for now
+
 ### SCRUM-77 implements frontend event search and filter
 
 ### SCRUM-78 creates event details page

@@ -193,5 +193,225 @@
       "color": "Black",
       "location": "Rack 3"
     }
+  },
+  {
+    "model": "events.event",
+    "pk": 1,
+    "fields": {
+      "name": "Summer Music Festival",
+      "start_datetime": "2024-07-15T15:00:00Z",
+      "end_datetime": "2024-07-16T03:00:00Z",
+      "location": "Central Park",
+      "notes": "Annual summer music festival with multiple stages and food vendors"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 2,
+    "fields": {
+      "name": "Winter Gala",
+      "start_datetime": "2024-12-20T01:00:00Z",
+      "end_datetime": "2024-12-20T05:00:00Z",
+      "location": "Grand Ballroom",
+      "notes": "Formal winter event with dinner and dancing"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 3,
+    "fields": {
+      "name": "Spring Theater Production",
+      "start_datetime": "2024-04-10T00:00:00Z",
+      "end_datetime": "2024-04-10T03:00:00Z",
+      "location": "Main Theater",
+      "notes": "Opening night of the spring season"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 4,
+    "fields": {
+      "name": "Halloween Costume Party",
+      "start_datetime": "2024-10-31T01:00:00Z",
+      "end_datetime": "2024-11-01T05:00:00Z",
+      "location": "Community Center",
+      "notes": "Costume contest and themed decorations"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 5,
+    "fields": {
+      "name": "New Year's Eve Celebration",
+      "start_datetime": "2024-12-31T02:00:00Z",
+      "end_datetime": "2025-01-01T06:00:00Z",
+      "location": "Downtown Plaza",
+      "notes": "Fireworks and live entertainment"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 6,
+    "fields": {
+      "name": "Summer Workshop Series",
+      "start_datetime": "2024-06-01T14:00:00Z",
+      "end_datetime": "2024-06-01T22:00:00Z",
+      "location": "Workshop Room A",
+      "notes": "All-day workshop on costume design"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 7,
+    "fields": {
+      "name": "Charity Fundraiser",
+      "start_datetime": "2024-09-15T00:00:00Z",
+      "end_datetime": "2024-09-15T03:00:00Z",
+      "location": "Hotel Conference Center",
+      "notes": "Annual charity gala with auction"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 8,
+    "fields": {
+      "name": "Children's Theater Show",
+      "start_datetime": "2024-05-20T19:00:00Z",
+      "end_datetime": "2024-05-20T21:00:00Z",
+      "location": "Children's Theater",
+      "notes": "Family-friendly matinee performance"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 9,
+    "fields": {
+      "name": "Jazz Night at the Lounge",
+      "start_datetime": "2024-08-05T01:00:00Z",
+      "end_datetime": "2024-08-05T04:00:00Z",
+      "location": "Downtown Jazz Club",
+      "notes": "Live jazz performance with local musicians"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 10,
+    "fields": {
+      "name": "Art Gallery Opening",
+      "start_datetime": "2024-06-15T00:00:00Z",
+      "end_datetime": "2024-06-15T03:00:00Z",
+      "location": "Modern Art Gallery",
+      "notes": "Opening reception for new contemporary art exhibit"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 11,
+    "fields": {
+      "name": "Community Farmers Market",
+      "start_datetime": "2024-07-06T14:00:00Z",
+      "end_datetime": "2024-07-06T19:00:00Z",
+      "location": "City Square",
+      "notes": "Weekly farmers market with local vendors"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 12,
+    "fields": {
+      "name": "Comedy Night",
+      "start_datetime": "2024-09-28T01:00:00Z",
+      "end_datetime": "2024-09-28T03:30:00Z",
+      "location": "Comedy Club",
+      "notes": "Stand-up comedy showcase featuring local comedians"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 13,
+    "fields": {
+      "name": "Tech Conference 2024",
+      "start_datetime": "2024-11-08T14:00:00Z",
+      "end_datetime": "2024-11-08T22:00:00Z",
+      "location": "Convention Center",
+      "notes": "Annual technology conference with keynote speakers"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 14,
+    "fields": {
+      "name": "Holiday Craft Fair",
+      "start_datetime": "2024-12-07T15:00:00Z",
+      "end_datetime": "2024-12-07T21:00:00Z",
+      "location": "Community Hall",
+      "notes": "Handmade crafts and holiday gifts from local artisans"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 15,
+    "fields": {
+      "name": "Wine Tasting Event",
+      "start_datetime": "2024-08-22T00:00:00Z",
+      "end_datetime": "2024-08-22T03:00:00Z",
+      "location": "Vineyard Tasting Room",
+      "notes": "Wine tasting with cheese pairings and live music"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 16,
+    "fields": {
+      "name": "Book Club Meeting",
+      "start_datetime": "2024-05-15T19:00:00Z",
+      "end_datetime": "2024-05-15T21:00:00Z",
+      "location": "Public Library",
+      "notes": "Monthly book discussion group meeting"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 17,
+    "fields": {
+      "name": "Food Truck Festival",
+      "start_datetime": "2024-07-27T15:00:00Z",
+      "end_datetime": "2024-07-27T22:00:00Z",
+      "location": "Riverside Park",
+      "notes": "Food trucks, live music, and family activities"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 18,
+    "fields": {
+      "name": "Yoga in the Park",
+      "start_datetime": "2024-06-08T14:00:00Z",
+      "end_datetime": "2024-06-08T15:30:00Z",
+      "location": "Memorial Park",
+      "notes": "Free outdoor yoga class for all skill levels"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 19,
+    "fields": {
+      "name": "Classical Concert",
+      "start_datetime": "2024-10-12T00:00:00Z",
+      "end_datetime": "2024-10-12T02:30:00Z",
+      "location": "Symphony Hall",
+      "notes": "Orchestra performance featuring Beethoven and Mozart"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": 20,
+    "fields": {
+      "name": "Science Fair",
+      "start_datetime": "2024-04-20T14:00:00Z",
+      "end_datetime": "2024-04-20T18:00:00Z",
+      "location": "High School Gymnasium",
+      "notes": "Student science projects and demonstrations"
+    }
   }
 ]
