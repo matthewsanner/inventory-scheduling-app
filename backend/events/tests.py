@@ -254,6 +254,298 @@ class TestEventAPI:
         assert response.data['count'] == 0
         assert response.data['results'] == []
 
+    def test_filter_by_location(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Event 1",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2),
+            location="Main Hall"
+        )
+        Event.objects.create(
+            name="Event 2",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=2),
+            location="Side Room"
+        )
+        url = reverse('event-list')
+        response = authenticated_staff_client.get(url, {'location': 'Main'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['location'] == "Main Hall"
+
+    def test_filter_by_notes(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Event 1",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2),
+            notes="Important meeting"
+        )
+        Event.objects.create(
+            name="Event 2",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=2),
+            notes="Regular check-in"
+        )
+        url = reverse('event-list')
+        response = authenticated_staff_client.get(url, {'notes': 'Important'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['notes'] == "Important meeting"
+
+    def test_filter_by_start_datetime_after(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Past Event",
+            start_datetime=now - timedelta(days=2),
+            end_datetime=now - timedelta(days=2, hours=2)
+        )
+        Event.objects.create(
+            name="Future Event",
+            start_datetime=now + timedelta(days=5),
+            end_datetime=now + timedelta(days=5, hours=2)
+        )
+        url = reverse('event-list')
+        filter_date = (now + timedelta(days=1)).isoformat()
+        response = authenticated_staff_client.get(url, {'start_datetime_after': filter_date})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['name'] == "Future Event"
+
+    def test_filter_by_start_datetime_before(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Past Event",
+            start_datetime=now - timedelta(days=2),
+            end_datetime=now - timedelta(days=2, hours=2)
+        )
+        Event.objects.create(
+            name="Future Event",
+            start_datetime=now + timedelta(days=5),
+            end_datetime=now + timedelta(days=5, hours=2)
+        )
+        url = reverse('event-list')
+        filter_date = (now + timedelta(days=1)).isoformat()
+        response = authenticated_staff_client.get(url, {'start_datetime_before': filter_date})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['name'] == "Past Event"
+
+    def test_filter_by_end_datetime_after(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Event 1",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=1)
+        )
+        Event.objects.create(
+            name="Event 2",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=3)
+        )
+        url = reverse('event-list')
+        filter_date = (now + timedelta(days=2, hours=2)).isoformat()
+        response = authenticated_staff_client.get(url, {'end_datetime_after': filter_date})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['name'] == "Event 2"
+
+    def test_filter_by_end_datetime_before(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Event 1",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=1)
+        )
+        Event.objects.create(
+            name="Event 2",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=3)
+        )
+        url = reverse('event-list')
+        filter_date = (now + timedelta(days=2, hours=2)).isoformat()
+        response = authenticated_staff_client.get(url, {'end_datetime_before': filter_date})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['name'] == "Event 1"
+
+    def test_filter_combined_filters(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Conference Event",
+            start_datetime=now + timedelta(days=5),
+            end_datetime=now + timedelta(days=5, hours=8),
+            location="Main Hall",
+            notes="Tech conference"
+        )
+        Event.objects.create(
+            name="Workshop Event",
+            start_datetime=now + timedelta(days=5),
+            end_datetime=now + timedelta(days=5, hours=3),
+            location="Side Room",
+            notes="Training workshop"
+        )
+        Event.objects.create(
+            name="Other Event",
+            start_datetime=now + timedelta(days=10),
+            end_datetime=now + timedelta(days=10, hours=2),
+            location="Main Hall",
+            notes="Other event"
+        )
+        url = reverse('event-list')
+        filter_date = (now + timedelta(days=6)).isoformat()
+        response = authenticated_staff_client.get(url, {
+            'location': 'Main',
+            'start_datetime_before': filter_date
+        })
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['name'] == "Conference Event"
+
+    def test_search_events_by_name(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Python Workshop",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2)
+        )
+        Event.objects.create(
+            name="JavaScript Conference",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=3)
+        )
+        url = reverse('event-list')
+        response = authenticated_staff_client.get(url, {'search': 'Python'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert 'Python' in response.data['results'][0]['name']
+
+    def test_search_events_by_location(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Event 1",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2),
+            location="Conference Center"
+        )
+        Event.objects.create(
+            name="Event 2",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=2),
+            location="Training Room"
+        )
+        url = reverse('event-list')
+        response = authenticated_staff_client.get(url, {'search': 'Conference'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['location'] == "Conference Center"
+
+    def test_search_events_by_notes(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Event 1",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2),
+            notes="Quarterly review meeting"
+        )
+        Event.objects.create(
+            name="Event 2",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=2),
+            notes="Team building activity"
+        )
+        url = reverse('event-list')
+        response = authenticated_staff_client.get(url, {'search': 'review'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert 'review' in response.data['results'][0]['notes'].lower()
+
+    def test_search_events_no_results(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Event 1",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2)
+        )
+        url = reverse('event-list')
+        response = authenticated_staff_client.get(url, {'search': 'NonexistentTerm'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 0
+        assert response.data['results'] == []
+
+    def test_order_events_by_name(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Zebra Event",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2)
+        )
+        Event.objects.create(
+            name="Alpha Event",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=2)
+        )
+        Event.objects.create(
+            name="Beta Event",
+            start_datetime=now + timedelta(days=3),
+            end_datetime=now + timedelta(days=3, hours=2)
+        )
+        url = reverse('event-list')
+        response = authenticated_staff_client.get(url, {'ordering': 'name'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['results'][0]['name'] == "Alpha Event"
+        assert response.data['results'][1]['name'] == "Beta Event"
+        assert response.data['results'][2]['name'] == "Zebra Event"
+
+    def test_order_events_by_start_datetime(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Event 3",
+            start_datetime=now + timedelta(days=3),
+            end_datetime=now + timedelta(days=3, hours=2)
+        )
+        Event.objects.create(
+            name="Event 1",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2)
+        )
+        Event.objects.create(
+            name="Event 2",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=2)
+        )
+        url = reverse('event-list')
+        response = authenticated_staff_client.get(url, {'ordering': 'start_datetime'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['results'][0]['name'] == "Event 1"
+        assert response.data['results'][1]['name'] == "Event 2"
+        assert response.data['results'][2]['name'] == "Event 3"
+
+    def test_order_events_by_start_datetime_descending(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Event 1",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2)
+        )
+        Event.objects.create(
+            name="Event 3",
+            start_datetime=now + timedelta(days=3),
+            end_datetime=now + timedelta(days=3, hours=2)
+        )
+        Event.objects.create(
+            name="Event 2",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=2)
+        )
+        url = reverse('event-list')
+        response = authenticated_staff_client.get(url, {'ordering': '-start_datetime'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['results'][0]['name'] == "Event 3"
+        assert response.data['results'][1]['name'] == "Event 2"
+        assert response.data['results'][2]['name'] == "Event 1"
+
     @pytest.mark.parametrize("invalid_payload", [
         {},
         {'name': '', 'start_datetime': '2024-01-01T10:00:00Z'},

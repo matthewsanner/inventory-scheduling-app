@@ -261,6 +261,294 @@ class TestItemAPI:
         assert response.data['count'] == 0
         assert response.data['results'] == []
 
+    def test_filter_by_category(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 1",
+            quantity=1,
+            category="ACC"
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=1,
+            category="APP"
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'category': 'ACC'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['category'] == "ACC"
+
+    def test_filter_by_color(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 1",
+            quantity=1,
+            color="Red"
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=1,
+            color="Blue"
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'color': 'Red'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['color'] == "Red"
+
+    def test_filter_by_location(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 1",
+            quantity=1,
+            location="Shelf A1"
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=1,
+            location="Shelf B2"
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'location': 'Shelf A'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['location'] == "Shelf A1"
+
+    def test_filter_combined_filters(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Red Hat",
+            quantity=1,
+            category="HAT",
+            color="Red",
+            location="Shelf A1"
+        )
+        Item.objects.create(
+            name="Blue Hat",
+            quantity=1,
+            category="HAT",
+            color="Blue",
+            location="Shelf A1"
+        )
+        Item.objects.create(
+            name="Red Shirt",
+            quantity=1,
+            category="SHI",
+            color="Red",
+            location="Shelf A1"
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {
+            'category': 'HAT',
+            'color': 'Red'
+        })
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['name'] == "Red Hat"
+
+    def test_search_items_by_name(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Python Book",
+            quantity=1
+        )
+        Item.objects.create(
+            name="JavaScript Guide",
+            quantity=1
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'search': 'Python'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert 'Python' in response.data['results'][0]['name']
+
+    def test_search_items_by_description(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 1",
+            quantity=1,
+            description="Technical manual"
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=1,
+            description="User guide"
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'search': 'technical'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert 'technical' in response.data['results'][0]['description'].lower()
+
+    def test_search_items_by_color(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 1",
+            quantity=1,
+            color="Light Blue"
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=1,
+            color="Dark Red"
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'search': 'Blue'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['color'] == "Light Blue"
+
+    def test_search_items_by_location(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 1",
+            quantity=1,
+            location="Conference Room A"
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=1,
+            location="Training Room B"
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'search': 'Conference'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['location'] == "Conference Room A"
+
+    def test_search_items_no_results(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 1",
+            quantity=1
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'search': 'NonexistentTerm'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 0
+        assert response.data['results'] == []
+
+    def test_order_items_by_name(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Zebra Item",
+            quantity=1
+        )
+        Item.objects.create(
+            name="Alpha Item",
+            quantity=1
+        )
+        Item.objects.create(
+            name="Beta Item",
+            quantity=1
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'ordering': 'name'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['results'][0]['name'] == "Alpha Item"
+        assert response.data['results'][1]['name'] == "Beta Item"
+        assert response.data['results'][2]['name'] == "Zebra Item"
+
+    def test_order_items_by_category(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 3",
+            quantity=1,
+            category="ZEB"
+        )
+        Item.objects.create(
+            name="Item 1",
+            quantity=1,
+            category="ACC"
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=1,
+            category="APP"
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'ordering': 'category'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['results'][0]['category'] == "ACC"
+        assert response.data['results'][1]['category'] == "APP"
+        assert response.data['results'][2]['category'] == "ZEB"
+
+    def test_order_items_by_quantity(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 3",
+            quantity=3
+        )
+        Item.objects.create(
+            name="Item 1",
+            quantity=1
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=2
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'ordering': 'quantity'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['results'][0]['quantity'] == 1
+        assert response.data['results'][1]['quantity'] == 2
+        assert response.data['results'][2]['quantity'] == 3
+
+    def test_order_items_by_quantity_descending(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 1",
+            quantity=1
+        )
+        Item.objects.create(
+            name="Item 3",
+            quantity=3
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=2
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'ordering': '-quantity'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['results'][0]['quantity'] == 3
+        assert response.data['results'][1]['quantity'] == 2
+        assert response.data['results'][2]['quantity'] == 1
+
+    def test_order_items_by_color(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 3",
+            quantity=1,
+            color="Zebra"
+        )
+        Item.objects.create(
+            name="Item 1",
+            quantity=1,
+            color="Alpha"
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=1,
+            color="Beta"
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'ordering': 'color'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['results'][0]['color'] == "Alpha"
+        assert response.data['results'][1]['color'] == "Beta"
+        assert response.data['results'][2]['color'] == "Zebra"
+
+    def test_order_items_by_location(self, authenticated_staff_client):
+        Item.objects.create(
+            name="Item 3",
+            quantity=1,
+            location="Shelf Z"
+        )
+        Item.objects.create(
+            name="Item 1",
+            quantity=1,
+            location="Shelf A"
+        )
+        Item.objects.create(
+            name="Item 2",
+            quantity=1,
+            location="Shelf B"
+        )
+        url = reverse('item-list')
+        response = authenticated_staff_client.get(url, {'ordering': 'location'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['results'][0]['location'] == "Shelf A"
+        assert response.data['results'][1]['location'] == "Shelf B"
+        assert response.data['results'][2]['location'] == "Shelf Z"
+
     def test_category_choices(self, authenticated_staff_client):
         url = reverse('category-choices')
         response = authenticated_staff_client.get(url)

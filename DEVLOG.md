@@ -281,7 +281,11 @@
 
 ### SCRUM-31 implements backend event filtering and search
 
-### SCRUM-75 adds backend permissions for events
+- create EventFilter class in events/api/views.py to define filterable fields
+- add search_fields to EventViewSet to enable search across name, notes, and location fields
+- add ordering_fields to EventViewSet to enable ordering by name, start_datetime, end_datetime, and location
+- add comprehensive backend tests for filtering, search, and ordering functionality
+- also add backend tests for items filtering, search, ordering to match coverage in events
 
 ### SCRUM-76 creates events page and API service
 
