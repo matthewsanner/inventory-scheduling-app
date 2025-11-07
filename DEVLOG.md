@@ -349,10 +349,16 @@
 
 ### SCRUM-81 new event migration
 
-- just needed to create and apply new migration to reflect model ordering by start_datetime instead of id now
+- create and apply new migration to reflect model ordering by start_datetime instead of id
 
 ### SCRUM-81 fixes token logic, clean up
 
-- fixes token retry logic in axiosConfig.js to make sure it doesn't actually cause the infinite loop issue it was trying to prevent
-- adds defaults to Event model fields with blank=True to fit best practices
-- comments out a couple unused imports
+- fix token retry logic in axiosConfig.js to make sure it doesn't actually cause the infinite loop issue it was trying to prevent
+- add defaults to Event model fields with blank=True to fit best practices
+- comment out a couple unused imports
+
+### SCRUM-81 fixes seed data, adds BE datetime validation, modal error issue
+
+- fix start.sh to check for empty tables for events and items separately and load separate seed data for either one if they are empty
+- adds backend datetime validation in the model and serializer for events to make sure the end time is not before the start time
+- fix delete item and delete event user flows to close the delete modal when a deletion error occurs

@@ -1,0 +1,198 @@
+[
+  {
+    "model": "items.item",
+    "pk": 1,
+    "fields": {
+      "name": "Velvet Cape",
+      "description": "A flowing red velvet cape for theatrical productions.",
+      "quantity": 2,
+      "image": "/box.png",
+      "category": "CAP",
+      "color": "Red",
+      "location": "Storage Room A"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 2,
+    "fields": {
+      "name": "Gold Crown",
+      "description": "A sparkling golden crown with imitation jewels.",
+      "quantity": 3,
+      "image": "/box.png",
+      "category": "CRO",
+      "color": "Gold",
+      "location": "Prop Closet"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 3,
+    "fields": {
+      "name": "Steampunk Goggles",
+      "description": "Bronze goggles with tinted lenses.",
+      "quantity": 4,
+      "image": "/box.png",
+      "category": "STE",
+      "color": "Bronze",
+      "location": "Workshop"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 4,
+    "fields": {
+      "name": "Opera Cape",
+      "description": "Classic black opera cape with satin lining.",
+      "quantity": 2,
+      "image": "/box.png",
+      "category": "CAP",
+      "color": "Black",
+      "location": "Main Office"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 5,
+    "fields": {
+      "name": "Feather Headdress",
+      "description": "Tall green feathered headdress for performances.",
+      "quantity": 2,
+      "image": "/box.png",
+      "category": "HEA",
+      "color": "Green",
+      "location": "Costume Storage"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 6,
+    "fields": {
+      "name": "LED Shoulder Pads",
+      "description": "Light-up LED shoulder pads for a futuristic costume.",
+      "quantity": 1,
+      "image": "/box.png",
+      "category": "LED",
+      "color": "White",
+      "location": "Prop Closet"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 7,
+    "fields": {
+      "name": "Twenties Fringe Dress",
+      "description": "Flapper-style dress with black fringe.",
+      "quantity": 1,
+      "image": "/box.png",
+      "category": "TWE",
+      "color": "Black",
+      "location": "Wardrobe Rack"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 8,
+    "fields": {
+      "name": "Blue Tutu",
+      "description": "Fluffy blue tutu skirt.",
+      "quantity": 1,
+      "image": "/box.png",
+      "category": "TUT",
+      "color": "Blue",
+      "location": "Storage Room B"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 9,
+    "fields": {
+      "name": "Stilt Walker Pants",
+      "description": "Extra-long pants for stilt performers.",
+      "quantity": 1,
+      "image": "/box.png",
+      "category": "STI",
+      "color": "Red",
+      "location": "Workshop"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 10,
+    "fields": {
+      "name": "Decorative Skull Prop",
+      "description": "Plastic skull prop for Halloween events.",
+      "quantity": 1,
+      "image": "/box.png",
+      "category": "PRO",
+      "color": "White",
+      "location": "Decor Closet"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 11,
+    "fields": {
+      "name": "Pirate Hat",
+      "description": "Classic tricorn pirate hat.",
+      "quantity": 1,
+      "image": "/box.png",
+      "category": "HAT",
+      "color": "Black",
+      "location": "Headwear Shelf"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 12,
+    "fields": {
+      "name": "LED Sign",
+      "description": "Customizable LED signage.",
+      "quantity": 1,
+      "image": "/box.png",
+      "category": "SIG",
+      "color": "Multi",
+      "location": "Control Room"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 13,
+    "fields": {
+      "name": "White Lace Gloves",
+      "description": "Elegant lace gloves for formal events.",
+      "quantity": 1,
+      "image": "/box.png",
+      "category": "GLO",
+      "color": "White",
+      "location": "Accessories Drawer"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 14,
+    "fields": {
+      "name": "Rainbow Wigs",
+      "description": "Colorful rainbow wig for festivals.",
+      "quantity": 1,
+      "image": "/box.png",
+      "category": "WIG",
+      "color": "Rainbow",
+      "location": "Wig Rack"
+    }
+  },
+  {
+    "model": "items.item",
+    "pk": 15,
+    "fields": {
+      "name": "Sequin Shrug",
+      "description": "Short sequin shrug jacket.",
+      "quantity": 1,
+      "image": "/box.png",
+      "category": "SHR",
+      "color": "Black",
+      "location": "Rack 3"
+    }
+  }
+]
+

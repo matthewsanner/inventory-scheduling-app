@@ -36,6 +36,7 @@ const ItemDetail = () => {
       .catch((error) => {
         console.error("Error deleting item:", error);
         setErrorKey(ErrorKeys.DELETE_ITEM_FAILED);
+        setShowDeleteModal(false);
       });
   };
 

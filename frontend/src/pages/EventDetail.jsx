@@ -48,6 +48,7 @@ const EventDetail = () => {
       .catch((error) => {
         console.error("Error deleting event:", error);
         setErrorKey(ErrorKeys.DELETE_EVENT_FAILED);
+        setShowDeleteModal(false);
       });
   };
 
@@ -70,52 +71,54 @@ const EventDetail = () => {
 
   return (
     <>
-    <Card className="my-8 max-w-2xl mx-auto p-6 shadow-lg">
-      <h2 className="text-4xl font-bold mb-4 text-gray-800">{event.name}</h2>
+      <Card className="my-8 max-w-2xl mx-auto p-6 shadow-lg">
+        <h2 className="text-4xl font-bold mb-4 text-gray-800">{event.name}</h2>
 
-      <div className="bg-gray-50 rounded-lg p-4 mb-6 border">
-        <ul className="grid grid-cols-1 gap-4 text-gray-700 text-sm">
-          <li>
-            <strong className="block font-semibold">Start Date & Time:</strong>
-            {formatDateTime(event.start_datetime)}
-          </li>
-          <li>
-            <strong className="block font-semibold">End Date & Time:</strong>
-            {formatDateTime(event.end_datetime)}
-          </li>
-          <li>
-            <strong className="block font-semibold">Location:</strong>
-            {event.location || <em>No location specified.</em>}
-          </li>
-        </ul>
-      </div>
+        <div className="bg-gray-50 rounded-lg p-4 mb-6 border">
+          <ul className="grid grid-cols-1 gap-4 text-gray-700 text-sm">
+            <li>
+              <strong className="block font-semibold">
+                Start Date & Time:
+              </strong>
+              {formatDateTime(event.start_datetime)}
+            </li>
+            <li>
+              <strong className="block font-semibold">End Date & Time:</strong>
+              {formatDateTime(event.end_datetime)}
+            </li>
+            <li>
+              <strong className="block font-semibold">Location:</strong>
+              {event.location || <em>No location specified.</em>}
+            </li>
+          </ul>
+        </div>
 
-      {event.notes && (
-        <p className="mb-4 text-gray-700 text-lg">
-          <strong className="block font-semibold mb-2">Notes:</strong>
-          {event.notes}
-        </p>
-      )}
+        {event.notes && (
+          <p className="mb-4 text-gray-700 text-lg">
+            <strong className="block font-semibold mb-2">Notes:</strong>
+            {event.notes}
+          </p>
+        )}
 
-      <div className="flex justify-between gap-4">
-        <Button color="red" onClick={() => setShowDeleteModal(true)}>
-          Delete Event
-        </Button>
-        <Button color="green" onClick={() => navigate(`/events/${id}/edit`)}>
-          Edit Event
-        </Button>
-        <Button color="light" onClick={() => navigate("/events")}>
-          ← Back to Events
-        </Button>
-      </div>
-    </Card>
+        <div className="flex justify-between gap-4">
+          <Button color="red" onClick={() => setShowDeleteModal(true)}>
+            Delete Event
+          </Button>
+          <Button color="green" onClick={() => navigate(`/events/${id}/edit`)}>
+            Edit Event
+          </Button>
+          <Button color="light" onClick={() => navigate("/events")}>
+            ← Back to Events
+          </Button>
+        </div>
+      </Card>
 
-    <DeleteEventModal
-      open={showDeleteModal}
-      onClose={() => setShowDeleteModal(false)}
-      onConfirm={handleDelete}
-      eventName={event.name}
-    />
+      <DeleteEventModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        eventName={event.name}
+      />
     </>
   );
 };
