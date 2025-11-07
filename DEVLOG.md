@@ -303,9 +303,14 @@
 - fix an issue in axiosConfig.js that was causing an infinite loop of token refresh attempts anytime app loaded with invalid or expired token
 - adds ASCII art logo to Home page so that it has something on it for now
 
-### SCRUM-77 implements frontend event search and filter
-
 ### SCRUM-78 creates event details page
+
+- create EventDetailService.js in frontend/src/services following the same pattern as ItemDetailService.js, with getEvent function that fetches a single event by ID
+- create EventDetail.jsx page component in frontend/src/pages that mirrors the ItemDetail page structure but tailored for the Event model, displays event name as header, formatted start and end datetime, location (with fallback message if empty), and notes section (only displayed when notes exist)
+- add event detail route to App.jsx routing configuration at /events/:id
+- add LOAD_EVENT_FAILED error key to errorMessages.js with appropriate error message and navigation back to events page
+- create comprehensive EventDetail.test.jsx test file covering all functionality including fetching and displaying event details, handling optional fields (location and notes), datetime formatting, error handling, loading states, and navigation
+- verify that clicking on events in the events table properly navigates to the event details page and displays all event information
 
 ### SCRUM-79 creates new event form
 
