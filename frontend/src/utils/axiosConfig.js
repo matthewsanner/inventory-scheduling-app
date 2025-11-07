@@ -31,20 +31,29 @@ axios.interceptors.response.use(
     const originalRequest = error.config;
 
     // Don't try to refresh if this is already a refresh token request
-    const isRefreshRequest = originalRequest.url?.includes('/auth/token/refresh/');
-    
+    const isRefreshRequest = originalRequest.url?.includes(
+      "/auth/token/refresh/"
+    );
+
     // If error is 401 and we haven't already tried to refresh and it's not a refresh request
-    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isRefreshRequest
+    ) {
       originalRequest._retry = true;
 
       try {
         const refreshTokenValue = localStorage.getItem("refresh_token");
-        
+
         if (refreshTokenValue) {
           // Use separate axios instance for refresh to avoid interceptor loop
-          const refreshResponse = await refreshAxios.post('auth/token/refresh/', {
-            refresh: refreshTokenValue,
-          });
+          const refreshResponse = await refreshAxios.post(
+            "auth/token/refresh/",
+            {
+              refresh: refreshTokenValue,
+            }
+          );
 
           const newAccessToken = refreshResponse.data.access;
           localStorage.setItem("access_token", newAccessToken);
@@ -57,9 +66,7 @@ axios.interceptors.response.use(
         // Refresh failed, clear tokens and prevent further retries
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        // Mark the original request as failed to prevent infinite loops
-        originalRequest._retry = false;
-        // Don't redirect here - let the auth context handle it
+        // Don't redirect here- let the auth context handle it
         return Promise.reject(refreshError);
       }
     }
@@ -69,4 +76,3 @@ axios.interceptors.response.use(
 );
 
 export default axios;
-

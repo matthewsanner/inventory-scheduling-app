@@ -346,3 +346,13 @@
 - add DELETE_EVENT_FAILED error key to errorMessages.js with appropriate error message and navigation back to events page
 - add comprehensive delete functionality tests to EventDetail.test.jsx covering modal opening, modal closing, successful deletion and navigation, and error handling
 - verify that delete button on event detail page properly opens confirmation modal and that successful deletion redirects back to events list
+
+### SCRUM-81 new event migration
+
+- just needed to create and apply new migration to reflect model ordering by start_datetime instead of id now
+
+### SCRUM-81 fixes token logic, clean up
+
+- fixes token retry logic in axiosConfig.js to make sure it doesn't actually cause the infinite loop issue it was trying to prevent
+- adds defaults to Event model fields with blank=True to fit best practices
+- comments out a couple unused imports
