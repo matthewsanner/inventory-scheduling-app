@@ -1,14 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate, useParams } from "react-router";
 import EventDetail from "../pages/EventDetail";
 import { mockEvent } from "./testUtils";
-import { getEvent } from "../services/EventDetailService";
+import { getEvent, deleteEvent } from "../services/EventDetailService";
 
 // Mock service module
 vi.mock("../services/EventDetailService", () => ({
   getEvent: vi.fn(),
+  deleteEvent: vi.fn(),
 }));
 
 // Mock useNavigate and useParams from react-router
@@ -22,6 +23,16 @@ vi.mock("react-router", async () => {
 });
 
 const mockNavigate = vi.fn();
+
+function getVisibleModalByTestId(testId) {
+  const modals = screen.queryAllByTestId(testId);
+  return modals.find((modal) => {
+    return (
+      window.getComputedStyle(modal).display !== "none" &&
+      !modal.classList.contains("hidden")
+    );
+  });
+}
 
 const renderEventDetailPage = () =>
   render(
@@ -172,21 +183,97 @@ describe("EventDetail Page", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/events/1/edit");
   });
 
-  it("displays Delete Event button", async () => {
-    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+  it("opens delete confirmation modal when Delete Event button is clicked", async () => {
+    renderEventDetailPage();
+
+    // Wait for the initial content to appear
+    await waitFor(() => {
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+    });
+
+    // Click the delete button
+    const deleteButton = screen.getByRole("button", { name: "Delete Event" });
+    await user.click(deleteButton);
+
+    // Get the modal by its test ID
+    const modal = await waitFor(() => getVisibleModalByTestId("delete-modal"));
+
+    // Scope queries to inside the modal
+    const { getByText, getByRole } = within(modal);
+
+    expect(getByText(/Are you sure you want to delete/)).toBeInTheDocument();
+    expect(getByText(/Summer Festival/)).toBeInTheDocument();
+    expect(getByRole("button", { name: "Yes, I'm sure" })).toBeInTheDocument();
+    expect(getByRole("button", { name: "No, cancel" })).toBeInTheDocument();
+  });
+
+  it("closes delete modal when cancel is clicked", async () => {
     renderEventDetailPage();
 
     await waitFor(() => {
       expect(screen.getByText("Summer Festival")).toBeInTheDocument();
     });
 
-    const deleteButton = screen.getByRole("button", { name: "Delete Event" });
-    expect(deleteButton).toBeInTheDocument();
-    
-    await user.click(deleteButton);
-    expect(consoleLogSpy).toHaveBeenCalledWith("Delete event functionality to be implemented");
-    
-    consoleLogSpy.mockRestore();
+    // Open modal
+    await user.click(screen.getByRole("button", { name: "Delete Event" }));
+    expect(
+      screen.getByText(/Are you sure you want to delete/)
+    ).toBeInTheDocument();
+
+    // Close modal
+    await user.click(screen.getByRole("button", { name: "No, cancel" }));
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/Are you sure you want to delete/)
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("deletes event and navigates to events page when confirmed", async () => {
+    deleteEvent.mockResolvedValueOnce({});
+    renderEventDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+    });
+
+    // Open modal and confirm deletion
+    await user.click(screen.getByRole("button", { name: "Delete Event" }));
+    await user.click(screen.getByRole("button", { name: "Yes, I'm sure" }));
+
+    await waitFor(() => {
+      expect(deleteEvent).toHaveBeenCalledWith("1");
+      expect(mockNavigate).toHaveBeenCalledWith("/events");
+    });
+  });
+
+  it("handles delete API error", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    deleteEvent.mockRejectedValueOnce(new Error("Failed to delete"));
+
+    renderEventDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+    });
+
+    // Open modal and confirm deletion
+    await user.click(screen.getByRole("button", { name: "Delete Event" }));
+    await user.click(screen.getByRole("button", { name: "Yes, I'm sure" }));
+
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error deleting event:",
+        expect.any(Error)
+      );
+      expect(
+        screen.getByText("Failed to delete event. Please try again later.")
+      ).toBeInTheDocument();
+    });
+
+    consoleErrorSpy.mockRestore();
   });
 });
 

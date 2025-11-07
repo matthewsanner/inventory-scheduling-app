@@ -339,3 +339,10 @@
 - verify that the edit event form properly loads existing event data and that successful submission redirects back to the events list
 
 ### SCRUM-81 implements event deletion with confirmation modal
+
+- add deleteEvent function to EventDetailService.js to handle DELETE request to events API endpoint
+- create DeleteEventModal component following the same pattern as DeleteItemModal, with confirmation dialog using Flowbite Modal component with popup prop, warning icon from react-icons, and confirmation/cancel buttons
+- update EventDetail.jsx to implement delete functionality: add showDeleteModal state, handleDelete function that calls deleteEvent service and navigates to events list on success, and integrate DeleteEventModal component with the delete button
+- add DELETE_EVENT_FAILED error key to errorMessages.js with appropriate error message and navigation back to events page
+- add comprehensive delete functionality tests to EventDetail.test.jsx covering modal opening, modal closing, successful deletion and navigation, and error handling
+- verify that delete button on event detail page properly opens confirmation modal and that successful deletion redirects back to events list

@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { Card, Button } from "flowbite-react";
 import LoadingCard from "../components/LoadingCard";
 import ErrorCard from "../components/ErrorCard";
+import DeleteEventModal from "../components/DeleteEventModal";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
-import { getEvent } from "../services/EventDetailService";
+import { getEvent, deleteEvent } from "../services/EventDetailService";
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -12,6 +13,7 @@ const EventDetail = () => {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorKey, setErrorKey] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     getEvent(id)
@@ -38,6 +40,17 @@ const EventDetail = () => {
     });
   };
 
+  const handleDelete = () => {
+    deleteEvent(id)
+      .then(() => {
+        navigate("/events");
+      })
+      .catch((error) => {
+        console.error("Error deleting event:", error);
+        setErrorKey(ErrorKeys.DELETE_EVENT_FAILED);
+      });
+  };
+
   if (errorKey) {
     const errorConfig =
       ERROR_CONFIG[errorKey] || ERROR_CONFIG[ErrorKeys.GENERIC_ERROR];
@@ -56,6 +69,7 @@ const EventDetail = () => {
   }
 
   return (
+    <>
     <Card className="my-8 max-w-2xl mx-auto p-6 shadow-lg">
       <h2 className="text-4xl font-bold mb-4 text-gray-800">{event.name}</h2>
 
@@ -84,12 +98,7 @@ const EventDetail = () => {
       )}
 
       <div className="flex justify-between gap-4">
-        <Button
-          color="red"
-          onClick={() => {
-            // TODO: Implement delete functionality
-            console.log("Delete event functionality to be implemented");
-          }}>
+        <Button color="red" onClick={() => setShowDeleteModal(true)}>
           Delete Event
         </Button>
         <Button color="green" onClick={() => navigate(`/events/${id}/edit`)}>
@@ -100,6 +109,14 @@ const EventDetail = () => {
         </Button>
       </div>
     </Card>
+
+    <DeleteEventModal
+      open={showDeleteModal}
+      onClose={() => setShowDeleteModal(false)}
+      onConfirm={handleDelete}
+      eventName={event.name}
+    />
+    </>
   );
 };
 

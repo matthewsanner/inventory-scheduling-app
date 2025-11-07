@@ -6,3 +6,7 @@ export const getEvent = (id) => {
   return axios.get(`${API_URL}events/${id}/`);
 };
 
+export const deleteEvent = (id) => {
+  return axios.delete(`${API_URL}events/${id}/`);
+};
+
