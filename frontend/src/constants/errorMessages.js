@@ -6,6 +6,7 @@ export const ErrorKeys = {
   DELETE_ITEM_FAILED: "DELETE_ITEM_FAILED",
   LOAD_EVENTS_FAILED: "LOAD_EVENTS_FAILED",
   LOAD_EVENT_FAILED: "LOAD_EVENT_FAILED",
+  CREATE_EVENT_FAILED: "CREATE_EVENT_FAILED",
   GENERIC_ERROR: "GENERIC_ERROR",
 };
 
@@ -42,6 +43,11 @@ export const ERROR_CONFIG = {
   },
   [ErrorKeys.LOAD_EVENT_FAILED]: {
     message: "Failed to load event details. Please try again later.",
+    onBack: (navigate) => () => navigate("/events"),
+    backLabel: "← Back to Events",
+  },
+  [ErrorKeys.CREATE_EVENT_FAILED]: {
+    message: "Failed to create event. Please try again later.",
     onBack: (navigate) => () => navigate("/events"),
     backLabel: "← Back to Events",
   },

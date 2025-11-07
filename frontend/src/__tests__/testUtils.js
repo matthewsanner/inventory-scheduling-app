@@ -83,3 +83,11 @@ export const mockEvents = {
     },
   ],
 };
+
+export const mockEventFormData = {
+  name: "Summer Festival",
+  start_datetime: "2024-07-15T10:00",
+  end_datetime: "2024-07-15T18:00",
+  location: "Central Park",
+  notes: "Annual summer music festival",
+};

@@ -314,6 +314,16 @@
 
 ### SCRUM-79 creates new event form
 
+- create NewEventService.js in frontend/src/services following the same pattern as NewItemService.js, with createEvent function that posts new event data to the events API endpoint
+- create NewEvent.jsx page component in frontend/src/pages that mirrors the NewItem page structure but tailored for the Event model, includes form fields for name (required), start_datetime (required, datetime-local input), end_datetime (required, datetime-local input), location (optional), and notes (optional textarea)
+- add form validation to ensure name, start_datetime, and end_datetime are provided, and that end_datetime is after start_datetime
+- convert datetime-local format to ISO string format when submitting to the API
+- add CREATE_EVENT_FAILED error key to errorMessages.js with appropriate error message and navigation back to events page
+- add /events/new route to App.jsx routing configuration
+- add mockEventFormData to testUtils.js for testing purposes
+- create comprehensive NewEvent.test.jsx test file covering all functionality including form rendering, input handling, successful submission and navigation, error handling, validation (required fields and datetime ordering), loading states, and optional fields
+- verify that the "Add New Event" button on the events page properly navigates to the new event form and that successful submission redirects back to the events list
+
 ### SCRUM-80 creates edit event form
 
 ### SCRUM-81 implements event deletion with confirmation modal
