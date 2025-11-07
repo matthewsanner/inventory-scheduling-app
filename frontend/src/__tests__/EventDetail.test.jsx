@@ -158,5 +158,35 @@ describe("EventDetail Page", () => {
 
     expect(mockNavigate).toHaveBeenCalledWith("/events");
   });
+
+  it("navigates to edit page when Edit Event button is clicked", async () => {
+    renderEventDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+    });
+
+    const editButton = screen.getByRole("button", { name: "Edit Event" });
+    await user.click(editButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/events/1/edit");
+  });
+
+  it("displays Delete Event button", async () => {
+    const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    renderEventDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByRole("button", { name: "Delete Event" });
+    expect(deleteButton).toBeInTheDocument();
+    
+    await user.click(deleteButton);
+    expect(consoleLogSpy).toHaveBeenCalledWith("Delete event functionality to be implemented");
+    
+    consoleLogSpy.mockRestore();
+  });
 });
 

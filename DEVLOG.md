@@ -326,4 +326,16 @@
 
 ### SCRUM-80 creates edit event form
 
+- create EditEventService.js in frontend/src/services following the same pattern as EditItemService.js, with fetchEventById function that gets a single event by ID and updateEvent function that updates event data via PUT request to the events API endpoint
+- create EditEvent.jsx page component in frontend/src/pages that mirrors the NewEvent page structure but loads existing event data like EditItem does, includes form fields for name (required), start_datetime (required, datetime-local input), end_datetime (required, datetime-local input), location (optional), and notes (optional textarea)
+- add loading state with LoadingCard while fetching event data
+- convert ISO datetime strings from API to datetime-local format when loading event data into the form, and convert back to ISO string format when submitting to the API
+- add form validation to ensure name, start_datetime, and end_datetime are provided, and that end_datetime is after start_datetime
+- add UPDATE_EVENT_FAILED error key to errorMessages.js with appropriate error message and navigation back to event details page
+- add /events/:id/edit route to App.jsx routing configuration
+- create comprehensive EditEvent.test.jsx test file covering all functionality including loading states, fetching and displaying event data, form input handling, successful submission and navigation, error handling (both fetch and update errors), validation (required fields and datetime ordering), datetime format conversion, cancel navigation, and edge cases
+- add Edit Event and Delete Event buttons to EventDetail.jsx page to match the button layout of ItemDetail.jsx, with Edit Event button navigating to the edit form and Delete Event button placeholder
+- update EventDetail.test.jsx to include tests for the new Edit Event and Delete Event buttons
+- verify that the edit event form properly loads existing event data and that successful submission redirects back to the events list
+
 ### SCRUM-81 implements event deletion with confirmation modal

@@ -83,7 +83,18 @@ const EventDetail = () => {
         </p>
       )}
 
-      <div className="flex justify-end gap-4">
+      <div className="flex justify-between gap-4">
+        <Button
+          color="red"
+          onClick={() => {
+            // TODO: Implement delete functionality
+            console.log("Delete event functionality to be implemented");
+          }}>
+          Delete Event
+        </Button>
+        <Button color="green" onClick={() => navigate(`/events/${id}/edit`)}>
+          Edit Event
+        </Button>
         <Button color="light" onClick={() => navigate("/events")}>
           ← Back to Events
         </Button>
@@ -93,4 +104,3 @@ const EventDetail = () => {
 };
 
 export default EventDetail;
-

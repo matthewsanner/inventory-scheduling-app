@@ -7,6 +7,7 @@ export const ErrorKeys = {
   LOAD_EVENTS_FAILED: "LOAD_EVENTS_FAILED",
   LOAD_EVENT_FAILED: "LOAD_EVENT_FAILED",
   CREATE_EVENT_FAILED: "CREATE_EVENT_FAILED",
+  UPDATE_EVENT_FAILED: "UPDATE_EVENT_FAILED",
   GENERIC_ERROR: "GENERIC_ERROR",
 };
 
@@ -50,6 +51,11 @@ export const ERROR_CONFIG = {
     message: "Failed to create event. Please try again later.",
     onBack: (navigate) => () => navigate("/events"),
     backLabel: "← Back to Events",
+  },
+  [ErrorKeys.UPDATE_EVENT_FAILED]: {
+    message: "Failed to update event. Please check your input and try again.",
+    onBack: (navigate, id) => () => navigate(`/events/${id}`),
+    backLabel: "← Back to Event Details",
   },
   [ErrorKeys.GENERIC_ERROR]: {
     message: "Something went wrong. Please try again.",

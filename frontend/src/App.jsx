@@ -9,6 +9,7 @@ import EditItem from "./pages/EditItem";
 import Events from "./pages/Events";
 import EventDetail from "./pages/EventDetail";
 import NewEvent from "./pages/NewEvent";
+import EditEvent from "./pages/EditEvent";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -32,6 +33,7 @@ function App() {
               <Route path="/events" element={<Events />} />
               <Route path="/events/:id" element={<EventDetail />} />
               <Route path="/events/new" element={<NewEvent />} />
+              <Route path="/events/:id/edit" element={<EditEvent />} />
             </Routes>
           </ErrorBoundary>
         </div>
