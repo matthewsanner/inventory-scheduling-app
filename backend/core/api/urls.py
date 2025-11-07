@@ -7,6 +7,7 @@ router = DefaultRouter()
 
 urlpatterns = [
   path('items/', include('items.api.urls')),
+  path('events/', include('events.api.urls')),
   path('auth/register/', register, name='register'),
   path('auth/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
   path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

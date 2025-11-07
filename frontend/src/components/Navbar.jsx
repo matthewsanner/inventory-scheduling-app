@@ -20,6 +20,9 @@ const Navbar = () => {
         <Link to="/items" className="hover:underline">
           Items
         </Link>
+        <Link to="/events" className="hover:underline">
+          Events
+        </Link>
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
             {user && (

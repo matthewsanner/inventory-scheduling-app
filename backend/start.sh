@@ -4,10 +4,18 @@ python manage.py migrate --noinput
 
 # Check if any Items exist before loading sample data
 if [ "$(python manage.py shell -c 'from items.models import Item; print(Item.objects.exists())')" = "False" ]; then
-  echo "Loading sample data..."
-  python manage.py loaddata sample_data.json
+  echo "Loading sample item data..."
+  python manage.py loaddata sample_items.json
 else
-  echo "Sample data already present, skipping."
+  echo "Sample item data already present, skipping."
+fi
+
+# Check if any Events exist before loading sample event data
+if [ "$(python manage.py shell -c 'from events.models import Event; print(Event.objects.exists())')" = "False" ]; then
+  echo "Loading sample event data..."
+  python manage.py loaddata sample_events.json
+else
+  echo "Sample event data already present, skipping."
 fi
 
 # Automatically create superuser if it doesn't exist

@@ -266,3 +266,105 @@
 ### SCRUM-74 Adds minimums to quantity selectors
 
 - Add minimum of 1 to quantity selectors
+
+## SCRUM-8 Create events
+
+### SCRUM-30 creates event model and API
+
+- set up new Event model with fields: name, start_datetime, end_datetime, optional location, and optional notes
+- add serializer, viewset, and URL routing for events, following similar structure as the existing items API
+- make and apply migrations inside the backend Docker container for events "app"
+- confirm CRUD routes working through manual API tests
+- write backend unit tests for event endpoints, serializer, model, etc.
+- update backend unit tests for items to match coverage on events
+- suppress pytest deprecation warning for a known compatibility issue between Django and DRF, not a problem for the app right now
+
+### SCRUM-31 implements backend event filtering and search
+
+- create EventFilter class in events/api/views.py to define filterable fields
+- add search_fields to EventViewSet to enable search across name, notes, and location fields
+- add ordering_fields to EventViewSet to enable ordering by name, start_datetime, end_datetime, and location
+- add comprehensive backend tests for filtering, search, and ordering functionality
+- also add backend tests for items filtering, search, ordering to match coverage in events
+
+### SCRUM-76 creates events page and API service
+
+- create EventsService.js in frontend/src/services following the same pattern as ItemsService.js, with getEvents function that handles pagination, filtering, and error handling
+- create Events.jsx page component in frontend/src/pages that mirrors the Items page structure but tailored for the Event model, includes table displaying event name, start date, end date, and location with formatted datetime display in local time, entries displayed in ascending order of event start date
+- add search, location, and date filter inputs to the events page, with clear filters functionality
+- add pagination controls using Flowbite Pagination component matching the items page style
+- add error handling using ErrorCard and LoadingCard components consistent with other pages
+- add events route to App.jsx routing configuration
+- add Events link to Navbar component
+- add LOAD_EVENTS_FAILED error key to errorMessages.js with appropriate error message and navigation
+- add mock events data to testUtils.js for testing purposes including mockEvent and mockEvents exports
+- create comprehensive Events.test.jsx test file covering all functionality including fetching and displaying events, filtering, pagination, navigation, error handling, loading states, and edge cases
+- verify that events page displays properly and integrates with the existing backend events API
+- fix an issue in axiosConfig.js that was causing an infinite loop of token refresh attempts anytime app loaded with invalid or expired token
+- adds ASCII art logo to Home page so that it has something on it for now
+
+### SCRUM-78 creates event details page
+
+- create EventDetailService.js in frontend/src/services following the same pattern as ItemDetailService.js, with getEvent function that fetches a single event by ID
+- create EventDetail.jsx page component in frontend/src/pages that mirrors the ItemDetail page structure but tailored for the Event model, displays event name as header, formatted start and end datetime, location (with fallback message if empty), and notes section (only displayed when notes exist)
+- add event detail route to App.jsx routing configuration at /events/:id
+- add LOAD_EVENT_FAILED error key to errorMessages.js with appropriate error message and navigation back to events page
+- create comprehensive EventDetail.test.jsx test file covering all functionality including fetching and displaying event details, handling optional fields (location and notes), datetime formatting, error handling, loading states, and navigation
+- verify that clicking on events in the events table properly navigates to the event details page and displays all event information
+
+### SCRUM-79 creates new event form
+
+- create NewEventService.js in frontend/src/services following the same pattern as NewItemService.js, with createEvent function that posts new event data to the events API endpoint
+- create NewEvent.jsx page component in frontend/src/pages that mirrors the NewItem page structure but tailored for the Event model, includes form fields for name (required), start_datetime (required, datetime-local input), end_datetime (required, datetime-local input), location (optional), and notes (optional textarea)
+- add form validation to ensure name, start_datetime, and end_datetime are provided, and that end_datetime is after start_datetime
+- convert datetime-local format to ISO string format when submitting to the API
+- add CREATE_EVENT_FAILED error key to errorMessages.js with appropriate error message and navigation back to events page
+- add /events/new route to App.jsx routing configuration
+- add mockEventFormData to testUtils.js for testing purposes
+- create comprehensive NewEvent.test.jsx test file covering all functionality including form rendering, input handling, successful submission and navigation, error handling, validation (required fields and datetime ordering), loading states, and optional fields
+- verify that the "Add New Event" button on the events page properly navigates to the new event form and that successful submission redirects back to the events list
+
+### SCRUM-80 creates edit event form
+
+- create EditEventService.js in frontend/src/services following the same pattern as EditItemService.js, with fetchEventById function that gets a single event by ID and updateEvent function that updates event data via PUT request to the events API endpoint
+- create EditEvent.jsx page component in frontend/src/pages that mirrors the NewEvent page structure but loads existing event data like EditItem does, includes form fields for name (required), start_datetime (required, datetime-local input), end_datetime (required, datetime-local input), location (optional), and notes (optional textarea)
+- add loading state with LoadingCard while fetching event data
+- convert ISO datetime strings from API to datetime-local format when loading event data into the form, and convert back to ISO string format when submitting to the API
+- add form validation to ensure name, start_datetime, and end_datetime are provided, and that end_datetime is after start_datetime
+- add UPDATE_EVENT_FAILED error key to errorMessages.js with appropriate error message and navigation back to event details page
+- add /events/:id/edit route to App.jsx routing configuration
+- create comprehensive EditEvent.test.jsx test file covering all functionality including loading states, fetching and displaying event data, form input handling, successful submission and navigation, error handling (both fetch and update errors), validation (required fields and datetime ordering), datetime format conversion, cancel navigation, and edge cases
+- add Edit Event and Delete Event buttons to EventDetail.jsx page to match the button layout of ItemDetail.jsx, with Edit Event button navigating to the edit form and Delete Event button placeholder
+- update EventDetail.test.jsx to include tests for the new Edit Event and Delete Event buttons
+- verify that the edit event form properly loads existing event data and that successful submission redirects back to the events list
+
+### SCRUM-81 implements event deletion with confirmation modal
+
+- add deleteEvent function to EventDetailService.js to handle DELETE request to events API endpoint
+- create DeleteEventModal component following the same pattern as DeleteItemModal, with confirmation dialog using Flowbite Modal component with popup prop, warning icon from react-icons, and confirmation/cancel buttons
+- update EventDetail.jsx to implement delete functionality: add showDeleteModal state, handleDelete function that calls deleteEvent service and navigates to events list on success, and integrate DeleteEventModal component with the delete button
+- add DELETE_EVENT_FAILED error key to errorMessages.js with appropriate error message and navigation back to events page
+- add comprehensive delete functionality tests to EventDetail.test.jsx covering modal opening, modal closing, successful deletion and navigation, and error handling
+- verify that delete button on event detail page properly opens confirmation modal and that successful deletion redirects back to events list
+
+### SCRUM-81 new event migration
+
+- create and apply new migration to reflect model ordering by start_datetime instead of id
+
+### SCRUM-81 fixes token logic, clean up
+
+- fix token retry logic in axiosConfig.js to make sure it doesn't actually cause the infinite loop issue it was trying to prevent
+- add defaults to Event model fields with blank=True to fit best practices
+- comment out a couple unused imports
+
+### SCRUM-81 fixes seed data, adds BE datetime validation, modal error issue
+
+- fix start.sh to check for empty tables for events and items separately and load separate seed data for either one if they are empty
+- adds backend datetime validation in the model and serializer for events to make sure the end time is not before the start time
+- fix delete item and delete event user flows to close the delete modal when a deletion error occurs
+
+### SCRUM-81 fixes/adds BE tests, services use configured axios
+
+- fix a couple BE unit tests that had unintentionally bad data with start datetimes after end datetimes
+- add BE tests for the new BE datetime validations in model and serializer
+- set all services to use the configured axios instance instead of the base instance, this allows us to use relative URLs and properly take advantage of automatic token refreshes on 401 errors, and explicitly include JWT auth headers via the request interceptor
