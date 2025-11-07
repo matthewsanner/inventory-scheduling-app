@@ -362,3 +362,9 @@
 - fix start.sh to check for empty tables for events and items separately and load separate seed data for either one if they are empty
 - adds backend datetime validation in the model and serializer for events to make sure the end time is not before the start time
 - fix delete item and delete event user flows to close the delete modal when a deletion error occurs
+
+### SCRUM-81 fixes/adds BE tests, services use configured axios
+
+- fix a couple BE unit tests that had unintentionally bad data with start datetimes after end datetimes
+- add BE tests for the new BE datetime validations in model and serializer
+- set all services to use the configured axios instance instead of the base instance, this allows us to use relative URLs and properly take advantage of automatic token refreshes on 401 errors, and explicitly include JWT auth headers via the request interceptor

@@ -1,8 +1,5 @@
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import axios from "../utils/axiosConfig";
 
 export const createEvent = (formData) => {
-  return axios.post(`${API_URL}events/`, formData);
+  return axios.post(`events/`, formData);
 };
-

@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from datetime import timedelta
+from django.core.exceptions import ValidationError
 from .models import Event
 from .api.serializers import EventSerializer
 from django.conf import settings
@@ -93,6 +94,39 @@ class TestEventModel:
     def test_event_str_representation(self, sample_event):
         assert str(sample_event) == f"Name: {sample_event.name}"
 
+    def test_create_event_with_valid_datetime_range(self):
+        now = timezone.now()
+        event = Event.objects.create(
+            name="Valid Event",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2)
+        )
+        assert event.name == "Valid Event"
+        assert event.end_datetime > event.start_datetime
+
+    def test_create_event_with_end_before_start_raises_validation_error(self):
+        now = timezone.now()
+        with pytest.raises(ValidationError) as exc_info:
+            Event.objects.create(
+                name="Invalid Event",
+                start_datetime=now + timedelta(days=1),
+                end_datetime=now + timedelta(days=1, hours=-2)
+            )
+        assert 'end_datetime' in exc_info.value.error_dict
+        assert 'End datetime must be after start datetime.' in str(exc_info.value.error_dict['end_datetime'])
+
+    def test_create_event_with_end_equal_to_start_raises_validation_error(self):
+        now = timezone.now()
+        start = now + timedelta(days=1)
+        with pytest.raises(ValidationError) as exc_info:
+            Event.objects.create(
+                name="Invalid Event",
+                start_datetime=start,
+                end_datetime=start
+            )
+        assert 'end_datetime' in exc_info.value.error_dict
+        assert 'End datetime must be after start datetime.' in str(exc_info.value.error_dict['end_datetime'])
+
 @pytest.mark.django_db
 class TestEventSerializer:
     def test_serialize_event(self, sample_event):
@@ -146,6 +180,62 @@ class TestEventSerializer:
         assert event.name == data['name']
         assert event.location == ""
         assert event.notes == ""
+
+    def test_serializer_validates_end_datetime_after_start_datetime(self):
+        now = timezone.now()
+        data = {
+            'name': 'Valid Event',
+            'start_datetime': (now + timedelta(days=1)).isoformat(),
+            'end_datetime': (now + timedelta(days=1, hours=2)).isoformat()
+        }
+        serializer = EventSerializer(data=data)
+        assert serializer.is_valid()
+
+    def test_serializer_rejects_end_datetime_before_start_datetime(self):
+        now = timezone.now()
+        data = {
+            'name': 'Invalid Event',
+            'start_datetime': (now + timedelta(days=1)).isoformat(),
+            'end_datetime': (now + timedelta(days=1, hours=-2)).isoformat()
+        }
+        serializer = EventSerializer(data=data)
+        assert not serializer.is_valid()
+        assert 'end_datetime' in serializer.errors
+        assert 'End datetime must be after start datetime.' in str(serializer.errors['end_datetime'])
+
+    def test_serializer_rejects_end_datetime_equal_to_start_datetime(self):
+        now = timezone.now()
+        start = (now + timedelta(days=1)).isoformat()
+        data = {
+            'name': 'Invalid Event',
+            'start_datetime': start,
+            'end_datetime': start
+        }
+        serializer = EventSerializer(data=data)
+        assert not serializer.is_valid()
+        assert 'end_datetime' in serializer.errors
+        assert 'End datetime must be after start datetime.' in str(serializer.errors['end_datetime'])
+
+    def test_serializer_validates_datetime_on_update(self, sample_event):
+        now = timezone.now()
+        # Try to update with invalid datetime range
+        data = {
+            'start_datetime': (now + timedelta(days=5)).isoformat(),
+            'end_datetime': (now + timedelta(days=5, hours=-1)).isoformat()
+        }
+        serializer = EventSerializer(sample_event, data=data, partial=True)
+        assert not serializer.is_valid()
+        assert 'end_datetime' in serializer.errors
+
+    def test_serializer_validates_datetime_on_partial_update(self, sample_event):
+        now = timezone.now()
+        # Try to update only end_datetime to be before start_datetime
+        data = {
+            'end_datetime': (sample_event.start_datetime - timedelta(hours=1)).isoformat()
+        }
+        serializer = EventSerializer(sample_event, data=data, partial=True)
+        assert not serializer.is_valid()
+        assert 'end_datetime' in serializer.errors
 
 @pytest.mark.django_db
 class TestEventAPI:
@@ -298,7 +388,7 @@ class TestEventAPI:
         Event.objects.create(
             name="Past Event",
             start_datetime=now - timedelta(days=2),
-            end_datetime=now - timedelta(days=2, hours=2)
+            end_datetime=now - timedelta(days=2) + timedelta(hours=2)
         )
         Event.objects.create(
             name="Future Event",
@@ -317,7 +407,7 @@ class TestEventAPI:
         Event.objects.create(
             name="Past Event",
             start_datetime=now - timedelta(days=2),
-            end_datetime=now - timedelta(days=2, hours=2)
+            end_datetime=now - timedelta(days=2) + timedelta(hours=2)
         )
         Event.objects.create(
             name="Future Event",
@@ -555,6 +645,52 @@ class TestEventAPI:
         url = reverse('event-list')
         response = authenticated_manager_client.post(url, invalid_payload, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_create_event_with_invalid_datetime_range_via_api(self, authenticated_manager_client):
+        now = timezone.now()
+        url = reverse('event-list')
+        data = {
+            'name': 'Invalid Event',
+            'start_datetime': (now + timedelta(days=1)).isoformat(),
+            'end_datetime': (now + timedelta(days=1, hours=-2)).isoformat()
+        }
+        response = authenticated_manager_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'end_datetime' in response.data
+        assert 'End datetime must be after start datetime.' in str(response.data['end_datetime'])
+
+    def test_create_event_with_equal_datetimes_via_api(self, authenticated_manager_client):
+        now = timezone.now()
+        start = (now + timedelta(days=1)).isoformat()
+        url = reverse('event-list')
+        data = {
+            'name': 'Invalid Event',
+            'start_datetime': start,
+            'end_datetime': start
+        }
+        response = authenticated_manager_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'end_datetime' in response.data
+
+    def test_update_event_with_invalid_datetime_range_via_api(self, authenticated_manager_client, sample_event):
+        now = timezone.now()
+        url = reverse('event-detail', kwargs={'pk': sample_event.pk})
+        data = {
+            'start_datetime': (now + timedelta(days=5)).isoformat(),
+            'end_datetime': (now + timedelta(days=5, hours=-1)).isoformat()
+        }
+        response = authenticated_manager_client.patch(url, data, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'end_datetime' in response.data
+
+    def test_update_event_end_datetime_before_start_via_api(self, authenticated_manager_client, sample_event):
+        url = reverse('event-detail', kwargs={'pk': sample_event.pk})
+        data = {
+            'end_datetime': (sample_event.start_datetime - timedelta(hours=1)).isoformat()
+        }
+        response = authenticated_manager_client.patch(url, data, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'end_datetime' in response.data
 
     def test_pagination_metadata(self, authenticated_staff_client):
         # Create multiple events

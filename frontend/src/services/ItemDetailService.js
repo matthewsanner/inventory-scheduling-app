@@ -1,11 +1,9 @@
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import axios from "../utils/axiosConfig";
 
 export const getItem = (id) => {
-  return axios.get(`${API_URL}items/${id}/`);
+  return axios.get(`items/${id}/`);
 };
 
 export const deleteItem = (id) => {
-  return axios.delete(`${API_URL}items/${id}/`);
+  return axios.delete(`items/${id}/`);
 };

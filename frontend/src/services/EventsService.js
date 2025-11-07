@@ -1,7 +1,5 @@
-import axios from "axios";
+import axios from "../utils/axiosConfig";
 import { ErrorKeys } from "../constants/errorMessages";
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 // Generic error handler
 const handleApiError = (error, fallbackKey = ErrorKeys.GENERIC_ERROR) => {
@@ -14,19 +12,19 @@ export const getEvents = async (page, filters, pageSize = 10) => {
     // Convert date format to ISO datetime format for API
     const processedFilters = { ...filters };
     const dateFields = {
-      'start_datetime_after': 'start', // Start of day (00:00:00)
-      'start_datetime_before': 'end', // End of day (23:59:59)
+      start_datetime_after: "start", // Start of day (00:00:00)
+      start_datetime_before: "end", // End of day (23:59:59)
     };
 
     Object.keys(dateFields).forEach((field) => {
       if (processedFilters[field]) {
         // Convert date (YYYY-MM-DD) to ISO datetime format
         const dateValue = processedFilters[field];
-        if (dateValue && !dateValue.includes('T')) {
+        if (dateValue && !dateValue.includes("T")) {
           // It's a date-only value, convert to ISO datetime
           const date = new Date(dateValue);
           if (!isNaN(date.getTime())) {
-            if (dateFields[field] === 'start') {
+            if (dateFields[field] === "start") {
               // Set to start of day (00:00:00) in local timezone, then convert to ISO
               date.setHours(0, 0, 0, 0);
             } else {
@@ -44,7 +42,7 @@ export const getEvents = async (page, filters, pageSize = 10) => {
 
     // Remove empty string filters
     Object.keys(processedFilters).forEach((key) => {
-      if (processedFilters[key] === '') {
+      if (processedFilters[key] === "") {
         delete processedFilters[key];
       }
     });
@@ -54,7 +52,7 @@ export const getEvents = async (page, filters, pageSize = 10) => {
       ...processedFilters,
     });
 
-    const response = await axios.get(`${API_URL}events/?${params}`);
+    const response = await axios.get(`events/?${params}`);
     const pageCount = Math.ceil(response.data.count / pageSize);
 
     return { data: response.data.results, pageCount };
@@ -62,4 +60,3 @@ export const getEvents = async (page, filters, pageSize = 10) => {
     return handleApiError(error, ErrorKeys.LOAD_EVENTS_FAILED);
   }
 };
-

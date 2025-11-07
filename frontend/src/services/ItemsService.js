@@ -1,7 +1,5 @@
-import axios from "axios";
+import axios from "../utils/axiosConfig";
 import { ErrorKeys } from "../constants/errorMessages";
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 // Generic error handler (optional)
 const handleApiError = (error, fallbackKey = ErrorKeys.GENERIC_ERROR) => {
@@ -11,7 +9,7 @@ const handleApiError = (error, fallbackKey = ErrorKeys.GENERIC_ERROR) => {
 
 export const getCategories = async () => {
   try {
-    const response = await axios.get(`${API_URL}items/categories/`);
+    const response = await axios.get(`items/categories/`);
     return { data: response.data };
   } catch (error) {
     return handleApiError(error, ErrorKeys.LOAD_CATEGORIES_FAILED);
@@ -25,7 +23,7 @@ export const getItems = async (page, filters, pageSize = 10) => {
       ...filters,
     });
 
-    const response = await axios.get(`${API_URL}items/?${params}`);
+    const response = await axios.get(`items/?${params}`);
     const pageCount = Math.ceil(response.data.count / pageSize);
 
     return { data: response.data.results, pageCount };
