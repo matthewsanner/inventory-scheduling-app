@@ -368,3 +368,25 @@
 - fix a couple BE unit tests that had unintentionally bad data with start datetimes after end datetimes
 - add BE tests for the new BE datetime validations in model and serializer
 - set all services to use the configured axios instance instead of the base instance, this allows us to use relative URLs and properly take advantage of automatic token refreshes on 401 errors, and explicitly include JWT auth headers via the request interceptor
+
+## SCRUM-10 Handle item bookings
+
+### SCRUM-37 creates ItemBooking model and API
+
+- create itembookings Django app
+- create ItemBooking model with foreign key to Item, foreign key to Event, quantity field (PositiveSmallIntegerField), and created_at datetime field (auto_now_add)
+- add compound uniqueness constraint on (item, event) in ItemBooking model Meta class
+- add db_index=True to item and event foreign key fields in ItemBooking model for indexing
+- add indexes to Event model for start_datetime and end_datetime fields in Event model Meta class for efficient overlap queries
+- implement overbooking validation in ItemBooking model clean() method that checks all existing bookings for the same item whose events overlap with the booking's event, raises ValidationError if total booked quantity would exceed item quantity
+- create ItemBookingSerializer with read-only fields: item_name, event_name, event_start_datetime, event_end_datetime for display purposes
+- implement overbooking validation in ItemBookingSerializer validate() method to prevent overbooking via API
+- make item and event fields read-only during updates (but writable during creation) by overriding serializer init() method to conditionally set read_only=True when instance exists
+- create ItemBookingViewSet with IsManagerOrStaffReadOnly permission class, using standard ModelViewSet behavior
+- create ItemBooking API URLs using DefaultRouter and register in core/api/urls.py at 'itembookings/' path
+- register itembookings app in INSTALLED_APPS in settings.py
+- create comprehensive backend tests covering model creation, uniqueness constraint, overbooking validation (overlapping events, non-overlapping events, partial overlaps), serializer serialization/deserialization, read-only fields, API CRUD operations, update restrictions, permissions (staff read-only, manager full access), and edge cases
+
+### SCRUM-38 item booking creation flow
+
+### SCRUM-82 display item bookings on event & item detail pages

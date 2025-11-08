@@ -25,3 +25,7 @@ class Event(models.Model):
 
   class Meta:
     ordering = ['start_datetime']
+    indexes = [
+      models.Index(fields=['start_datetime']),
+      models.Index(fields=['end_datetime']),
+    ]
