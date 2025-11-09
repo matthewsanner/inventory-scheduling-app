@@ -11,6 +11,9 @@ export const ErrorKeys = {
   DELETE_EVENT_FAILED: "DELETE_EVENT_FAILED",
   CREATE_ITEM_BOOKING_FAILED: "CREATE_ITEM_BOOKING_FAILED",
   LOAD_ITEM_BOOKINGS_FAILED: "LOAD_ITEM_BOOKINGS_FAILED",
+  LOAD_ITEM_BOOKING_FAILED: "LOAD_ITEM_BOOKING_FAILED",
+  UPDATE_ITEM_BOOKING_FAILED: "UPDATE_ITEM_BOOKING_FAILED",
+  DELETE_ITEM_BOOKING_FAILED: "DELETE_ITEM_BOOKING_FAILED",
   GENERIC_ERROR: "GENERIC_ERROR",
 };
 
@@ -74,6 +77,22 @@ export const ERROR_CONFIG = {
     message: "Failed to load item bookings. Please try again later.",
     onBack: (navigate) => () => navigate("/items"),
     backLabel: "← Back to Items",
+  },
+  [ErrorKeys.LOAD_ITEM_BOOKING_FAILED]: {
+    message: "Failed to load item booking details. Please try again later.",
+    onBack: (navigate, itemId) => () => navigate(`/items/${itemId}`),
+    backLabel: "← Back to Item Details",
+  },
+  [ErrorKeys.UPDATE_ITEM_BOOKING_FAILED]: {
+    message:
+      "Failed to update item booking. Please check your input and try again.",
+    onBack: (navigate, itemId) => () => navigate(`/items/${itemId}`),
+    backLabel: "← Back to Item Details",
+  },
+  [ErrorKeys.DELETE_ITEM_BOOKING_FAILED]: {
+    message: "Failed to delete item booking. Please try again later.",
+    onBack: (navigate, itemId) => () => navigate(`/items/${itemId}`),
+    backLabel: "← Back to Item Details",
   },
   [ErrorKeys.GENERIC_ERROR]: {
     message: "Something went wrong. Please try again.",

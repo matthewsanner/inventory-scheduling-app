@@ -157,7 +157,7 @@ const ItemDetail = () => {
         itemName={item.name}
       />
 
-      <Card className="my-8 max-w-2xl mx-auto p-6 shadow-lg">
+      <Card className="my-8 max-w-3xl mx-auto p-6 shadow-lg">
         <h3 className="text-2xl font-bold mb-4 text-gray-800">Item Bookings</h3>
         {bookingsLoading ? (
           <LoadingCard message="Loading bookings..." />
