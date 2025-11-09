@@ -9,6 +9,7 @@ export const ErrorKeys = {
   CREATE_EVENT_FAILED: "CREATE_EVENT_FAILED",
   UPDATE_EVENT_FAILED: "UPDATE_EVENT_FAILED",
   DELETE_EVENT_FAILED: "DELETE_EVENT_FAILED",
+  CREATE_ITEM_BOOKING_FAILED: "CREATE_ITEM_BOOKING_FAILED",
   GENERIC_ERROR: "GENERIC_ERROR",
 };
 
@@ -62,6 +63,11 @@ export const ERROR_CONFIG = {
     message: "Failed to delete event. Please try again later.",
     onBack: (navigate) => () => navigate("/events"),
     backLabel: "← Back to Events",
+  },
+  [ErrorKeys.CREATE_ITEM_BOOKING_FAILED]: {
+    message: "Failed to create item booking. Please try again later.",
+    onBack: (navigate, id) => () => navigate(`/items/${id}`),
+    backLabel: "← Back to Item Details",
   },
   [ErrorKeys.GENERIC_ERROR]: {
     message: "Something went wrong. Please try again.",

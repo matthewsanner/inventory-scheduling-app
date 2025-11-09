@@ -389,4 +389,21 @@
 
 ### SCRUM-38 item booking creation flow
 
+- delete accidentally duplicated clean function in ItemBooking model
+- add "Book Item" button to item detail page using Flowbite Button component with blue color, positioned alongside existing Edit Item and Delete Item buttons
+- create CurrentFutureEventsView API endpoint in events/api/views.py that returns events where end_datetime >= now, ordered by start_datetime, for use in item booking form dropdown
+- add current-future route to events/api/urls.py for the new endpoint
+- create NewItemBookingService.js in frontend/src/services with getCurrentFutureEvents function to fetch current/future events and createItemBooking function to create new item bookings
+- create NewItemBooking.jsx page component with form fields for event selection (dropdown of current/future events with formatted dates) and quantity (number input with minimum of 1), includes form validation for required fields and quantity minimum, handles backend validation errors by displaying error messages from API response (especially for overbooking scenarios), includes loading state while fetching events and submitting form, includes Add Item Booking and Cancel buttons matching style of other form pages
+- add /items/:id/book route to App.jsx routing configuration
+- add CREATE_ITEM_BOOKING_FAILED error key to errorMessages.js with appropriate error message and navigation back to item details page
+- add mockCurrentFutureEvents and mockItemBookingFormData to testUtils.js for testing purposes
+- create comprehensive NewItemBooking.test.jsx test file covering all functionality including loading states, fetching and displaying events, form input handling, successful submission and navigation, error handling (both API errors and backend validation errors), validation (required fields and quantity minimum), cancel navigation, and edge cases
+- create comprehensive backend tests for CurrentFutureEventsView endpoint covering filtering (only returns events with end_datetime >= now), ordering (by start_datetime), authentication requirements, permissions (staff and manager access), edge cases (events ending now, empty results), and exclusion of past events
+- create and run migrations for new ItemBooking model, should have been done in previous commit really, this also appropriately created and applied new migrations for the Events model
+- verify that clicking "Book Item" button on item detail page properly navigates to the new item booking form and that successful submission redirects back to item details page
+- standardize quantity handling across all forms (NewItem, EditItem, NewItemBooking) to use custom validation only, update tests appropriately
+
 ### SCRUM-82 display item bookings on event & item detail pages
+
+### SCRUM-83 item booking edit page w/ delete

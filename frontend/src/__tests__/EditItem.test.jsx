@@ -323,6 +323,23 @@ describe("EditItem Page", () => {
     ).toBeInTheDocument();
   });
 
+  it("prevents form submission if quantity is less than 1", async () => {
+    renderEditItemPage();
+
+    const quantityInput = await screen.findByLabelText("Quantity");
+    await user.clear(quantityInput);
+    await user.type(quantityInput, "0");
+
+    const submitButton = await screen.findByRole("button", {
+      name: "Update Item",
+    });
+    await user.click(submitButton);
+
+    expect(
+      await screen.findByText(/quantity must be at least 1/i)
+    ).toBeInTheDocument();
+  });
+
   it("resets previous errors and shows loading state during submission", async () => {
     fetchCategories.mockResolvedValue({ data: mockCategories });
     fetchItemById.mockResolvedValueOnce({ data: mockItem });

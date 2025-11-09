@@ -740,3 +740,131 @@ class TestEventAPI:
         url = reverse('event-list')
         response = api_client.get(url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_current_future_events_endpoint_returns_only_future_events(self, authenticated_staff_client):
+        now = timezone.now()
+        # Create past event
+        past_event = Event.objects.create(
+            name="Past Event",
+            start_datetime=now - timedelta(days=2),
+            end_datetime=now - timedelta(days=2) + timedelta(hours=2)
+        )
+        # Create current event (ends in future)
+        current_event = Event.objects.create(
+            name="Current Event",
+            start_datetime=now - timedelta(hours=1),
+            end_datetime=now + timedelta(hours=1)
+        )
+        # Create future event
+        future_event = Event.objects.create(
+            name="Future Event",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2)
+        )
+        url = reverse('current-future-events')
+        response = authenticated_staff_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+        event_names = [event['name'] for event in response.data]
+        assert 'Past Event' not in event_names
+        assert 'Current Event' in event_names
+        assert 'Future Event' in event_names
+
+    def test_current_future_events_ordered_by_start_datetime(self, authenticated_staff_client):
+        now = timezone.now()
+        # Create events in reverse order
+        event3 = Event.objects.create(
+            name="Event 3",
+            start_datetime=now + timedelta(days=3),
+            end_datetime=now + timedelta(days=3, hours=2)
+        )
+        event1 = Event.objects.create(
+            name="Event 1",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2)
+        )
+        event2 = Event.objects.create(
+            name="Event 2",
+            start_datetime=now + timedelta(days=2),
+            end_datetime=now + timedelta(days=2, hours=2)
+        )
+        url = reverse('current-future-events')
+        response = authenticated_staff_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 3
+        assert response.data[0]['name'] == "Event 1"
+        assert response.data[1]['name'] == "Event 2"
+        assert response.data[2]['name'] == "Event 3"
+
+    def test_current_future_events_includes_events_ending_now(self, authenticated_staff_client):
+        now = timezone.now()
+        # Create event that ends at or after now (use small buffer to account for timing between test setup and query)
+        event_ending_now = Event.objects.create(
+            name="Event Ending Now",
+            start_datetime=now - timedelta(hours=2),
+            end_datetime=now + timedelta(seconds=1)
+        )
+        url = reverse('current-future-events')
+        response = authenticated_staff_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == "Event Ending Now"
+
+    def test_current_future_events_excludes_events_ending_in_past(self, authenticated_staff_client):
+        now = timezone.now()
+        # Create event that ended in the past
+        past_event = Event.objects.create(
+            name="Past Event",
+            start_datetime=now - timedelta(days=2),
+            end_datetime=now - timedelta(days=1)
+        )
+        url = reverse('current-future-events')
+        response = authenticated_staff_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 0
+
+    def test_current_future_events_requires_authentication(self, api_client):
+        url = reverse('current-future-events')
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_current_future_events_accessible_by_staff(self, authenticated_staff_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Future Event",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2)
+        )
+        url = reverse('current-future-events')
+        response = authenticated_staff_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_current_future_events_accessible_by_manager(self, authenticated_manager_client):
+        now = timezone.now()
+        Event.objects.create(
+            name="Future Event",
+            start_datetime=now + timedelta(days=1),
+            end_datetime=now + timedelta(days=1, hours=2)
+        )
+        url = reverse('current-future-events')
+        response = authenticated_manager_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_current_future_events_returns_empty_list_when_no_future_events(self, authenticated_staff_client):
+        now = timezone.now()
+        # Create only past events
+        Event.objects.create(
+            name="Past Event 1",
+            start_datetime=now - timedelta(days=2),
+            end_datetime=now - timedelta(days=1)
+        )
+        Event.objects.create(
+            name="Past Event 2",
+            start_datetime=now - timedelta(days=5),
+            end_datetime=now - timedelta(days=4)
+        )
+        url = reverse('current-future-events')
+        response = authenticated_staff_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 0
+        assert response.data == []

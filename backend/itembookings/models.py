@@ -11,28 +11,6 @@ class ItemBooking(models.Model):
 
   def clean(self):
     super().clean()
-    # Check for overbooking
-    if self.item and self.event:
-      # Get all existing bookings for this item
-      existing_bookings = ItemBooking.objects.filter(item=self.item).exclude(pk=self.pk if self.pk else None)
-      
-      # Check if any existing booking's event overlaps with this event
-      total_booked = 0
-      for booking in existing_bookings:
-        # Check if events overlap
-        # Events overlap if new_start < existing_end AND new_end > existing_start
-        if (self.event.start_datetime < booking.event.end_datetime and 
-            self.event.end_datetime > booking.event.start_datetime):
-          total_booked += booking.quantity
-      
-      # Check if adding this booking would exceed item quantity
-      if total_booked + self.quantity > self.item.quantity:
-        raise ValidationError({
-          'quantity': f'Cannot book {self.quantity} items. Only {self.item.quantity - total_booked} available for this time period.'
-        })
-
-  def clean(self):
-    super().clean()
 
     # Ensure both item and event exist before validation
     if not self.item or not self.event:

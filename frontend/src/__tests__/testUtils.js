@@ -91,3 +91,28 @@ export const mockEventFormData = {
   location: "Central Park",
   notes: "Annual summer music festival",
 };
+
+export const mockCurrentFutureEvents = [
+  {
+    id: 1,
+    name: "Summer Festival",
+    start_datetime: "2024-07-15T10:00:00Z",
+    end_datetime: "2024-07-15T18:00:00Z",
+    location: "Central Park",
+    notes: "Annual summer music festival",
+  },
+  {
+    id: 2,
+    name: "Winter Gala",
+    start_datetime: "2024-12-20T19:00:00Z",
+    end_datetime: "2024-12-20T23:00:00Z",
+    location: "Grand Ballroom",
+    notes: "Formal winter event",
+  },
+];
+
+export const mockItemBookingFormData = {
+  item: "1",
+  event: "1",
+  quantity: 2,
+};

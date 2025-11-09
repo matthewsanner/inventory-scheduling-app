@@ -60,7 +60,8 @@ const NewItem = () => {
 
     const errors = {};
     if (!formData.name.trim()) errors.name = "Name is required.";
-    if (!formData.quantity || formData.quantity < 1)
+    const quantityNum = parseInt(formData.quantity, 10);
+    if (!formData.quantity || isNaN(quantityNum) || quantityNum < 1)
       errors.quantity = "Quantity must be at least 1.";
 
     if (Object.keys(errors).length > 0) {
@@ -156,7 +157,6 @@ const NewItem = () => {
             value={formData.quantity}
             onChange={handleChange}
             disabled={submitting}
-            min={1}
           />
           {formErrors.quantity && (
             <p className="text-red-500">{formErrors.quantity}</p>

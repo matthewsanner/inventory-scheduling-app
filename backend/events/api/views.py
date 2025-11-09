@@ -1,5 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from django_filters import rest_framework as filters
+from django.utils import timezone
 from ..models import Event
 from .serializers import EventSerializer
 from core.permissions import IsManagerOrStaffReadOnly
@@ -22,4 +26,13 @@ class EventViewSet(ModelViewSet):
     search_fields = ['name', 'notes', 'location']
     ordering_fields = ['name', 'start_datetime', 'end_datetime', 'location']
     permission_classes = [IsManagerOrStaffReadOnly]
+
+class CurrentFutureEventsView(APIView):
+    permission_classes = [IsManagerOrStaffReadOnly]
+    
+    def get(self, request, *args, **kwargs):
+        now = timezone.now()
+        events = Event.objects.filter(end_datetime__gte=now).order_by('start_datetime')
+        serializer = EventSerializer(events, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 

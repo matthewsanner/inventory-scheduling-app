@@ -102,6 +102,9 @@ const ItemDetail = () => {
           <Button color="green" onClick={() => navigate(`/items/${id}/edit`)}>
             Edit Item
           </Button>
+          <Button color="blue" onClick={() => navigate(`/items/${id}/book`)}>
+            Book Item
+          </Button>
           <Button color="light" onClick={() => navigate("/items")}>
             ← Back to Items
           </Button>
