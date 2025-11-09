@@ -214,6 +214,21 @@ describe("NewItem Page", () => {
     ).toBeInTheDocument();
   });
 
+  it("prevents form submission if quantity is less than 1", async () => {
+    renderNewItemPage();
+
+    const quantityInput = screen.getByLabelText("Quantity");
+    await user.clear(quantityInput);
+    await user.type(quantityInput, "0");
+
+    const submitButton = screen.getByRole("button", { name: "Add Item" });
+    await user.click(submitButton);
+
+    expect(
+      await screen.findByText(/quantity must be at least 1/i)
+    ).toBeInTheDocument();
+  });
+
   it("resets previous errors and shows loading state during submission", async () => {
     // Use a delayed promise to allow testing the loading state
     let resolveCreate;

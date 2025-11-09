@@ -6,6 +6,8 @@ import Items from "./pages/Items";
 import ItemDetail from "./pages/ItemDetail";
 import NewItem from "./pages/NewItem";
 import EditItem from "./pages/EditItem";
+import NewItemBooking from "./pages/NewItemBooking";
+import EditItemBooking from "./pages/EditItemBooking";
 import Events from "./pages/Events";
 import EventDetail from "./pages/EventDetail";
 import NewEvent from "./pages/NewEvent";
@@ -30,6 +32,8 @@ function App() {
               <Route path="/items/:id" element={<ItemDetail />} />
               <Route path="/items/new" element={<NewItem />} />
               <Route path="/items/:id/edit" element={<EditItem />} />
+              <Route path="/items/:id/book" element={<NewItemBooking />} />
+              <Route path="/itembookings/:id/edit" element={<EditItemBooking />} />
               <Route path="/events" element={<Events />} />
               <Route path="/events/:id" element={<EventDetail />} />
               <Route path="/events/new" element={<NewEvent />} />

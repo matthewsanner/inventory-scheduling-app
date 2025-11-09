@@ -368,3 +368,80 @@
 - fix a couple BE unit tests that had unintentionally bad data with start datetimes after end datetimes
 - add BE tests for the new BE datetime validations in model and serializer
 - set all services to use the configured axios instance instead of the base instance, this allows us to use relative URLs and properly take advantage of automatic token refreshes on 401 errors, and explicitly include JWT auth headers via the request interceptor
+
+## SCRUM-10 Handle item bookings
+
+### SCRUM-37 creates ItemBooking model and API
+
+- create itembookings Django app
+- create ItemBooking model with foreign key to Item, foreign key to Event, quantity field (PositiveSmallIntegerField), and created_at datetime field (auto_now_add)
+- add compound uniqueness constraint on (item, event) in ItemBooking model Meta class
+- add db_index=True to item and event foreign key fields in ItemBooking model for indexing
+- add indexes to Event model for start_datetime and end_datetime fields in Event model Meta class for efficient overlap queries
+- implement overbooking validation in ItemBooking model clean() method that checks all existing bookings for the same item whose events overlap with the booking's event, raises ValidationError if total booked quantity would exceed item quantity
+- create ItemBookingSerializer with read-only fields: item_name, event_name, event_start_datetime, event_end_datetime for display purposes
+- implement overbooking validation in ItemBookingSerializer validate() method to prevent overbooking via API
+- make item and event fields read-only during updates (but writable during creation) by overriding serializer init() method to conditionally set read_only=True when instance exists
+- create ItemBookingViewSet with IsManagerOrStaffReadOnly permission class, using standard ModelViewSet behavior
+- create ItemBooking API URLs using DefaultRouter and register in core/api/urls.py at 'itembookings/' path
+- register itembookings app in INSTALLED_APPS in settings.py
+- create comprehensive backend tests covering model creation, uniqueness constraint, overbooking validation (overlapping events, non-overlapping events, partial overlaps), serializer serialization/deserialization, read-only fields, API CRUD operations, update restrictions, permissions (staff read-only, manager full access), and edge cases
+
+### SCRUM-38 item booking creation flow
+
+- delete accidentally duplicated clean function in ItemBooking model
+- add "Book Item" button to item detail page using Flowbite Button component with blue color, positioned alongside existing Edit Item and Delete Item buttons
+- create CurrentFutureEventsView API endpoint in events/api/views.py that returns events where end_datetime >= now, ordered by start_datetime, for use in item booking form dropdown
+- add current-future route to events/api/urls.py for the new endpoint
+- create NewItemBookingService.js in frontend/src/services with getCurrentFutureEvents function to fetch current/future events and createItemBooking function to create new item bookings
+- create NewItemBooking.jsx page component with form fields for event selection (dropdown of current/future events with formatted dates) and quantity (number input with minimum of 1), includes form validation for required fields and quantity minimum, handles backend validation errors by displaying error messages from API response (especially for overbooking scenarios), includes loading state while fetching events and submitting form, includes Add Item Booking and Cancel buttons matching style of other form pages
+- add /items/:id/book route to App.jsx routing configuration
+- add CREATE_ITEM_BOOKING_FAILED error key to errorMessages.js with appropriate error message and navigation back to item details page
+- add mockCurrentFutureEvents and mockItemBookingFormData to testUtils.js for testing purposes
+- create comprehensive NewItemBooking.test.jsx test file covering all functionality including loading states, fetching and displaying events, form input handling, successful submission and navigation, error handling (both API errors and backend validation errors), validation (required fields and quantity minimum), cancel navigation, and edge cases
+- create comprehensive backend tests for CurrentFutureEventsView endpoint covering filtering (only returns events with end_datetime >= now), ordering (by start_datetime), authentication requirements, permissions (staff and manager access), edge cases (events ending now, empty results), and exclusion of past events
+- create and run migrations for new ItemBooking model, should have been done in previous commit really, this also appropriately created and applied new migrations for the Events model
+- verify that clicking "Book Item" button on item detail page properly navigates to the new item booking form and that successful submission redirects back to item details page
+- standardize quantity handling across all forms (NewItem, EditItem, NewItemBooking) to use custom validation only, update tests appropriately
+
+### SCRUM-82 display item bookings on event & item detail pages
+
+- add ItemBookingFilter class to ItemBookingViewSet in backend/itembookings/api/views.py to enable filtering by item and event foreign keys
+- create ItemBookingService.js in frontend/src/services with getItemBookingsByItem and getItemBookingsByEvent functions to fetch filtered bookings from the API
+- update ItemDetail.jsx to fetch and display item bookings for that item in a separate card below the main item details card, showing event name, event start datetime, event end datetime, and quantity in a table format
+- update EventDetail.jsx to fetch and display item bookings for that event in a separate card below the main event details card, showing item name and quantity in a table format
+- make booking table rows clickable to navigate to item booking edit page which doesn't exist yet
+- add loading states and error handling for bookings (bookings errors are logged but don't prevent the main detail page from displaying)
+- add LOAD_ITEM_BOOKINGS_FAILED error key to errorMessages.js (not used currently)
+- add mockItemBooking and mockItemBookings to testUtils.js for testing purposes
+- create comprehensive unit tests for ItemDetail and EventDetail components covering booking display, loading states, empty states, navigation to edit page, and error handling
+
+### SCRUM-83 item booking edit page w/ delete
+
+- create EditItemBookingService.js in frontend/src/services following the same pattern as EditItemService.js, with fetchItemBookingById function that gets a single item booking by ID, updateItemBooking function that updates booking data via PATCH request to the itembookings API endpoint, and deleteItemBooking function that deletes a booking via DELETE request
+- create DeleteItemBookingModal.jsx component following the same pattern as DeleteItemModal, with confirmation dialog using Flowbite Modal component with popup prop, warning icon from react-icons, and confirmation/cancel buttons, displays item name and event name in the confirmation message
+- create EditItemBooking.jsx page component in frontend/src/pages that loads existing booking data and displays it in a form, includes form fields for item (disabled, displays item name), event (disabled, displays event name with formatted start and end datetime), and quantity (editable, number input with minimum of 1), includes form validation to ensure quantity is at least 1, handles backend validation errors by displaying error messages from API response (especially for overbooking scenarios), includes loading state while fetching booking data and submitting form, includes Update Booking, Delete Booking, and Cancel buttons matching style of other form pages
+- add error keys for LOAD_ITEM_BOOKING_FAILED, UPDATE_ITEM_BOOKING_FAILED, and DELETE_ITEM_BOOKING_FAILED to errorMessages.js with appropriate error messages and navigation back to item details page
+- add /itembookings/:id/edit route to App.jsx routing configuration
+- create comprehensive EditItemBooking.test.jsx test file covering all functionality including loading states, fetching and displaying booking data, form input handling (quantity only, item and event disabled), successful submission and navigation, error handling (both API errors and backend validation errors), validation (quantity minimum), delete modal functionality (opening, closing, successful deletion, error handling), cancel navigation, loading states during submission, and edge cases
+- verify that clicking on item bookings in the item detail page and event detail page properly navigates to the edit item booking form and that successful submission or deletion redirects back to item details page
+
+### SCRUM-83 fixes variable scope issue
+
+- fixes possible overlapping_bookings variable scope issue in itembookings/api/serializer
+
+### SCRUM-83 minor code improvements
+
+- perform sum for overlapping bookings directly in database instead of Python, more efficient
+- extract quantity validation and datetime formatting into utility functions called across multiple files
+- extract backend error handling from NewItemBooking.jsx and EditItemBooking.jsx into a utility function
+
+### SCRUM-83 more minor code improvements
+
+- extends use of datetime formatting utility function to other files with one custom passed option
+- improves the validateQuantity function by removing a confusing check
+- extracts overbooking validation logic so that it can be then called by model's clean method and serializer's validate method from a central file
+
+### SCRUM-83 fixes indentation
+
+- fixes indentation on ItemBookingFilter

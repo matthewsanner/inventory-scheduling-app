@@ -1,17 +1,30 @@
 import { useParams, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
-import { Card, Button } from "flowbite-react";
+import {
+  Card,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeadCell,
+  TableRow,
+} from "flowbite-react";
 import LoadingCard from "../components/LoadingCard";
 import ErrorCard from "../components/ErrorCard";
 import DeleteItemModal from "../components/DeleteItemModal";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
 import { getItem, deleteItem } from "../services/ItemDetailService";
+import { getItemBookingsByItem } from "../services/ItemBookingService";
+import { formatDateTime } from "../utils/dateFormatting";
 
 const ItemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [item, setItem] = useState(null);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bookingsLoading, setBookingsLoading] = useState(true);
   const [errorKey, setErrorKey] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -25,6 +38,21 @@ const ItemDetail = () => {
         console.error("Error fetching item:", error);
         setErrorKey(ErrorKeys.LOAD_ITEM_FAILED);
         setLoading(false);
+      });
+
+    getItemBookingsByItem(id)
+      .then((response) => {
+        if (response.errorKey) {
+          console.error("Error fetching bookings:", response.error);
+          // Don't set error key for bookings failure, just log it
+        } else {
+          setBookings(response.data || []);
+        }
+        setBookingsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching bookings:", error);
+        setBookingsLoading(false);
       });
   }, [id]);
 
@@ -102,6 +130,9 @@ const ItemDetail = () => {
           <Button color="green" onClick={() => navigate(`/items/${id}/edit`)}>
             Edit Item
           </Button>
+          <Button color="blue" onClick={() => navigate(`/items/${id}/book`)}>
+            Book Item
+          </Button>
           <Button color="light" onClick={() => navigate("/items")}>
             ← Back to Items
           </Button>
@@ -114,6 +145,55 @@ const ItemDetail = () => {
         onConfirm={handleDelete}
         itemName={item.name}
       />
+
+      <Card className="my-8 max-w-3xl mx-auto p-6 shadow-lg">
+        <h3 className="text-2xl font-bold mb-4 text-gray-800">Item Bookings</h3>
+        {bookingsLoading ? (
+          <LoadingCard message="Loading bookings..." />
+        ) : bookings.length === 0 ? (
+          <p className="text-gray-600 italic">No bookings for this item.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table hoverable>
+              <TableHead>
+                <TableRow>
+                  <TableHeadCell>Event Name</TableHeadCell>
+                  <TableHeadCell>Start Date & Time</TableHeadCell>
+                  <TableHeadCell>End Date & Time</TableHeadCell>
+                  <TableHeadCell>Quantity</TableHeadCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {bookings.map((booking) => (
+                  <TableRow
+                    key={booking.id}
+                    className="bg-white dark:border-gray-700 dark:bg-gray-800 cursor-pointer hover:bg-gray-50"
+                    onClick={() =>
+                      navigate(`/itembookings/${booking.id}/edit`)
+                    }>
+                    <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                      {booking.event_name}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-gray-700 dark:text-gray-400">
+                      {formatDateTime(booking.event_start_datetime, {
+                        month: "short",
+                      })}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-gray-700 dark:text-gray-400">
+                      {formatDateTime(booking.event_end_datetime, {
+                        month: "short",
+                      })}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-gray-700 dark:text-gray-400">
+                      {booking.quantity}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </Card>
     </>
   );
 };
