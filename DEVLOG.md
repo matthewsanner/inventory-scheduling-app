@@ -425,3 +425,7 @@
 - add /itembookings/:id/edit route to App.jsx routing configuration
 - create comprehensive EditItemBooking.test.jsx test file covering all functionality including loading states, fetching and displaying booking data, form input handling (quantity only, item and event disabled), successful submission and navigation, error handling (both API errors and backend validation errors), validation (quantity minimum), delete modal functionality (opening, closing, successful deletion, error handling), cancel navigation, loading states during submission, and edge cases
 - verify that clicking on item bookings in the item detail page and event detail page properly navigates to the edit item booking form and that successful submission or deletion redirects back to item details page
+
+### SCRUM-83 fixes variable scope issue
+
+- fixes possible overlapping_bookings variable scope issue in itembookings/api/serializer
