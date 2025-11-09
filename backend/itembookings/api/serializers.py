@@ -30,14 +30,14 @@ class ItemBookingSerializer(ModelSerializer):
         event__start_datetime__lt=event.end_datetime,
         event__end_datetime__gt=event.start_datetime,
       )
-    if self.instance:
+      if self.instance:
         overlapping_bookings = overlapping_bookings.exclude(pk=self.instance.pk)
 
-    total_booked = sum(b.quantity for b in overlapping_bookings)
+      total_booked = sum(b.quantity for b in overlapping_bookings)
 
-    if total_booked + quantity > item.quantity:
-      raise ValidationError({
-          "quantity": f"Cannot book {quantity} items. Only {item.quantity - total_booked} available for this time period."
-      })
+      if total_booked + quantity > item.quantity:
+        raise ValidationError({
+            "quantity": f"Cannot book {quantity} items. Only {item.quantity - total_booked} available for this time period."
+        })
 
     return data
