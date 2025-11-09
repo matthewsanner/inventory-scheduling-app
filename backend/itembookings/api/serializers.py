@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer, ValidationError, CharField, DateTimeField
+from django.core.exceptions import ValidationError as DjangoValidationError
 from ..models import ItemBooking
-from django.db.models import Sum
 
 class ItemBookingSerializer(ModelSerializer):
   item_name = CharField(source='item.name', read_only=True)
@@ -26,21 +26,11 @@ class ItemBookingSerializer(ModelSerializer):
     quantity = data.get("quantity") or getattr(self.instance, "quantity", 1)
     
     if item and event:
-      overlapping_bookings = ItemBooking.objects.filter(
-        item=item,
-        event__start_datetime__lt=event.end_datetime,
-        event__end_datetime__gt=event.start_datetime,
-      )
-      if self.instance:
-        overlapping_bookings = overlapping_bookings.exclude(pk=self.instance.pk)
-
-      total_booked = overlapping_bookings.aggregate(
-        total=Sum('quantity') 
-      )['total'] or 0
-
-      if total_booked + quantity > item.quantity:
-        raise ValidationError({
-            "quantity": f"Cannot book {quantity} items. Only {item.quantity - total_booked} available for this time period."
-        })
+      exclude_pk = self.instance.pk if self.instance else None
+      try:
+        ItemBooking.validate_overbooking(item, event, quantity, exclude_pk)
+      except DjangoValidationError as e:
+        # Convert Django ValidationError to DRF ValidationError
+        raise ValidationError(e.error_dict)
 
     return data

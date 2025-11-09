@@ -16,6 +16,7 @@ import DeleteEventModal from "../components/DeleteEventModal";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
 import { getEvent, deleteEvent } from "../services/EventDetailService";
 import { getItemBookingsByEvent } from "../services/ItemBookingService";
+import { formatDateTime } from "../utils/dateFormatting";
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -54,18 +55,6 @@ const EventDetail = () => {
         setBookingsLoading(false);
       });
   }, [id]);
-
-  const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return "";
-    const date = new Date(dateTimeString);
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
-  };
 
   const handleDelete = () => {
     deleteEvent(id)
@@ -107,11 +96,15 @@ const EventDetail = () => {
               <strong className="block font-semibold">
                 Start Date & Time:
               </strong>
-              {formatDateTime(event.start_datetime)}
+              {formatDateTime(event.start_datetime, {
+                month: "short",
+              })}
             </li>
             <li>
               <strong className="block font-semibold">End Date & Time:</strong>
-              {formatDateTime(event.end_datetime)}
+              {formatDateTime(event.end_datetime, {
+                month: "short",
+              })}
             </li>
             <li>
               <strong className="block font-semibold">Location:</strong>

@@ -5,7 +5,7 @@
  */
 export const validateQuantity = (quantity) => {
   const quantityNum = parseInt(quantity, 10);
-  if (!quantity || isNaN(quantityNum) || quantityNum < 1) {
+  if (isNaN(quantityNum) || quantityNum < 1) {
     return "Quantity must be at least 1.";
   }
   return null;

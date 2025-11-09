@@ -16,6 +16,7 @@ import DeleteItemModal from "../components/DeleteItemModal";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
 import { getItem, deleteItem } from "../services/ItemDetailService";
 import { getItemBookingsByItem } from "../services/ItemBookingService";
+import { formatDateTime } from "../utils/dateFormatting";
 
 const ItemDetail = () => {
   const { id } = useParams();
@@ -65,18 +66,6 @@ const ItemDetail = () => {
         setErrorKey(ErrorKeys.DELETE_ITEM_FAILED);
         setShowDeleteModal(false);
       });
-  };
-
-  const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return "";
-    const date = new Date(dateTimeString);
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
   };
 
   if (errorKey) {
@@ -186,10 +175,14 @@ const ItemDetail = () => {
                       {booking.event_name}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-gray-700 dark:text-gray-400">
-                      {formatDateTime(booking.event_start_datetime)}
+                      {formatDateTime(booking.event_start_datetime, {
+                        month: "short",
+                      })}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-gray-700 dark:text-gray-400">
-                      {formatDateTime(booking.event_end_datetime)}
+                      {formatDateTime(booking.event_end_datetime, {
+                        month: "short",
+                      })}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-gray-700 dark:text-gray-400">
                       {booking.quantity}

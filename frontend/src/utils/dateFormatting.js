@@ -6,20 +6,19 @@
  */
 export const formatDateTime = (dateString, options = {}) => {
   if (!dateString) return "";
-  
+
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "";
-  
+
   const defaultOptions = {
     year: "numeric",
     month: "numeric",
     day: "numeric",
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
   };
-  
+
   const formatOptions = { ...defaultOptions, ...options };
-  
+
   return date.toLocaleString("en-US", formatOptions);
 };
-

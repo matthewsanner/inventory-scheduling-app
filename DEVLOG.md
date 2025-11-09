@@ -435,3 +435,9 @@
 - perform sum for overlapping bookings directly in database instead of Python, more efficient
 - extract quantity validation and datetime formatting into utility functions called across multiple files
 - extract backend error handling from NewItemBooking.jsx and EditItemBooking.jsx into a utility function
+
+### SCRUM-83 more minor code improvements
+
+- extends use of datetime formatting utility function to other files with one custom passed option
+- improves the validateQuantity function by removing a confusing check
+- extracts overbooking validation logic so that it can be then called by model's clean method and serializer's validate method from a central file

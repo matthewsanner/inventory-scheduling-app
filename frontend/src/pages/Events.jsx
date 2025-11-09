@@ -17,6 +17,7 @@ import ErrorCard from "../components/ErrorCard";
 import LoadingCard from "../components/LoadingCard";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
 import { getEvents } from "../services/EventsService";
+import { formatDateTime } from "../utils/dateFormatting";
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -77,18 +78,6 @@ const Events = () => {
       start_datetime_before: "",
     });
     setCurrentPage(1);
-  };
-
-  const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return "";
-    const date = new Date(dateTimeString);
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
   };
 
   const currentErrorConfig =
@@ -190,10 +179,14 @@ const Events = () => {
                         {event.name}
                       </TableCell>
                       <TableCell className="truncate">
-                        {formatDateTime(event.start_datetime)}
+                        {formatDateTime(event.start_datetime, {
+                          month: "short",
+                        })}
                       </TableCell>
                       <TableCell className="truncate">
-                        {formatDateTime(event.end_datetime)}
+                        {formatDateTime(event.end_datetime, {
+                          month: "short",
+                        })}
                       </TableCell>
                       <TableCell className="truncate" title={event.location}>
                         {event.location || "—"}
