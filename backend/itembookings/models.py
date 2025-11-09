@@ -28,7 +28,9 @@ class ItemBooking(models.Model):
       overlapping_bookings = overlapping_bookings.exclude(pk=self.pk)
 
     # Total quantity already booked in overlapping events
-    total_booked = sum(b.quantity for b in overlapping_bookings)
+    total_booked = overlapping_bookings.aggregate(
+      total=models.Sum('quantity')
+    )['total'] or 0
 
     # Check available quantity
     available = self.item.quantity - total_booked

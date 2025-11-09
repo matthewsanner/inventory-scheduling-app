@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
-import {
-  Card,
-  Button,
-  Label,
-  TextInput,
-  Select,
-} from "flowbite-react";
+import { Card, Button, Label, TextInput, Select } from "flowbite-react";
 import LoadingCard from "../components/LoadingCard";
 import ErrorCard from "../components/ErrorCard";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
-import { getCurrentFutureEvents, createItemBooking } from "../services/NewItemBookingService";
+import {
+  getCurrentFutureEvents,
+  createItemBooking,
+} from "../services/NewItemBookingService";
+import { validateQuantity } from "../utils/validation";
+import { formatDateTime } from "../utils/dateFormatting";
+import { handleBackendError } from "../utils/errorHandling";
 
 const NewItemBooking = () => {
   const navigate = useNavigate();
@@ -60,9 +60,8 @@ const NewItemBooking = () => {
 
     const errors = {};
     if (!formData.event) errors.event = "Event is required.";
-    const quantityNum = parseInt(formData.quantity, 10);
-    if (!formData.quantity || isNaN(quantityNum) || quantityNum < 1)
-      errors.quantity = "Quantity must be at least 1.";
+    const quantityError = validateQuantity(formData.quantity);
+    if (quantityError) errors.quantity = quantityError;
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -79,21 +78,16 @@ const NewItemBooking = () => {
       await createItemBooking(submitData);
       navigate(`/items/${id}`);
     } catch (error) {
-      console.error("Error creating item booking:", error);
-      // Handle backend validation errors
-      if (error.response?.data) {
-        const backendErrors = error.response.data;
-        // Check for quantity validation error from backend
-        if (backendErrors.quantity) {
-          setFormErrors({ quantity: Array.isArray(backendErrors.quantity) ? backendErrors.quantity[0] : backendErrors.quantity });
-        } else if (backendErrors.non_field_errors) {
-          // Handle other validation errors
-          setFormErrors({ event: Array.isArray(backendErrors.non_field_errors) ? backendErrors.non_field_errors[0] : backendErrors.non_field_errors });
-        } else {
-          setErrorKey(ErrorKeys.CREATE_ITEM_BOOKING_FAILED);
-        }
-      } else {
-        setErrorKey(ErrorKeys.CREATE_ITEM_BOOKING_FAILED);
+      const { formErrors: backendFormErrors, errorKey: backendErrorKey } =
+        handleBackendError(error, ErrorKeys.CREATE_ITEM_BOOKING_FAILED, {
+          non_field_errors: "event",
+        });
+
+      if (Object.keys(backendFormErrors).length > 0) {
+        setFormErrors(backendFormErrors);
+      }
+      if (backendErrorKey) {
+        setErrorKey(backendErrorKey);
       }
     } finally {
       setSubmitting(false);
@@ -117,17 +111,6 @@ const NewItemBooking = () => {
     return <LoadingCard message="Loading events..." />;
   }
 
-  const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   return (
     <Card className="my-6 max-w-xl mx-auto p-4 shadow-lg rounded-lg">
       <h2 className="text-3xl mb-4">Book Item</h2>
@@ -145,11 +128,14 @@ const NewItemBooking = () => {
             </option>
             {events.map((event) => (
               <option key={event.id} value={event.id}>
-                {event.name} ({formatDateTime(event.start_datetime)} - {formatDateTime(event.end_datetime)})
+                {event.name} ({formatDateTime(event.start_datetime)} -{" "}
+                {formatDateTime(event.end_datetime)})
               </option>
             ))}
           </Select>
-          {formErrors.event && <p className="text-red-500">{formErrors.event}</p>}
+          {formErrors.event && (
+            <p className="text-red-500">{formErrors.event}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="quantity">Quantity</Label>
@@ -179,4 +165,3 @@ const NewItemBooking = () => {
 };
 
 export default NewItemBooking;
-

@@ -16,6 +16,7 @@ import {
   fetchItemById,
   updateItem,
 } from "../services/EditItemService";
+import { validateQuantity } from "../utils/validation";
 
 const EditItem = () => {
   const navigate = useNavigate();
@@ -78,9 +79,8 @@ const EditItem = () => {
 
     const errors = {};
     if (!formData.name.trim()) errors.name = "Name is required.";
-    const quantityNum = parseInt(formData.quantity, 10);
-    if (!formData.quantity || isNaN(quantityNum) || quantityNum < 1)
-      errors.quantity = "Quantity must be at least 1.";
+    const quantityError = validateQuantity(formData.quantity);
+    if (quantityError) errors.quantity = quantityError;
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);

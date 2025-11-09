@@ -429,3 +429,9 @@
 ### SCRUM-83 fixes variable scope issue
 
 - fixes possible overlapping_bookings variable scope issue in itembookings/api/serializer
+
+### SCRUM-83 minor code improvements
+
+- perform sum for overlapping bookings directly in database instead of Python, more efficient
+- extract quantity validation and datetime formatting into utility functions called across multiple files
+- extract backend error handling from NewItemBooking.jsx and EditItemBooking.jsx into a utility function

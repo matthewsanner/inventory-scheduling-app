@@ -10,6 +10,9 @@ import {
   updateItemBooking,
   deleteItemBooking,
 } from "../services/EditItemBookingService";
+import { validateQuantity } from "../utils/validation";
+import { formatDateTime } from "../utils/dateFormatting";
+import { handleBackendError } from "../utils/errorHandling";
 
 const EditItemBooking = () => {
   const navigate = useNavigate();
@@ -58,9 +61,8 @@ const EditItemBooking = () => {
     setErrorKey(null);
 
     const errors = {};
-    const quantityNum = parseInt(formData.quantity, 10);
-    if (!formData.quantity || isNaN(quantityNum) || quantityNum < 1)
-      errors.quantity = "Quantity must be at least 1.";
+    const quantityError = validateQuantity(formData.quantity);
+    if (quantityError) errors.quantity = quantityError;
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -77,22 +79,14 @@ const EditItemBooking = () => {
       // Navigate back to item detail page
       navigate(`/items/${bookingData.item}`);
     } catch (error) {
-      console.error("Error updating item booking:", error);
-      // Handle backend validation errors
-      if (error.response?.data) {
-        const backendErrors = error.response.data;
-        // Check for quantity validation error from backend
-        if (backendErrors.quantity) {
-          setFormErrors({
-            quantity: Array.isArray(backendErrors.quantity)
-              ? backendErrors.quantity[0]
-              : backendErrors.quantity,
-          });
-        } else {
-          setErrorKey(ErrorKeys.UPDATE_ITEM_BOOKING_FAILED);
-        }
-      } else {
-        setErrorKey(ErrorKeys.UPDATE_ITEM_BOOKING_FAILED);
+      const { formErrors: backendFormErrors, errorKey: backendErrorKey } =
+        handleBackendError(error, ErrorKeys.UPDATE_ITEM_BOOKING_FAILED);
+
+      if (Object.keys(backendFormErrors).length > 0) {
+        setFormErrors(backendFormErrors);
+      }
+      if (backendErrorKey) {
+        setErrorKey(backendErrorKey);
       }
     } finally {
       setSubmitting(false);
@@ -109,17 +103,6 @@ const EditItemBooking = () => {
       setErrorKey(ErrorKeys.DELETE_ITEM_BOOKING_FAILED);
       setShowDeleteModal(false);
     }
-  };
-
-  const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString(undefined, {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   };
 
   if (errorKey) {

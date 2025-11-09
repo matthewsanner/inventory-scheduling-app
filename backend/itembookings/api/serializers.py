@@ -1,5 +1,6 @@
 from rest_framework.serializers import ModelSerializer, ValidationError, CharField, DateTimeField
 from ..models import ItemBooking
+from django.db.models import Sum
 
 class ItemBookingSerializer(ModelSerializer):
   item_name = CharField(source='item.name', read_only=True)
@@ -33,7 +34,9 @@ class ItemBookingSerializer(ModelSerializer):
       if self.instance:
         overlapping_bookings = overlapping_bookings.exclude(pk=self.instance.pk)
 
-      total_booked = sum(b.quantity for b in overlapping_bookings)
+      total_booked = overlapping_bookings.aggregate(
+        total=Sum('quantity') 
+      )['total'] or 0
 
       if total_booked + quantity > item.quantity:
         raise ValidationError({
