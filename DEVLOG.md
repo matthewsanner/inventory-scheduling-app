@@ -441,3 +441,7 @@
 - extends use of datetime formatting utility function to other files with one custom passed option
 - improves the validateQuantity function by removing a confusing check
 - extracts overbooking validation logic so that it can be then called by model's clean method and serializer's validate method from a central file
+
+### SCRUM-83 fixes indentation
+
+- fixes indentation on ItemBookingFilter

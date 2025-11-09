@@ -5,12 +5,12 @@ from .serializers import ItemBookingSerializer
 from core.permissions import IsManagerOrStaffReadOnly
 
 class ItemBookingFilter(filters.FilterSet):
-    item = filters.NumberFilter(field_name='item', lookup_expr='exact')
-    event = filters.NumberFilter(field_name='event', lookup_expr='exact')
+  item = filters.NumberFilter(field_name='item', lookup_expr='exact')
+  event = filters.NumberFilter(field_name='event', lookup_expr='exact')
 
-    class Meta:
-        model = ItemBooking
-        fields = ['item', 'event']
+  class Meta:
+    model = ItemBooking
+    fields = ['item', 'event']
 
 class ItemBookingViewSet(ModelViewSet):
   queryset = ItemBooking.objects.all()
