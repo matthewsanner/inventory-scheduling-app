@@ -406,4 +406,14 @@
 
 ### SCRUM-82 display item bookings on event & item detail pages
 
+- add ItemBookingFilter class to ItemBookingViewSet in backend/itembookings/api/views.py to enable filtering by item and event foreign keys
+- create ItemBookingService.js in frontend/src/services with getItemBookingsByItem and getItemBookingsByEvent functions to fetch filtered bookings from the API
+- update ItemDetail.jsx to fetch and display item bookings for that item in a separate card below the main item details card, showing event name, event start datetime, event end datetime, and quantity in a table format
+- update EventDetail.jsx to fetch and display item bookings for that event in a separate card below the main event details card, showing item name and quantity in a table format
+- make booking table rows clickable to navigate to item booking edit page which doesn't exist yet
+- add loading states and error handling for bookings (bookings errors are logged but don't prevent the main detail page from displaying)
+- add LOAD_ITEM_BOOKINGS_FAILED error key to errorMessages.js (not used currently)
+- add mockItemBooking and mockItemBookings to testUtils.js for testing purposes
+- create comprehensive unit tests for ItemDetail and EventDetail components covering booking display, loading states, empty states, navigation to edit page, and error handling
+
 ### SCRUM-83 item booking edit page w/ delete

@@ -3,13 +3,18 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate, useParams } from "react-router";
 import EventDetail from "../pages/EventDetail";
-import { mockEvent } from "./testUtils";
+import { mockEvent, mockItemBookings } from "./testUtils";
 import { getEvent, deleteEvent } from "../services/EventDetailService";
+import { getItemBookingsByEvent } from "../services/ItemBookingService";
 
-// Mock service module
+// Mock service modules
 vi.mock("../services/EventDetailService", () => ({
   getEvent: vi.fn(),
   deleteEvent: vi.fn(),
+}));
+
+vi.mock("../services/ItemBookingService", () => ({
+  getItemBookingsByEvent: vi.fn(),
 }));
 
 // Mock useNavigate and useParams from react-router
@@ -48,6 +53,12 @@ describe("EventDetail Page", () => {
     useNavigate.mockReturnValue(mockNavigate);
     useParams.mockReturnValue({ id: "1" });
     getEvent.mockResolvedValue({ data: mockEvent });
+    // Mock bookings for event (filtered by event, showing item_name and quantity)
+    const eventBookings = mockItemBookings.map((booking) => ({
+      ...booking,
+      // For event detail page, we show item_name and quantity
+    }));
+    getItemBookingsByEvent.mockResolvedValue({ data: eventBookings });
   });
 
   afterEach(() => {
@@ -77,7 +88,9 @@ describe("EventDetail Page", () => {
       expect(screen.getByText(/start date & time/i)).toBeInTheDocument();
       expect(screen.getByText(/end date & time/i)).toBeInTheDocument();
       expect(screen.getByText("Central Park")).toBeInTheDocument();
-      expect(screen.getByText("Annual summer music festival")).toBeInTheDocument();
+      expect(
+        screen.getByText("Annual summer music festival")
+      ).toBeInTheDocument();
     });
 
     // Verify API call
@@ -89,7 +102,8 @@ describe("EventDetail Page", () => {
 
     await waitFor(() => {
       // Check that dates are formatted (should contain month abbreviation and time)
-      const startDateText = screen.getByText(/start date & time/i).parentElement.textContent;
+      const startDateText =
+        screen.getByText(/start date & time/i).parentElement.textContent;
       expect(startDateText).toMatch(/Jul|July/);
       expect(startDateText).toMatch(/\d{1,2}/);
     });
@@ -118,7 +132,9 @@ describe("EventDetail Page", () => {
     renderEventDetailPage();
 
     await waitFor(() => {
-      expect(screen.getByText("Annual summer music festival")).toBeInTheDocument();
+      expect(
+        screen.getByText("Annual summer music festival")
+      ).toBeInTheDocument();
     });
   });
 
@@ -150,7 +166,9 @@ describe("EventDetail Page", () => {
       );
       // Also check that the error message appears in the UI
       expect(
-        screen.getByText("Failed to load event details. Please try again later.")
+        screen.getByText(
+          "Failed to load event details. Please try again later."
+        )
       ).toBeInTheDocument();
     });
 
@@ -275,5 +293,88 @@ describe("EventDetail Page", () => {
 
     consoleErrorSpy.mockRestore();
   });
-});
 
+  it("fetches and displays item bookings", async () => {
+    renderEventDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Item Bookings")).toBeInTheDocument();
+      // Check that Fancy Dress appears (may appear multiple times in bookings)
+      const fancyDressElements = screen.getAllByText("Fancy Dress");
+      expect(fancyDressElements.length).toBeGreaterThan(0);
+      // Check quantities appear in the bookings table
+      expect(screen.getByText("2")).toBeInTheDocument();
+      expect(screen.getByText("1")).toBeInTheDocument();
+    });
+
+    expect(getItemBookingsByEvent).toHaveBeenCalledWith("1");
+  });
+
+  it("displays loading state for bookings", async () => {
+    getItemBookingsByEvent.mockImplementation(() => new Promise(() => {}));
+    renderEventDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+      expect(screen.getByText(/loading bookings/i)).toBeInTheDocument();
+    });
+  });
+
+  it("displays message when no bookings exist", async () => {
+    getItemBookingsByEvent.mockResolvedValueOnce({ data: [] });
+    renderEventDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+      expect(
+        screen.getByText("No bookings for this event.")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("navigates to booking edit page when booking row is clicked", async () => {
+    renderEventDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Item Bookings")).toBeInTheDocument();
+      // Wait for bookings to load
+      expect(screen.getAllByText("Fancy Dress").length).toBeGreaterThan(0);
+    });
+
+    // Find the bookings table and then find the first row within it
+    const itemBookingsHeading = screen.getByText("Item Bookings");
+    const bookingsCard =
+      itemBookingsHeading.closest('[class*="Card"]') ||
+      itemBookingsHeading.closest("div");
+    const table = bookingsCard?.querySelector("table");
+    expect(table).toBeInTheDocument();
+
+    // Find the first row in the table body
+    const firstRow = table.querySelector("tbody tr");
+    expect(firstRow).toBeInTheDocument();
+    await user.click(firstRow);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/itembookings/1/edit");
+  });
+
+  it("handles booking fetch error gracefully", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    getItemBookingsByEvent.mockRejectedValueOnce(new Error("Failed to fetch"));
+
+    renderEventDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error fetching bookings:",
+        expect.any(Error)
+      );
+      // Should still show the event details even if bookings fail
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+});

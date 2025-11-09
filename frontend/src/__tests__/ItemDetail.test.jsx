@@ -3,13 +3,18 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate, useParams } from "react-router";
 import ItemDetail from "../pages/ItemDetail";
-import { mockItem } from "./testUtils";
+import { mockItem, mockItemBookings } from "./testUtils";
 import { getItem, deleteItem } from "../services/ItemDetailService";
+import { getItemBookingsByItem } from "../services/ItemBookingService";
 
-// Mock service module
+// Mock service modules
 vi.mock("../services/ItemDetailService", () => ({
   getItem: vi.fn(),
   deleteItem: vi.fn(),
+}));
+
+vi.mock("../services/ItemBookingService", () => ({
+  getItemBookingsByItem: vi.fn(),
 }));
 
 // Mock useNavigate and useParams from react-router
@@ -48,6 +53,7 @@ describe("ItemDetail Page", () => {
     useNavigate.mockReturnValue(mockNavigate);
     useParams.mockReturnValue({ id: "1" });
     getItem.mockResolvedValue({ data: mockItem });
+    getItemBookingsByItem.mockResolvedValue({ data: mockItemBookings });
   });
 
   afterEach(() => {
@@ -252,5 +258,73 @@ describe("ItemDetail Page", () => {
     await user.click(backButton);
 
     expect(mockNavigate).toHaveBeenCalledWith("/items");
+  });
+
+  it("fetches and displays item bookings", async () => {
+    renderItemDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Item Bookings")).toBeInTheDocument();
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+      expect(screen.getByText("Winter Gala")).toBeInTheDocument();
+      expect(screen.getByText("2")).toBeInTheDocument();
+      expect(screen.getByText("1")).toBeInTheDocument();
+    });
+
+    expect(getItemBookingsByItem).toHaveBeenCalledWith("1");
+  });
+
+  it("displays loading state for bookings", async () => {
+    getItemBookingsByItem.mockImplementation(() => new Promise(() => {}));
+    renderItemDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+      expect(screen.getByText(/loading bookings/i)).toBeInTheDocument();
+    });
+  });
+
+  it("displays message when no bookings exist", async () => {
+    getItemBookingsByItem.mockResolvedValueOnce({ data: [] });
+    renderItemDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+      expect(screen.getByText("No bookings for this item.")).toBeInTheDocument();
+    });
+  });
+
+  it("navigates to booking edit page when booking row is clicked", async () => {
+    renderItemDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Summer Festival")).toBeInTheDocument();
+    });
+
+    const bookingRow = screen.getByText("Summer Festival").closest("tr");
+    await user.click(bookingRow);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/itembookings/1/edit");
+  });
+
+  it("handles booking fetch error gracefully", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    getItemBookingsByItem.mockRejectedValueOnce(new Error("Failed to fetch"));
+
+    renderItemDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error fetching bookings:",
+        expect.any(Error)
+      );
+      // Should still show the item details even if bookings fail
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+    });
+
+    consoleErrorSpy.mockRestore();
   });
 });
