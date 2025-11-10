@@ -94,7 +94,7 @@ describe("EditItem Page", () => {
     const imageInput = await screen.findByLabelText("Image URL");
     expect(imageInput).toHaveValue(mockItem.image);
     const categorySelect = await screen.findByLabelText("Category");
-    expect(categorySelect).toHaveValue(mockItem.category);
+    expect(categorySelect).toHaveValue(mockItem.category.toString());
     const quantityInput = await screen.findByLabelText("Quantity");
     expect(quantityInput).toHaveValue(mockItem.quantity);
     const colorInput = await screen.findByLabelText("Color");
@@ -135,13 +135,13 @@ describe("EditItem Page", () => {
     await user.type(descriptionInput, "Updated description");
     await user.clear(quantityInput);
     await user.type(quantityInput, "10");
-    await user.selectOptions(categorySelect, "COS");
+    await user.selectOptions(categorySelect, "1");
 
     // Verify input values
     expect(nameInput.value).toBe("Updated Name");
     expect(descriptionInput.value).toBe("Updated description");
     expect(Number(quantityInput.value)).toBe(10);
-    expect(categorySelect.value).toBe("COS");
+    expect(categorySelect.value).toBe("1");
   });
 
   it("handles successful form submission", async () => {

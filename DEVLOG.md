@@ -445,3 +445,29 @@
 ### SCRUM-83 fixes indentation
 
 - fixes indentation on ItemBookingFilter
+
+## SCRUM-84 Categories model
+
+### SCRUM-85 Turn categories into a model
+
+- create Category model in items/models.py with name field (unique), removing the need for hardcoded CATEGORY_CHOICES
+- create migration 0006_category.py to create Category table
+- create data migration 0007_populate_categories.py to populate Category table from existing CATEGORY_CHOICES data
+- update Item model to change category field from CharField with choices to ForeignKey(Category) with SET_NULL on delete
+- create migration 0008_convert_item_category_to_foreignkey.py to convert existing Item.category values from codes to ForeignKey references
+- update ItemSerializer to use category.name for category_long field instead of get_category_display(), remove category_code field, and handle category ID input in to_internal_value()
+- update CategoryChoicesView to query Category.objects.all() instead of Item.CATEGORY_CHOICES, returning {"value": cat.id, "label": cat.name} format
+- update ItemFilter to filter by category ID using NumberFilter instead of filtering by code
+- register Category model in Django admin with CategoryAdmin class for easy management
+- remove CATEGORY_CHOICES constant from Item model as it's no longer needed
+- create migration 0009_remove_category_code.py to remove code field from Category model (categories now use IDs and names only)
+- update all backend tests in items/tests.py to use Category instances instead of category codes, add category fixtures for common categories
+- update all backend tests in itembookings/tests.py to use Category instances
+- update frontend test utilities in testUtils.js to use category IDs (1, 2) instead of codes ("COS", "WIG")
+- update all frontend tests to convert category IDs to strings when interacting with HTML select elements (since HTML select values are always strings)
+- add waitFor() calls in frontend tests to ensure categories are loaded before selecting options
+- fix frontend test assertions to check for category IDs as strings and update button text matching for loading states
+- verify that API maintains backward compatibility with existing {value, label} format, where value is now category ID instead of code
+- verify that frontend code requires no changes since it uses cat.value and cat.label generically
+
+### SCRUM-86 Add ability to create new categories

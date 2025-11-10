@@ -77,6 +77,11 @@ describe("NewItem Page", () => {
   it("handles form input changes correctly", async () => {
     renderNewItemPage();
 
+    // Wait for categories to load
+    await waitFor(() => {
+      expect(screen.getByText("Costumes")).toBeInTheDocument();
+    });
+
     const nameInput = screen.getByLabelText("Name");
     const descriptionInput = screen.getByLabelText("Description");
     const imageInput = screen.getByLabelText("Image URL");
@@ -92,7 +97,7 @@ describe("NewItem Page", () => {
     await user.type(quantityInput, mockFormData.quantity.toString());
     await user.type(colorInput, mockFormData.color);
     await user.type(locationInput, mockFormData.location);
-    await user.selectOptions(categorySelect, mockFormData.category);
+    await user.selectOptions(categorySelect, mockFormData.category.toString());
 
     expect(nameInput.value).toBe(mockFormData.name);
     expect(descriptionInput.value).toBe(mockFormData.description);
@@ -100,12 +105,17 @@ describe("NewItem Page", () => {
     expect(quantityInput.value).toBe(mockFormData.quantity);
     expect(colorInput.value).toBe(mockFormData.color);
     expect(locationInput.value).toBe(mockFormData.location);
-    expect(categorySelect.value).toBe(mockFormData.category);
+    expect(categorySelect.value).toBe(mockFormData.category.toString());
   });
 
   it("submits the form successfully and navigates to items page", async () => {
     renderNewItemPage();
     createItem.mockResolvedValueOnce({});
+
+    // Wait for categories to load
+    await waitFor(() => {
+      expect(screen.getByText("Costumes")).toBeInTheDocument();
+    });
 
     await user.type(screen.getByLabelText("Name"), mockFormData.name);
     await user.type(
@@ -115,7 +125,7 @@ describe("NewItem Page", () => {
     await user.type(screen.getByLabelText("Image URL"), mockFormData.image);
     await user.selectOptions(
       screen.getByLabelText("Category"),
-      mockFormData.category
+      mockFormData.category.toString()
     );
     await user.clear(screen.getByLabelText("Quantity"));
     await user.type(
@@ -153,13 +163,17 @@ describe("NewItem Page", () => {
     renderNewItemPage();
 
     await user.type(screen.getByLabelText("Name"), mockFormData.name);
-    await user.click(screen.getByRole("button", { name: "Add Item" }));
+    const submitButton = screen.getByRole("button", { name: "Add Item" });
+    await user.click(submitButton);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText("Failed to create item. Please try again later.")
-      ).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText("Failed to create item. Please try again later.")
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
 
     const backButton = screen.getByRole("button", {
       name: "← Back to Items",
@@ -253,9 +267,9 @@ describe("NewItem Page", () => {
     // Should reset errors and show loading state
     await waitFor(() => {
       const updatedButton = screen.getByRole("button", {
-        name: /adding item/i,
+        name: "Adding item...",
       });
-      expect(updatedButton).toHaveTextContent(/adding item/i);
+      expect(updatedButton).toHaveTextContent("Adding item...");
     });
 
     // Resolve the promise to complete the submission

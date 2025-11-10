@@ -10,7 +10,7 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 from .models import ItemBooking
 from .api.serializers import ItemBookingSerializer
-from items.models import Item
+from items.models import Item, Category
 from events.models import Event
 from django.conf import settings
 
@@ -55,12 +55,16 @@ def authenticated_staff_client(api_client, staff_user):
     return api_client
 
 @pytest.fixture
-def sample_item():
+def category_acc():
+    return Category.objects.get_or_create(name='Accessories')[0]
+
+@pytest.fixture
+def sample_item(category_acc):
     return Item.objects.create(
         name="Test Item",
         description="Test Description",
         quantity=5,
-        category="ACC",
+        category=category_acc,
         color="Red",
         location="Shelf A1"
     )

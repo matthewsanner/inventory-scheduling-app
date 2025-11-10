@@ -1,13 +1,13 @@
 export const mockCategories = [
-  { value: "COS", label: "Costumes" },
-  { value: "WIG", label: "Wigs" },
+  { value: 1, label: "Costumes" },
+  { value: 2, label: "Wigs" },
 ];
 
 export const mockFormData = {
   name: "Fancy Dress",
   description: "Beautifully made gothic dress",
   image: "http://example.com/image1.jpg",
-  category: "COS",
+  category: 1,
   quantity: "5",
   color: "Red",
   location: "Shelf A",
@@ -18,7 +18,7 @@ export const mockItem = {
   name: "Fancy Dress",
   description: "Beautifully made gothic dress",
   image: "http://example.com/image1.jpg",
-  category: "COS",
+  category: 1,
   category_long: "Costumes",
   quantity: 5,
   color: "Red",
@@ -33,7 +33,7 @@ export const mockItems = {
       name: "Fancy Dress",
       description: "Beautifully made gothic dress",
       image: "http://example.com/image1.jpg",
-      category: "COS",
+      category: 1,
       category_long: "Costumes",
       quantity: 5,
       color: "Red",
@@ -44,7 +44,7 @@ export const mockItems = {
       name: "80s Wig",
       description: "Frazzled old wig",
       image: "http://example.com/image2.jpg",
-      category: "WIG",
+      category: 2,
       category_long: "Wigs",
       quantity: 2,
       color: "Blonde",

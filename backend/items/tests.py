@@ -6,11 +6,31 @@ from django.contrib.auth.models import Group
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import Item
+from .models import Item, Category
 from .api.serializers import ItemSerializer
 from django.conf import settings
 
 User = get_user_model()
+
+@pytest.fixture
+def category_acc():
+    return Category.objects.get_or_create(name='Accessories')[0]
+
+@pytest.fixture
+def category_app():
+    return Category.objects.get_or_create(name='Apparatus')[0]
+
+@pytest.fixture
+def category_hat():
+    return Category.objects.get_or_create(name='Hats')[0]
+
+@pytest.fixture
+def category_shi():
+    return Category.objects.get_or_create(name='Shirts')[0]
+
+@pytest.fixture
+def category_zeb():
+    return Category.objects.get_or_create(name='Zebra')[0]
 
 @pytest.fixture
 def api_client():
@@ -51,31 +71,31 @@ def authenticated_staff_client(api_client, staff_user):
     return api_client
 
 @pytest.fixture
-def sample_item():
+def sample_item(category_acc):
     return Item.objects.create(
         name="Test Item",
         description="Test Description",
         quantity=1,
-        category="ACC",
+        category=category_acc,
         color="Red",
         location="Shelf A1"
     )
 
 @pytest.mark.django_db
 class TestItemModel:
-    def test_create_item(self):
+    def test_create_item(self, category_acc):
         item = Item.objects.create(
             name="Test Item",
             description="Test Description",
             quantity=1,
-            category="ACC",
+            category=category_acc,
             color="Red",
             location="Shelf A1"
         )
         assert item.name == "Test Item"
         assert item.description == "Test Description"
         assert item.quantity == 1
-        assert item.category == "ACC"
+        assert item.category == category_acc
         assert item.color == "Red"
         assert item.location == "Shelf A1"
 
@@ -87,7 +107,7 @@ class TestItemModel:
         assert item.name == "Minimal Item"
         assert item.quantity == 1
         assert item.description == ""
-        assert item.category == ""
+        assert item.category is None
         assert item.color == ""
         assert item.location == ""
 
@@ -103,25 +123,29 @@ class TestItemSerializer:
         assert data['name'] == sample_item.name
         assert data['description'] == sample_item.description
         assert data['quantity'] == sample_item.quantity
-        assert data['category'] == sample_item.category
-        assert data['category_long'] == sample_item.get_category_display()
+        assert data['category'] == sample_item.category.id
+        assert data['category_long'] == sample_item.category.name
         assert data['color'] == sample_item.color
         assert data['location'] == sample_item.location
 
-    def test_deserialize_item(self):
+    def test_deserialize_item(self, category_app):
         data = {
             'name': 'New Item',
             'description': 'New Description',
             'quantity': 2,
-            'category': 'APP',
+            'category': category_app.id,
             'color': 'Blue',
             'location': 'Shelf B2'
         }
         serializer = ItemSerializer(data=data)
         assert serializer.is_valid()
         item = serializer.save()
-        for key in data:
-            assert getattr(item, key) == data[key]
+        assert item.name == data['name']
+        assert item.description == data['description']
+        assert item.quantity == data['quantity']
+        assert item.category == category_app
+        assert item.color == data['color']
+        assert item.location == data['location']
 
     def test_serializer_validation_error(self):
         data = {
@@ -143,7 +167,7 @@ class TestItemSerializer:
         item = serializer.save()
         assert item.name == data['name']
         assert item.description == ""
-        assert item.category == ""
+        assert item.category is None
         assert item.color == ""
         assert item.location == ""
 
@@ -156,13 +180,13 @@ class TestItemAPI:
         assert response.data['count'] == 1
         assert response.data['results'][0]['name'] == sample_item.name
 
-    def test_create_item(self, authenticated_manager_client):
+    def test_create_item(self, authenticated_manager_client, category_acc):
         url = reverse('item-list')
         data = {
             'name': 'New API Item',
             'description': 'Created via API',
             'quantity': 1,
-            'category': 'ACC',
+            'category': category_acc.id,
             'color': 'Green',
             'location': 'Shelf C3'
         }
@@ -173,7 +197,7 @@ class TestItemAPI:
         item = Item.objects.first()
         assert item.name == data['name']
         assert item.description == data['description']
-        assert item.category == data['category']
+        assert item.category == category_acc
         assert item.color == data['color']
         assert item.location == data['location']
 
@@ -189,7 +213,7 @@ class TestItemAPI:
         assert item.name == data['name']
         assert item.quantity == data['quantity']
         assert item.description == ""
-        assert item.category == ""
+        assert item.category is None
         assert item.color == ""
         assert item.location == ""
 
@@ -199,7 +223,7 @@ class TestItemAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.data['name'] == sample_item.name
         assert response.data['description'] == sample_item.description
-        assert response.data['category'] == sample_item.category
+        assert response.data['category'] == sample_item.category.id
         assert response.data['color'] == sample_item.color
         assert response.data['location'] == sample_item.location
 
@@ -216,13 +240,13 @@ class TestItemAPI:
         sample_item.refresh_from_db()
         assert sample_item.name == 'Updated Name'
 
-    def test_update_item_full(self, authenticated_manager_client, sample_item):
+    def test_update_item_full(self, authenticated_manager_client, sample_item, category_app):
         url = reverse('item-detail', kwargs={'pk': sample_item.pk})
         data = {
             'name': 'Fully Updated Item',
             'description': 'Updated Description',
             'quantity': 5,
-            'category': 'APP',
+            'category': category_app.id,
             'color': 'Blue',
             'location': 'Updated Location'
         }
@@ -232,7 +256,7 @@ class TestItemAPI:
         assert sample_item.name == data['name']
         assert sample_item.description == data['description']
         assert sample_item.quantity == data['quantity']
-        assert sample_item.category == data['category']
+        assert sample_item.category == category_app
         assert sample_item.color == data['color']
         assert sample_item.location == data['location']
 
@@ -261,22 +285,22 @@ class TestItemAPI:
         assert response.data['count'] == 0
         assert response.data['results'] == []
 
-    def test_filter_by_category(self, authenticated_staff_client):
+    def test_filter_by_category(self, authenticated_staff_client, category_acc, category_app):
         Item.objects.create(
             name="Item 1",
             quantity=1,
-            category="ACC"
+            category=category_acc
         )
         Item.objects.create(
             name="Item 2",
             quantity=1,
-            category="APP"
+            category=category_app
         )
         url = reverse('item-list')
-        response = authenticated_staff_client.get(url, {'category': 'ACC'})
+        response = authenticated_staff_client.get(url, {'category': category_acc.id})
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 1
-        assert response.data['results'][0]['category'] == "ACC"
+        assert response.data['results'][0]['category'] == category_acc.id
 
     def test_filter_by_color(self, authenticated_staff_client):
         Item.objects.create(
@@ -312,31 +336,31 @@ class TestItemAPI:
         assert response.data['count'] == 1
         assert response.data['results'][0]['location'] == "Shelf A1"
 
-    def test_filter_combined_filters(self, authenticated_staff_client):
+    def test_filter_combined_filters(self, authenticated_staff_client, category_hat, category_shi):
         Item.objects.create(
             name="Red Hat",
             quantity=1,
-            category="HAT",
+            category=category_hat,
             color="Red",
             location="Shelf A1"
         )
         Item.objects.create(
             name="Blue Hat",
             quantity=1,
-            category="HAT",
+            category=category_hat,
             color="Blue",
             location="Shelf A1"
         )
         Item.objects.create(
             name="Red Shirt",
             quantity=1,
-            category="SHI",
+            category=category_shi,
             color="Red",
             location="Shelf A1"
         )
         url = reverse('item-list')
         response = authenticated_staff_client.get(url, {
-            'category': 'HAT',
+            'category': category_hat.id,
             'color': 'Red'
         })
         assert response.status_code == status.HTTP_200_OK
@@ -440,28 +464,29 @@ class TestItemAPI:
         assert response.data['results'][1]['name'] == "Beta Item"
         assert response.data['results'][2]['name'] == "Zebra Item"
 
-    def test_order_items_by_category(self, authenticated_staff_client):
+    def test_order_items_by_category(self, authenticated_staff_client, category_acc, category_app, category_zeb):
         Item.objects.create(
             name="Item 3",
             quantity=1,
-            category="ZEB"
+            category=category_zeb
         )
         Item.objects.create(
             name="Item 1",
             quantity=1,
-            category="ACC"
+            category=category_acc
         )
         Item.objects.create(
             name="Item 2",
             quantity=1,
-            category="APP"
+            category=category_app
         )
         url = reverse('item-list')
         response = authenticated_staff_client.get(url, {'ordering': 'category'})
         assert response.status_code == status.HTTP_200_OK
-        assert response.data['results'][0]['category'] == "ACC"
-        assert response.data['results'][1]['category'] == "APP"
-        assert response.data['results'][2]['category'] == "ZEB"
+        # Categories are ordered by name, so Accessories, Apparatus, Zebra
+        assert response.data['results'][0]['category'] == category_acc.id
+        assert response.data['results'][1]['category'] == category_app.id
+        assert response.data['results'][2]['category'] == category_zeb.id
 
     def test_order_items_by_quantity(self, authenticated_staff_client):
         Item.objects.create(
@@ -550,12 +575,26 @@ class TestItemAPI:
         assert response.data['results'][2]['location'] == "Shelf Z"
 
     def test_category_choices(self, authenticated_staff_client):
+        # Create some categories for the test
+        category1 = Category.objects.create(name='Accessories')
+        category2 = Category.objects.create(name='Apparatus')
+        
         url = reverse('category-choices')
         response = authenticated_staff_client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == len(Item.CATEGORY_CHOICES)
-        for choice in Item.CATEGORY_CHOICES:
-            assert {'value': choice[0], 'label': choice[1]} in response.data
+        # Check that response is a list of dicts with value and label
+        assert isinstance(response.data, list)
+        assert len(response.data) >= 2  # At least the categories we created
+        for item in response.data:
+            assert 'value' in item
+            assert 'label' in item
+            assert isinstance(item['value'], int)  # Should be category ID
+            assert isinstance(item['label'], str)  # Should be category name
+        
+        # Check that our created categories are in the response
+        category_values = [item['value'] for item in response.data]
+        assert category1.id in category_values
+        assert category2.id in category_values
 
     @pytest.mark.parametrize("invalid_payload", [
         {},
@@ -567,14 +606,14 @@ class TestItemAPI:
         response = authenticated_manager_client.post(url, invalid_payload, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_pagination_metadata(self, authenticated_staff_client):
+    def test_pagination_metadata(self, authenticated_staff_client, category_acc):
         # Create multiple items
         for i in range(15):
             Item.objects.create(
                 name=f"Item {i}",
                 description="desc",
                 quantity=1,
-                category="ACC",
+                category=category_acc,
                 color="Black",
                 location="Shelf Z"
             )
@@ -589,12 +628,12 @@ class TestItemAPI:
 
         assert len(response.data['results']) == settings.REST_FRAMEWORK['PAGE_SIZE']
 
-    def test_staff_cannot_create_item(self, authenticated_staff_client):
+    def test_staff_cannot_create_item(self, authenticated_staff_client, category_acc):
         url = reverse('item-list')
         data = {
             'name': 'Unauthorized Item',
             'quantity': 1,
-            'category': 'ACC'
+            'category': category_acc.id
         }
         response = authenticated_staff_client.post(url, data, format='json')
         assert response.status_code == status.HTTP_403_FORBIDDEN

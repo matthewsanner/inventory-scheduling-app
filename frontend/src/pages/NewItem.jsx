@@ -71,7 +71,11 @@ const NewItem = () => {
 
     setSubmitting(true);
     try {
-      await createItem(formData);
+      const submitData = {
+        ...formData,
+        category: formData.category ? Number(formData.category) : "",
+      };
+      await createItem(submitData);
       navigate("/items");
     } catch (error) {
       console.error("Error creating item:", error);

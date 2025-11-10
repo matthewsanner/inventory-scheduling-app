@@ -124,7 +124,7 @@ describe("Items Page", () => {
     });
 
     const categorySelect = screen.getByTestId("category-select");
-    await user.selectOptions(categorySelect, "Costumes");
+    await user.selectOptions(categorySelect, "1");
 
     await waitFor(() => {
       const table = screen.getByTestId("items-table");
@@ -138,7 +138,7 @@ describe("Items Page", () => {
     const page1Items = Array.from({ length: 10 }, (_, i) => ({
       id: i + 1,
       name: `Item ${i + 1}`,
-      category: "COS",
+      category: 1,
       category_long: "Costumes",
       quantity: 1,
       color: "Red",
@@ -148,7 +148,7 @@ describe("Items Page", () => {
     const page2Items = Array.from({ length: 10 }, (_, i) => ({
       id: i + 11,
       name: `Item ${i + 11}`,
-      category: "WIG",
+      category: 2,
       category_long: "Wigs",
       quantity: 2,
       color: "Blonde",
@@ -320,7 +320,7 @@ describe("Items Page", () => {
     const page1Items = Array.from({ length: 10 }, (_, i) => ({
       id: i + 1,
       name: `Item ${i + 1}`,
-      category: "COS",
+      category: 1,
       category_long: "Costumes",
       quantity: 1,
       color: "Red",
@@ -330,7 +330,7 @@ describe("Items Page", () => {
     const page2Items = Array.from({ length: 10 }, (_, i) => ({
       id: i + 11,
       name: `Item ${i + 11}`,
-      category: "WIG",
+      category: 2,
       category_long: "Wigs",
       quantity: 2,
       color: "Blonde",
