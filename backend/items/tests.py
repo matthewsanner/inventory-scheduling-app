@@ -596,6 +596,61 @@ class TestItemAPI:
         assert category1.id in category_values
         assert category2.id in category_values
 
+    def test_create_category(self, authenticated_manager_client):
+        url = reverse('category-choices')
+        data = {'name': 'New Category'}
+        response = authenticated_manager_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_201_CREATED
+        assert 'value' in response.data
+        assert 'label' in response.data
+        assert response.data['label'] == 'New Category'
+        # Verify category was created in database
+        category = Category.objects.get(name='New Category')
+        assert category.id == response.data['value']
+
+    def test_create_category_duplicate_name(self, authenticated_manager_client):
+        # Create a category first
+        Category.objects.create(name='Existing Category')
+        url = reverse('category-choices')
+        data = {'name': 'Existing Category'}
+        response = authenticated_manager_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'name' in response.data
+
+    def test_create_category_empty_name(self, authenticated_manager_client):
+        url = reverse('category-choices')
+        data = {'name': ''}
+        response = authenticated_manager_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'name' in response.data
+
+    def test_create_category_missing_name(self, authenticated_manager_client):
+        url = reverse('category-choices')
+        data = {}
+        response = authenticated_manager_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'name' in response.data
+
+    def test_create_category_long_name(self, authenticated_manager_client):
+        url = reverse('category-choices')
+        # Create a name longer than 200 characters
+        data = {'name': 'A' * 201}
+        response = authenticated_manager_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'name' in response.data
+
+    def test_staff_cannot_create_category(self, authenticated_staff_client):
+        url = reverse('category-choices')
+        data = {'name': 'Unauthorized Category'}
+        response = authenticated_staff_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_unauthenticated_cannot_create_category(self, api_client):
+        url = reverse('category-choices')
+        data = {'name': 'Unauthorized Category'}
+        response = api_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
     @pytest.mark.parametrize("invalid_payload", [
         {},
         {'name': '', 'quantity': 0},

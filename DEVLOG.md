@@ -471,3 +471,14 @@
 - verify that frontend code requires no changes since it uses cat.value and cat.label generically
 
 ### SCRUM-86 Add ability to create new categories
+
+- create CategorySerializer in backend/items/api/serializers.py to handle category creation with name field validation
+- add POST method to CategoryChoicesView in backend/items/api/views.py to allow creating new categories via the existing categories endpoint, returns category in {value, label} format for consistency with GET endpoint
+- add comprehensive backend tests in backend/items/tests.py covering successful category creation, duplicate name validation, empty name validation, missing name validation, long name validation, staff permission restrictions, and unauthenticated access restrictions
+- create createCategory function in frontend/src/services/ItemsService.js to handle POST requests to categories endpoint with error handling
+- add category creation form widget to Items.jsx page with text input and submit button, positioned in the filter form grid alongside other filters
+- implement inline error handling for category creation that displays error messages below the form without disrupting the page, extracts specific error messages from backend validation responses
+- automatically add newly created categories to the category dropdown list and maintain alphabetical sorting
+- add CREATE_CATEGORY_FAILED and LOAD_CATEGORIES_FAILED error keys to ErrorKeys in errorMessages.js (used by service functions for consistent error identification, but not displayed in UI since category errors are handled inline)
+- create comprehensive frontend tests in Items.test.jsx covering successful category creation, error handling (duplicate names, empty names, backend validation errors), form validation, error message clearing, disabled state when categories unavailable, and loading state during creation
+- verify that new categories can be created and appear immediately in the category dropdown and can be used for filtering items

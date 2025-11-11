@@ -18,7 +18,7 @@ import {
 import ErrorCard from "../components/ErrorCard";
 import LoadingCard from "../components/LoadingCard";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
-import { getItems, getCategories } from "../services/ItemsService";
+import { getItems, getCategories, createCategory } from "../services/ItemsService";
 
 const Items = () => {
   const [items, setItems] = useState([]);
@@ -28,6 +28,9 @@ const Items = () => {
   const [categoriesError, setCategoriesError] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [categoryError, setCategoryError] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     category: "",
@@ -97,6 +100,47 @@ const Items = () => {
     setCurrentPage(1);
   };
 
+  const handleCreateCategory = async (e) => {
+    e.preventDefault();
+    setCategoryError("");
+    
+    if (!newCategoryName.trim()) {
+      setCategoryError("Category name is required.");
+      return;
+    }
+
+    setCreatingCategory(true);
+    const { data, errorKey, error } = await createCategory(newCategoryName.trim());
+    
+    if (data) {
+      // Add the new category to the list
+      setCategories((prev) => {
+        const updated = [...prev, data];
+        // Sort by label to maintain alphabetical order
+        return updated.sort((a, b) => a.label.localeCompare(b.label));
+      });
+      setNewCategoryName("");
+      setCategoryError("");
+    } else {
+      // Extract error message from response
+      let errorMessage = "Failed to create category. Please try again.";
+      if (error?.response?.data) {
+        const backendErrors = error.response.data;
+        if (backendErrors.name) {
+          errorMessage = Array.isArray(backendErrors.name)
+            ? backendErrors.name[0]
+            : backendErrors.name;
+        } else if (backendErrors.non_field_errors) {
+          errorMessage = Array.isArray(backendErrors.non_field_errors)
+            ? backendErrors.non_field_errors[0]
+            : backendErrors.non_field_errors;
+        }
+      }
+      setCategoryError(errorMessage);
+    }
+    setCreatingCategory(false);
+  };
+
   const currentErrorConfig =
     ERROR_CONFIG[errorKey] || ERROR_CONFIG[ErrorKeys.GENERIC_ERROR];
 
@@ -141,6 +185,34 @@ const Items = () => {
                   </option>
                 ))}
             </Select>
+          </div>
+          <div>
+            <Label htmlFor="new-category">Create New Category</Label>
+            <form onSubmit={handleCreateCategory} className="flex gap-2">
+              <TextInput
+                id="new-category"
+                name="newCategoryName"
+                placeholder="Category name..."
+                value={newCategoryName}
+                onChange={(e) => {
+                  setNewCategoryName(e.target.value);
+                  setCategoryError("");
+                }}
+                disabled={creatingCategory || categoriesError}
+                className="flex-1"
+              />
+              <Button
+                type="submit"
+                disabled={creatingCategory || categoriesError}
+                size="sm">
+                {creatingCategory ? "Adding..." : "Add"}
+              </Button>
+            </form>
+            {categoryError && (
+              <p className="text-red-500 text-sm mt-1" data-testid="category-error">
+                {categoryError}
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor="color">Color</Label>

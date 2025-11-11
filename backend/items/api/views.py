@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django_filters import rest_framework as filters
 from ..models import Item, Category
-from .serializers import ItemSerializer
+from .serializers import ItemSerializer, CategorySerializer
 from core.permissions import IsManagerOrStaffReadOnly
 from rest_framework.permissions import IsAuthenticated
 
@@ -32,3 +32,13 @@ class CategoryChoicesView(APIView):
     def get(self, request, *args, **kwargs):
         categories = [{"value": cat.id, "label": cat.name} for cat in Category.objects.all().order_by('name')]
         return Response(categories, status=status.HTTP_200_OK)
+    
+    def post(self, request, *args, **kwargs):
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            category = serializer.save()
+            return Response(
+                {"value": category.id, "label": category.name},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

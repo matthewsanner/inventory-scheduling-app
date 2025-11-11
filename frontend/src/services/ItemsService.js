@@ -31,3 +31,12 @@ export const getItems = async (page, filters, pageSize = 10) => {
     return handleApiError(error, ErrorKeys.LOAD_ITEMS_FAILED);
   }
 };
+
+export const createCategory = async (name) => {
+  try {
+    const response = await axios.post(`items/categories/`, { name });
+    return { data: response.data };
+  } catch (error) {
+    return handleApiError(error, ErrorKeys.CREATE_CATEGORY_FAILED);
+  }
+};

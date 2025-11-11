@@ -4,12 +4,13 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate } from "react-router";
 import Items from "../pages/Items";
 import { mockCategories, mockItems } from "./testUtils";
-import { getCategories, getItems } from "../services/ItemsService";
+import { getCategories, getItems, createCategory } from "../services/ItemsService";
 
 // Mock service module
 vi.mock("../services/ItemsService", () => ({
   getCategories: vi.fn(),
   getItems: vi.fn(),
+  createCategory: vi.fn(),
 }));
 
 // Mock useNavigate from react-router
@@ -365,5 +366,229 @@ describe("Items Page", () => {
     // On second (last) page: next disabled, previous enabled
     expect(prevButton).toBeEnabled();
     expect(nextButton).toBeDisabled();
+  });
+
+  it("creates a new category successfully and adds it to the dropdown", async () => {
+    renderItemsPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+    });
+
+    const newCategory = { value: 3, label: "New Category" };
+    createCategory.mockResolvedValueOnce({ data: newCategory });
+
+    const categoryInput = screen.getByPlaceholderText("Category name...");
+    const addButton = screen.getByRole("button", { name: "Add" });
+
+    await user.type(categoryInput, "New Category");
+    await user.click(addButton);
+
+    await waitFor(() => {
+      expect(createCategory).toHaveBeenCalledWith("New Category");
+      expect(categoryInput).toHaveValue("");
+    });
+
+    // Check that the new category appears in the dropdown
+    await waitFor(() => {
+      const categorySelect = screen.getByTestId("category-select");
+      expect(within(categorySelect).getByText("New Category")).toBeInTheDocument();
+    });
+  });
+
+  it("displays error message when category creation fails with duplicate name", async () => {
+    renderItemsPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+    });
+
+    const errorResponse = {
+      response: {
+        data: {
+          name: ["category with this name already exists."],
+        },
+      },
+    };
+    createCategory.mockResolvedValueOnce({
+      errorKey: "CREATE_CATEGORY_FAILED",
+      error: errorResponse,
+    });
+
+    const categoryInput = screen.getByPlaceholderText("Category name...");
+    const addButton = screen.getByRole("button", { name: "Add" });
+
+    await user.type(categoryInput, "Duplicate Category");
+    await user.click(addButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("category-error")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/category with this name already exists/i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("displays error message when category creation fails with backend validation error", async () => {
+    renderItemsPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+    });
+
+    const errorResponse = {
+      response: {
+        data: {
+          name: ["This field may not be blank."],
+        },
+      },
+    };
+    createCategory.mockResolvedValueOnce({
+      errorKey: "CREATE_CATEGORY_FAILED",
+      error: errorResponse,
+    });
+
+    const categoryInput = screen.getByPlaceholderText("Category name...");
+    const addButton = screen.getByRole("button", { name: "Add" });
+
+    // Use a valid name that passes frontend validation but backend rejects
+    // (e.g., if backend has additional validation)
+    await user.type(categoryInput, "Valid Name");
+    await user.click(addButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("category-error")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/this field may not be blank/i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("displays validation error when trying to submit empty category name", async () => {
+    renderItemsPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+    });
+
+    const categoryInput = screen.getByPlaceholderText("Category name...");
+    const addButton = screen.getByRole("button", { name: "Add" });
+
+    // Try to submit without entering a name
+    await user.click(addButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("category-error")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/category name is required/i)
+      ).toBeInTheDocument();
+    });
+
+    // Verify createCategory was not called
+    expect(createCategory).not.toHaveBeenCalled();
+  });
+
+  it("clears error message when user starts typing in category input", async () => {
+    renderItemsPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+    });
+
+    const errorResponse = {
+      response: {
+        data: {
+          name: ["Some error"],
+        },
+      },
+    };
+    createCategory.mockResolvedValueOnce({
+      errorKey: "CREATE_CATEGORY_FAILED",
+      error: errorResponse,
+    });
+
+    const categoryInput = screen.getByPlaceholderText("Category name...");
+    const addButton = screen.getByRole("button", { name: "Add" });
+
+    await user.type(categoryInput, "Test");
+    await user.click(addButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("category-error")).toBeInTheDocument();
+    });
+
+    // Start typing again
+    await user.type(categoryInput, "New");
+
+    // Error should be cleared
+    expect(screen.queryByTestId("category-error")).not.toBeInTheDocument();
+  });
+
+  it("disables category creation form when categories are unavailable", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    getCategories.mockResolvedValueOnce({
+      errorKey: "LOAD_CATEGORIES_FAILED",
+      error: new Error("Categories fetch failed"),
+    });
+    getItems.mockResolvedValueOnce({ data: mockItems.results, pageCount: 1 });
+
+    renderItemsPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+    });
+
+    const categoryInput = screen.getByPlaceholderText("Category name...");
+    const addButton = screen.getByRole("button", { name: "Add" });
+
+    expect(categoryInput).toBeDisabled();
+    expect(addButton).toBeDisabled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("shows 'Adding...' text on button while creating category", async () => {
+    renderItemsPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
+    });
+
+    // Mock a slow response
+    createCategory.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({ data: { value: 3, label: "New Category" } });
+          }, 100);
+        })
+    );
+
+    const categoryInput = screen.getByPlaceholderText("Category name...");
+    const addButton = screen.getByRole("button", { name: "Add" });
+
+    await user.type(categoryInput, "New Category");
+    await user.click(addButton);
+
+    // Button should show "Adding..." while request is in progress
+    await waitFor(() => {
+      const addingButton = screen.getByRole("button", { name: "Adding..." });
+      expect(addingButton).toBeInTheDocument();
+      expect(addingButton).toBeDisabled();
+    });
+
+    // Wait for completion
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Add" })).toBeInTheDocument();
+    });
   });
 });

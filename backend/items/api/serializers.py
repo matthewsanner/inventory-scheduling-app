@@ -1,5 +1,10 @@
 from rest_framework.serializers import ModelSerializer, CharField
-from ..models import Item
+from ..models import Item, Category
+
+class CategorySerializer(ModelSerializer):
+  class Meta:
+    model = Category
+    fields = ['id', 'name']
 
 class ItemSerializer(ModelSerializer):
   category_long = CharField(source='category.name', read_only=True)
