@@ -73,7 +73,7 @@ const NewItem = () => {
     try {
       const submitData = {
         ...formData,
-        category: formData.category ? Number(formData.category) : "",
+        category: formData.category ? Number(formData.category) : null,
       };
       await createItem(submitData);
       navigate("/items");

@@ -4,7 +4,11 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate } from "react-router";
 import Items from "../pages/Items";
 import { mockCategories, mockItems } from "./testUtils";
-import { getCategories, getItems, createCategory } from "../services/ItemsService";
+import {
+  getCategories,
+  getItems,
+  createCategory,
+} from "../services/ItemsService";
 
 // Mock service module
 vi.mock("../services/ItemsService", () => ({
@@ -392,7 +396,9 @@ describe("Items Page", () => {
     // Check that the new category appears in the dropdown
     await waitFor(() => {
       const categorySelect = screen.getByTestId("category-select");
-      expect(within(categorySelect).getByText("New Category")).toBeInTheDocument();
+      expect(
+        within(categorySelect).getByText("New Category")
+      ).toBeInTheDocument();
     });
   });
 
@@ -422,9 +428,7 @@ describe("Items Page", () => {
     await user.click(addButton);
 
     await waitFor(() => {
-      expect(
-        screen.getByTestId("category-error")
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("category-error")).toBeInTheDocument();
       expect(
         screen.getByText(/category with this name already exists/i)
       ).toBeInTheDocument();
@@ -459,9 +463,7 @@ describe("Items Page", () => {
     await user.click(addButton);
 
     await waitFor(() => {
-      expect(
-        screen.getByTestId("category-error")
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("category-error")).toBeInTheDocument();
       expect(
         screen.getByText(/this field may not be blank/i)
       ).toBeInTheDocument();
@@ -475,16 +477,13 @@ describe("Items Page", () => {
       expect(screen.getByText("Fancy Dress")).toBeInTheDocument();
     });
 
-    const categoryInput = screen.getByPlaceholderText("Category name...");
     const addButton = screen.getByRole("button", { name: "Add" });
 
     // Try to submit without entering a name
     await user.click(addButton);
 
     await waitFor(() => {
-      expect(
-        screen.getByTestId("category-error")
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("category-error")).toBeInTheDocument();
       expect(
         screen.getByText(/category name is required/i)
       ).toBeInTheDocument();

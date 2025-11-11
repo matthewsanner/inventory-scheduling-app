@@ -482,3 +482,9 @@
 - add CREATE_CATEGORY_FAILED and LOAD_CATEGORIES_FAILED error keys to ErrorKeys in errorMessages.js (used by service functions for consistent error identification, but not displayed in UI since category errors are handled inline)
 - create comprehensive frontend tests in Items.test.jsx covering successful category creation, error handling (duplicate names, empty names, backend validation errors), form validation, error message clearing, disabled state when categories unavailable, and loading state during creation
 - verify that new categories can be created and appear immediately in the category dropdown and can be used for filtering items
+
+### SCRUM-86 minor code improvements
+
+- remove unused variables
+- fix redundant if statement
+- change empty category to set to null instead of blank string

@@ -17,7 +17,7 @@ class ItemSerializer(ModelSerializer):
     # Handle category input - ensure empty strings become None
     if 'category' in data:
       category_value = data['category']
-      if not category_value or category_value == '':
+      if not category_value:
         data = data.copy()  # Make a mutable copy
         data['category'] = None
     return super().to_internal_value(data)

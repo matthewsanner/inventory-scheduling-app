@@ -18,7 +18,11 @@ import {
 import ErrorCard from "../components/ErrorCard";
 import LoadingCard from "../components/LoadingCard";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
-import { getItems, getCategories, createCategory } from "../services/ItemsService";
+import {
+  getItems,
+  getCategories,
+  createCategory,
+} from "../services/ItemsService";
 
 const Items = () => {
   const [items, setItems] = useState([]);
@@ -103,15 +107,15 @@ const Items = () => {
   const handleCreateCategory = async (e) => {
     e.preventDefault();
     setCategoryError("");
-    
+
     if (!newCategoryName.trim()) {
       setCategoryError("Category name is required.");
       return;
     }
 
     setCreatingCategory(true);
-    const { data, errorKey, error } = await createCategory(newCategoryName.trim());
-    
+    const { data, error } = await createCategory(newCategoryName.trim());
+
     if (data) {
       // Add the new category to the list
       setCategories((prev) => {
@@ -209,7 +213,9 @@ const Items = () => {
               </Button>
             </form>
             {categoryError && (
-              <p className="text-red-500 text-sm mt-1" data-testid="category-error">
+              <p
+                className="text-red-500 text-sm mt-1"
+                data-testid="category-error">
                 {categoryError}
               </p>
             )}
