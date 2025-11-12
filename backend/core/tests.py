@@ -155,6 +155,57 @@ class TestUserRegistrationSerializer:
         assert user.first_name == ''
         assert user.last_name == ''
 
+    def test_registration_strips_html_from_first_name(self):
+        # Test that HTML tags are stripped from first_name field
+        data = {
+            'username': 'htmluser',
+            'password': 'testpass123',
+            'email': 'html@example.com',
+            'first_name': '<script>alert("XSS")</script>Safe'
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        assert serializer.is_valid()
+        user = serializer.save()
+        # Bleach removes HTML tags but preserves text content
+        assert '<script>' not in user.first_name
+        assert '</script>' not in user.first_name
+        assert 'Safe' in user.first_name
+
+    def test_registration_strips_html_from_last_name(self):
+        # Test that HTML tags are stripped from last_name field
+        data = {
+            'username': 'htmluser2',
+            'password': 'testpass123',
+            'email': 'html2@example.com',
+            'last_name': '<b>Safe</b>'
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        assert serializer.is_valid()
+        user = serializer.save()
+        assert '<b>' not in user.last_name
+        assert 'Safe' in user.last_name
+
+    def test_registration_validates_email_format(self):
+        # Test that invalid email formats are rejected
+        data = {
+            'username': 'invalidemail',
+            'password': 'testpass123',
+            'email': 'not-a-valid-email'
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        assert not serializer.is_valid()
+        assert 'email' in serializer.errors
+
+    def test_registration_accepts_valid_email(self):
+        # Test that valid email formats are accepted
+        data = {
+            'username': 'validemail',
+            'password': 'testpass123',
+            'email': 'valid@example.com'
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        assert serializer.is_valid()
+
 @pytest.mark.django_db
 class TestAuthenticationAPI:
     def test_login_success(self, api_client, regular_user):

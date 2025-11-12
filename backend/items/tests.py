@@ -171,6 +171,163 @@ class TestItemSerializer:
         assert item.color == ""
         assert item.location == ""
 
+    def test_serializer_strips_html_from_name(self, category_acc):
+        # Test that HTML tags are stripped from name field
+        data = {
+            'name': '<script>alert("XSS")</script>Safe Name',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert serializer.is_valid()
+        item = serializer.save()
+        # Bleach removes HTML tags but preserves text content
+        assert '<script>' not in item.name
+        assert '</script>' not in item.name
+        assert 'Safe Name' in item.name
+
+    def test_serializer_strips_html_from_description(self, category_acc):
+        # Test that HTML tags are stripped from description field
+        data = {
+            'name': 'Test Item',
+            'description': '<img src="x" onerror="alert(1)">Safe description',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert serializer.is_valid()
+        item = serializer.save()
+        assert '<img' not in item.description
+        assert 'onerror' not in item.description
+        assert 'Safe description' in item.description
+
+    def test_serializer_strips_html_from_color(self, category_acc):
+        # Test that HTML tags are stripped from color field
+        data = {
+            'name': 'Test Item',
+            'color': '<b>Red</b>',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert serializer.is_valid()
+        item = serializer.save()
+        assert '<b>' not in item.color
+        assert 'Red' in item.color
+
+    def test_serializer_strips_html_from_location(self, category_acc):
+        # Test that HTML tags are stripped from location field
+        data = {
+            'name': 'Test Item',
+            'location': '<div>Shelf A1</div>',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert serializer.is_valid()
+        item = serializer.save()
+        assert '<div>' not in item.location
+        assert 'Shelf A1' in item.location
+
+    def test_serializer_rejects_javascript_url(self, category_acc):
+        # Test that javascript: protocol URLs are rejected
+        data = {
+            'name': 'Test Item',
+            'image': 'javascript:alert("XSS")',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert not serializer.is_valid()
+        assert 'image' in serializer.errors
+
+    def test_serializer_rejects_data_url(self, category_acc):
+        # Test that data: protocol URLs are rejected
+        data = {
+            'name': 'Test Item',
+            'image': 'data:text/html,<script>alert("XSS")</script>',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert not serializer.is_valid()
+        assert 'image' in serializer.errors
+
+    def test_serializer_accepts_http_url(self, category_acc):
+        # Test that http:// URLs are accepted
+        data = {
+            'name': 'Test Item',
+            'image': 'http://example.com/image.jpg',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert serializer.is_valid()
+        item = serializer.save()
+        assert item.image == 'http://example.com/image.jpg'
+
+    def test_serializer_accepts_https_url(self, category_acc):
+        # Test that https:// URLs are accepted
+        data = {
+            'name': 'Test Item',
+            'image': 'https://example.com/image.jpg',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert serializer.is_valid()
+        item = serializer.save()
+        assert item.image == 'https://example.com/image.jpg'
+
+    def test_serializer_accepts_relative_url(self, category_acc):
+        # Test that relative URLs (starting with /) are accepted
+        data = {
+            'name': 'Test Item',
+            'image': '/box.png',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert serializer.is_valid()
+        item = serializer.save()
+        assert item.image == '/box.png'
+
+    def test_serializer_rejects_relative_url_with_parent_directory(self, category_acc):
+        # Test that relative URLs with parent directory traversal are rejected
+        data = {
+            'name': 'Test Item',
+            'image': '/../box.png',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert not serializer.is_valid()
+        assert 'image' in serializer.errors
+
+    def test_serializer_rejects_relative_url_with_protocol(self, category_acc):
+        # Test that relative URLs with protocol-like patterns are rejected
+        data = {
+            'name': 'Test Item',
+            'image': '/javascript:alert(1)',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert not serializer.is_valid()
+        assert 'image' in serializer.errors
+
+    def test_serializer_rejects_invalid_url_format(self, category_acc):
+        # Test that invalid URL formats are rejected
+        data = {
+            'name': 'Test Item',
+            'image': 'not a valid url',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert not serializer.is_valid()
+        assert 'image' in serializer.errors
+
 @pytest.mark.django_db
 class TestItemAPI:
     def test_list_items(self, authenticated_staff_client, sample_item):
