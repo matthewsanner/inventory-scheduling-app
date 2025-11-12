@@ -512,3 +512,8 @@
 - add .select_related(category) to the ItemViewSet so that items' category data are retrieved in the initial database call for items instead of one by one after the initial call
 - fix backend items test that was making it's own categories instead of using the existing fixtures
 - improve frontend error message accessibility by adding role="alert" for displayed errors or role="status" for displayed status/success messages
+
+### SCRUM-86 error cleanup
+
+- fix error message display issue for item booking overbooking validation errors by moving validation logic directly into ItemBookingSerializer.validate() method, raising DRF ValidationError directly with string values (matching EventSerializer pattern) instead of converting from Django ValidationError
+- simplify frontend error handling in errorHandling.js

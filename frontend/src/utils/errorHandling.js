@@ -1,4 +1,27 @@
 /**
+ * Extracts a clean string error message from Django REST Framework error format
+ * DRF returns validation errors as arrays: {field: ['error message']}
+ * This function extracts the first element from arrays, or returns the value as-is if it's already a string
+ * @param {any} errorValue - The error value from DRF (typically an array like ['message'])
+ * @returns {string} - A clean string error message
+ */
+const extractErrorMessage = (errorValue) => {
+  // Handle null/undefined/empty
+  if (!errorValue) {
+    return "";
+  }
+
+  // Django REST Framework returns validation errors as arrays
+  // Extract the first element if it's an array
+  if (Array.isArray(errorValue)) {
+    return errorValue.length > 0 ? String(errorValue[0]) : "";
+  }
+
+  // If it's already a string, return it as-is
+  return String(errorValue);
+};
+
+/**
  * Handles backend error responses and extracts validation errors
  * @param {Error} error - The error object from the API call
  * @param {string} defaultErrorKey - The default error key to use if no specific errors are found
@@ -27,9 +50,7 @@ export const handleBackendError = (
     Object.keys(backendErrors).forEach((key) => {
       if (key !== "non_field_errors" && backendErrors[key]) {
         hasFieldErrors = true;
-        result.formErrors[key] = Array.isArray(backendErrors[key])
-          ? backendErrors[key][0]
-          : backendErrors[key];
+        result.formErrors[key] = extractErrorMessage(backendErrors[key]);
       }
     });
 
@@ -37,11 +58,9 @@ export const handleBackendError = (
     if (backendErrors.non_field_errors) {
       hasFieldErrors = true;
       const targetField = fieldMappings.non_field_errors || "non_field_errors";
-      result.formErrors[targetField] = Array.isArray(
+      result.formErrors[targetField] = extractErrorMessage(
         backendErrors.non_field_errors
-      )
-        ? backendErrors.non_field_errors[0]
-        : backendErrors.non_field_errors;
+      );
     }
 
     // If no specific field errors were found, use the default error key
