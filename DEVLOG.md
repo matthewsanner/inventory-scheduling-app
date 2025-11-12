@@ -541,3 +541,11 @@
 ### SCRUM-88 adds note
 
 - was going to hide certain UI elements from unauthorized users or users signed in as staff not managers, but decided not to do so right now because in the demo it is better to be able to see directly that certain tasks are blocked under those conditions in the UI when they are attempted
+
+### SCRUM-88 code cleanup
+
+- remove unused import CharField from ItemSerializer
+- add data immutability protection by adding data = data.copy() at the beginning of to_internal_value() methods in CategorySerializer, ItemSerializer, EventSerializer, and UserRegistrationSerializer to avoid mutating original input data
+- improve parent directory traversal validation in ItemSerializer image URL validation by replacing simple string inclusion check ('..' in image_url) with regex pattern to only reject .. when it appears as a complete path segment, allowing legitimate filenames
+- improve parent directory traversal validation in frontend sanitization.js by replacing simple string inclusion check with regex pattern in sanitizeUrl() and getSafeImageUrl() functions for consistency with backend validation
+- add test_serializer_accepts_relative_url_with_dots_in_filename test case in backend/items/tests.py to verify that relative URLs with .. in filenames (not as path segments) are properly accepted

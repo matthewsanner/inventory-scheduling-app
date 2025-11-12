@@ -40,6 +40,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         }
     
     def to_internal_value(self, data):
+        data = data.copy()  # Make a mutable copy to avoid mutating original input
         # Sanitize HTML from text fields
         text_fields = ['first_name', 'last_name']
         for field in text_fields:

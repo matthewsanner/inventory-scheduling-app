@@ -1,7 +1,8 @@
-from rest_framework.serializers import ModelSerializer, ValidationError, CharField
+from rest_framework.serializers import ModelSerializer, ValidationError
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError as DjangoValidationError
 import bleach
+import re
 from ..models import Item, Category
 
 class CategorySerializer(ModelSerializer):
@@ -10,6 +11,7 @@ class CategorySerializer(ModelSerializer):
     fields = ['id', 'name']
   
   def to_internal_value(self, data):
+    data = data.copy()  # Make a mutable copy to avoid mutating original input
     # Sanitize HTML from name field
     if 'name' in data and data['name']:
       # Strip all HTML tags and attributes
@@ -31,9 +33,9 @@ class ItemSerializer(ModelSerializer):
     return representation
   
   def to_internal_value(self, data):
+    data = data.copy()  # Make a mutable copy to avoid mutating original input
     # Handle category input- frontend sends integer or null, but handle empty strings defensively
     if 'category' in data and data['category'] == '':
-      data = data.copy()  # Make a mutable copy
       data['category'] = None
     
     # Sanitize HTML from text fields
@@ -55,7 +57,8 @@ class ItemSerializer(ModelSerializer):
               'image': 'Image URL contains invalid characters.'
             })
           # Basic path validation - reject parent directory traversal
-          if '..' in image_url:
+          # Use regex to only reject .. when it appears as a complete path segment
+          if re.search(r'(^|/)\.\.($|/)', image_url):
             raise ValidationError({
               'image': 'Image URL contains invalid path characters.'
             })

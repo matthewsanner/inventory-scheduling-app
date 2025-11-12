@@ -20,7 +20,8 @@ export const sanitizeUrl = (url) => {
   // Allow relative URLs (starting with /) for local images
   if (trimmedUrl.startsWith("/")) {
     // Reject dangerous patterns like parent directory traversal
-    if (trimmedUrl.includes("..")) {
+    // Use regex to only reject .. when it appears as a complete path segment
+    if (/(^|\/)\.\.($|\/)/.test(trimmedUrl)) {
       return null;
     }
     // Reject any protocol-like patterns in relative URLs
@@ -79,10 +80,11 @@ export const getSafeImageUrl = (url, fallbackUrl = "") => {
   }
 
   // For relative URLs that might not pass strict validation, allow simple paths starting with / as a fallback
+  // Use regex to only reject .. when it appears as a complete path segment
   if (
     typeof url === "string" &&
     url.trim().startsWith("/") &&
-    !url.includes("..") &&
+    !/(^|\/)\.\.($|\/)/.test(url.trim()) &&
     !url.includes(":")
   ) {
     return url.trim();

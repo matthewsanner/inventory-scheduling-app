@@ -304,6 +304,19 @@ class TestItemSerializer:
         assert not serializer.is_valid()
         assert 'image' in serializer.errors
 
+    def test_serializer_accepts_relative_url_with_dots_in_filename(self, category_acc):
+        # Test that relative URLs with .. in filename (not as path segment) are accepted
+        data = {
+            'name': 'Test Item',
+            'image': '/image..name.jpg',
+            'quantity': 1,
+            'category': category_acc.id
+        }
+        serializer = ItemSerializer(data=data)
+        assert serializer.is_valid()
+        item = serializer.save()
+        assert item.image == '/image..name.jpg'
+
     def test_serializer_rejects_relative_url_with_protocol(self, category_acc):
         # Test that relative URLs with protocol-like patterns are rejected
         data = {

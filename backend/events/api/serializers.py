@@ -8,6 +8,7 @@ class EventSerializer(ModelSerializer):
     fields = '__all__'
 
   def to_internal_value(self, data):
+    data = data.copy()  # Make a mutable copy to avoid mutating original input
     # Sanitize HTML from text fields
     text_fields = ['name', 'location', 'notes']
     for field in text_fields:
