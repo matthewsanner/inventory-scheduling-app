@@ -14,6 +14,8 @@ export const ErrorKeys = {
   LOAD_ITEM_BOOKING_FAILED: "LOAD_ITEM_BOOKING_FAILED",
   UPDATE_ITEM_BOOKING_FAILED: "UPDATE_ITEM_BOOKING_FAILED",
   DELETE_ITEM_BOOKING_FAILED: "DELETE_ITEM_BOOKING_FAILED",
+  LOAD_CATEGORIES_FAILED: "LOAD_CATEGORIES_FAILED",
+  CREATE_CATEGORY_FAILED: "CREATE_CATEGORY_FAILED",
   GENERIC_ERROR: "GENERIC_ERROR",
 };
 
@@ -93,6 +95,16 @@ export const ERROR_CONFIG = {
     message: "Failed to delete item booking. Please try again later.",
     onBack: (navigate, itemId) => () => navigate(`/items/${itemId}`),
     backLabel: "← Back to Item Details",
+  },
+  [ErrorKeys.LOAD_CATEGORIES_FAILED]: {
+    message: "Failed to load categories. Please try again later.",
+    onBack: (navigate) => () => navigate("/items"),
+    backLabel: "← Back to Items",
+  },
+  [ErrorKeys.CREATE_CATEGORY_FAILED]: {
+    message: "Failed to create category. Please try again later.",
+    onBack: (navigate) => () => navigate("/items"),
+    backLabel: "← Back to Items",
   },
   [ErrorKeys.GENERIC_ERROR]: {
     message: "Something went wrong. Please try again.",

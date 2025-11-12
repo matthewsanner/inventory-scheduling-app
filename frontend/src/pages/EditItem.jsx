@@ -47,7 +47,12 @@ const EditItem = () => {
           fetchItemById(id),
         ]);
         setCategories(categoryResponse.data);
-        setFormData(itemResponse.data);
+        // Extract category ID from nested category object
+        const itemData = itemResponse.data;
+        setFormData({
+          ...itemData,
+          category: itemData.category?.id?.toString() || "",
+        });
       } catch (error) {
         console.error("Error loading data:", error);
         if (error.message.includes("categories")) {
@@ -89,7 +94,11 @@ const EditItem = () => {
 
     setSubmitting(true);
     try {
-      await updateItem(id, formData);
+      const submitData = {
+        ...formData,
+        category: formData.category ? Number(formData.category) : null,
+      };
+      await updateItem(id, submitData);
       navigate("/items");
     } catch (error) {
       console.error("Error updating item:", error);
@@ -129,7 +138,11 @@ const EditItem = () => {
             onChange={handleChange}
             disabled={submitting}
           />
-          {formErrors.name && <p className="text-red-500">{formErrors.name}</p>}
+          {formErrors.name && (
+            <p className="text-red-500" role="alert">
+              {formErrors.name}
+            </p>
+          )}
         </div>
         <div>
           <Label htmlFor="description">Description</Label>
@@ -181,7 +194,9 @@ const EditItem = () => {
             disabled={submitting}
           />
           {formErrors.quantity && (
-            <p className="text-red-500">{formErrors.quantity}</p>
+            <p className="text-red-500" role="alert">
+              {formErrors.quantity}
+            </p>
           )}
         </div>
         <div>

@@ -77,7 +77,9 @@ const Register = () => {
         <h2 className="text-2xl font-bold mb-4">Create Account</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
+              role="alert">
               {error}
             </div>
           )}

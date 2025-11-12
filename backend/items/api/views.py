@@ -3,14 +3,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django_filters import rest_framework as filters
-from ..models import Item
-from .serializers import ItemSerializer
+from ..models import Item, Category
+from .serializers import ItemSerializer, CategorySerializer
 from core.permissions import IsManagerOrStaffReadOnly
-from rest_framework.permissions import IsAuthenticated
 
 class ItemFilter(filters.FilterSet):
     name = filters.CharFilter(lookup_expr='icontains')
-    category = filters.CharFilter()
+    category = filters.NumberFilter(field_name='category')
     color = filters.CharFilter(lookup_expr='icontains')
     location = filters.CharFilter(lookup_expr='icontains')
 
@@ -19,7 +18,7 @@ class ItemFilter(filters.FilterSet):
         fields = ['name', 'category', 'color', 'location']
 
 class ItemViewSet(ModelViewSet):
-    queryset = Item.objects.all()
+    queryset = Item.objects.select_related('category').all()
     serializer_class = ItemSerializer
     filterset_class = ItemFilter
     search_fields = ['name', 'description', 'color', 'location']
@@ -30,5 +29,15 @@ class CategoryChoicesView(APIView):
     permission_classes = [IsManagerOrStaffReadOnly]
     
     def get(self, request, *args, **kwargs):
-        categories = [{"value": c[0], "label": c[1]} for c in Item.CATEGORY_CHOICES]
+        categories = [{"value": cat.id, "label": cat.name} for cat in Category.objects.all()]
         return Response(categories, status=status.HTTP_200_OK)
+    
+    def post(self, request, *args, **kwargs):
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            category = serializer.save()
+            return Response(
+                {"value": category.id, "label": category.name},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -445,3 +445,75 @@
 ### SCRUM-83 fixes indentation
 
 - fixes indentation on ItemBookingFilter
+
+## SCRUM-84 Categories model
+
+### SCRUM-85 Turn categories into a model
+
+- create Category model in items/models.py with name field (unique), removing the need for hardcoded CATEGORY_CHOICES
+- create migration 0006_category.py to create Category table
+- create data migration 0007_populate_categories.py to populate Category table from existing CATEGORY_CHOICES data
+- update Item model to change category field from CharField with choices to ForeignKey(Category) with SET_NULL on delete
+- create migration 0008_convert_item_category_to_foreignkey.py to convert existing Item.category values from codes to ForeignKey references
+- update ItemSerializer to use category.name for category_long field instead of get_category_display(), remove category_code field, and handle category ID input in to_internal_value()
+- update CategoryChoicesView to query Category.objects.all() instead of Item.CATEGORY_CHOICES, returning {"value": cat.id, "label": cat.name} format
+- update ItemFilter to filter by category ID using NumberFilter instead of filtering by code
+- register Category model in Django admin with CategoryAdmin class for easy management
+- remove CATEGORY_CHOICES constant from Item model as it's no longer needed
+- create migration 0009_remove_category_code.py to remove code field from Category model (categories now use IDs and names only)
+- update all backend tests in items/tests.py to use Category instances instead of category codes, add category fixtures for common categories
+- update all backend tests in itembookings/tests.py to use Category instances
+- update frontend test utilities in testUtils.js to use category IDs (1, 2) instead of codes ("COS", "WIG")
+- update all frontend tests to convert category IDs to strings when interacting with HTML select elements (since HTML select values are always strings)
+- add waitFor() calls in frontend tests to ensure categories are loaded before selecting options
+- fix frontend test assertions to check for category IDs as strings and update button text matching for loading states
+- verify that API maintains backward compatibility with existing {value, label} format, where value is now category ID instead of code
+- verify that frontend code requires no changes since it uses cat.value and cat.label generically
+
+### SCRUM-86 Add ability to create new categories
+
+- create CategorySerializer in backend/items/api/serializers.py to handle category creation with name field validation
+- add POST method to CategoryChoicesView in backend/items/api/views.py to allow creating new categories via the existing categories endpoint, returns category in {value, label} format for consistency with GET endpoint
+- add comprehensive backend tests in backend/items/tests.py covering successful category creation, duplicate name validation, empty name validation, missing name validation, long name validation, staff permission restrictions, and unauthenticated access restrictions
+- create createCategory function in frontend/src/services/ItemsService.js to handle POST requests to categories endpoint with error handling
+- add category creation form widget to Items.jsx page with text input and submit button, positioned in the filter form grid alongside other filters
+- implement inline error handling for category creation that displays error messages below the form without disrupting the page, extracts specific error messages from backend validation responses
+- automatically add newly created categories to the category dropdown list and maintain alphabetical sorting
+- add CREATE_CATEGORY_FAILED and LOAD_CATEGORIES_FAILED error keys to ErrorKeys in errorMessages.js (used by service functions for consistent error identification, but not displayed in UI since category errors are handled inline)
+- create comprehensive frontend tests in Items.test.jsx covering successful category creation, error handling (duplicate names, empty names, backend validation errors), form validation, error message clearing, disabled state when categories unavailable, and loading state during creation
+- verify that new categories can be created and appear immediately in the category dropdown and can be used for filtering items
+
+### SCRUM-86 minor code improvements
+
+- remove unused variables
+- fix redundant if statement
+- change empty category to set to null instead of blank string
+
+### SCRUM-86 switch out category_long
+
+- remove category_long field from ItemSerializer in backend/items/api/serializers.py, replace with nested CategorySerializer using to_representation() method to return full category object {id, name} instead of separate category ID and category_long fields
+- update ItemSerializer to_representation() method to return nested category object for reads while maintaining ability to accept category ID for writes via simplified to_internal_value() method that handles the actual frontend inputs (integers or null) with minimal defensive handling for empty strings
+- simplify ItemSerializer to_internal_value() method to match frontend behavior: frontend sends category as integer (when selected) or null (when not selected), removed unnecessary nested object handling and generic falsy checks
+- update all backend tests in items/tests.py to check category.id and category.name from nested category object instead of separate category and category_long fields
+- update frontend Items.jsx to use item.category?.name instead of item.category_long for displaying category in table
+- update frontend ItemDetail.jsx to use item.category?.name instead of item.category_long for displaying category in item details
+- update frontend EditItem.jsx to extract category.id from nested category object when loading item data and convert category string to number when submitting form data
+- update frontend NewItem.jsx to convert category string to number when submitting form data for consistency with EditItem
+- update frontend test utilities in testUtils.js to use nested category objects {id, name} instead of separate category and category_long fields in mockItem and mockItems
+- update all frontend tests in Items.test.jsx, EditItem.test.jsx, and NewItem.test.jsx to use nested category objects and access category.name for display assertions
+- verify that API now returns category as nested object {id, name} instead of separate category ID and category_long fields
+- verify that frontend correctly handles null categories (returns empty string for display)
+- verify that serializer correctly handles frontend inputs: integers for selected categories, null for unselected categories
+- remove order_by in CategoryChoicesView because Category model already defines ordering name
+- remove default image url which was a local image because it wasn't do anything, will allow user to enter their own image URL here or they can enter "/box.png" if they want the default image, would like to change this later to allow image upload
+
+### SCRUM-86 code clean up, accessibility
+
+- add .select_related(category) to the ItemViewSet so that items' category data are retrieved in the initial database call for items instead of one by one after the initial call
+- fix backend items test that was making it's own categories instead of using the existing fixtures
+- improve frontend error message accessibility by adding role="alert" for displayed errors or role="status" for displayed status/success messages
+
+### SCRUM-86 error cleanup
+
+- fix error message display issue for item booking overbooking validation errors by moving validation logic directly into ItemBookingSerializer.validate() method, raising DRF ValidationError directly with string values (matching EventSerializer pattern) instead of converting from Django ValidationError
+- simplify frontend error handling in errorHandling.js
