@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import {
   Card,
-  Checkbox,
   Table,
   TableBody,
   TableCell,
@@ -286,8 +285,8 @@ const Items = () => {
                       </TableCell>
                       <TableCell
                         className="truncate"
-                        title={item.category_long}>
-                        {item.category_long}
+                        title={item.category?.name || ""}>
+                        {item.category?.name || ""}
                       </TableCell>
                       <TableCell className="text-center">
                         {item.quantity}

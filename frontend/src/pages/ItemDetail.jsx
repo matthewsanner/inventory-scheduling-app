@@ -106,7 +106,7 @@ const ItemDetail = () => {
           <ul className="grid grid-cols-2 gap-4 text-gray-700 text-sm">
             <li>
               <strong className="block font-semibold">Category:</strong>
-              {item.category_long}
+              {item.category?.name || ""}
             </li>
             <li>
               <strong className="block font-semibold">Quantity:</strong>

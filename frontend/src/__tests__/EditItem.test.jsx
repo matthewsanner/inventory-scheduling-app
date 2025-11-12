@@ -94,7 +94,7 @@ describe("EditItem Page", () => {
     const imageInput = await screen.findByLabelText("Image URL");
     expect(imageInput).toHaveValue(mockItem.image);
     const categorySelect = await screen.findByLabelText("Category");
-    expect(categorySelect).toHaveValue(mockItem.category.toString());
+    expect(categorySelect).toHaveValue(mockItem.category.id.toString());
     const quantityInput = await screen.findByLabelText("Quantity");
     expect(quantityInput).toHaveValue(mockItem.quantity);
     const colorInput = await screen.findByLabelText("Color");

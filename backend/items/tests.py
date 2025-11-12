@@ -123,8 +123,8 @@ class TestItemSerializer:
         assert data['name'] == sample_item.name
         assert data['description'] == sample_item.description
         assert data['quantity'] == sample_item.quantity
-        assert data['category'] == sample_item.category.id
-        assert data['category_long'] == sample_item.category.name
+        assert data['category']['id'] == sample_item.category.id
+        assert data['category']['name'] == sample_item.category.name
         assert data['color'] == sample_item.color
         assert data['location'] == sample_item.location
 
@@ -223,7 +223,8 @@ class TestItemAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.data['name'] == sample_item.name
         assert response.data['description'] == sample_item.description
-        assert response.data['category'] == sample_item.category.id
+        assert response.data['category']['id'] == sample_item.category.id
+        assert response.data['category']['name'] == sample_item.category.name
         assert response.data['color'] == sample_item.color
         assert response.data['location'] == sample_item.location
 
@@ -300,7 +301,7 @@ class TestItemAPI:
         response = authenticated_staff_client.get(url, {'category': category_acc.id})
         assert response.status_code == status.HTTP_200_OK
         assert response.data['count'] == 1
-        assert response.data['results'][0]['category'] == category_acc.id
+        assert response.data['results'][0]['category']['id'] == category_acc.id
 
     def test_filter_by_color(self, authenticated_staff_client):
         Item.objects.create(
@@ -484,9 +485,9 @@ class TestItemAPI:
         response = authenticated_staff_client.get(url, {'ordering': 'category'})
         assert response.status_code == status.HTTP_200_OK
         # Categories are ordered by name, so Accessories, Apparatus, Zebra
-        assert response.data['results'][0]['category'] == category_acc.id
-        assert response.data['results'][1]['category'] == category_app.id
-        assert response.data['results'][2]['category'] == category_zeb.id
+        assert response.data['results'][0]['category']['id'] == category_acc.id
+        assert response.data['results'][1]['category']['id'] == category_app.id
+        assert response.data['results'][2]['category']['id'] == category_zeb.id
 
     def test_order_items_by_quantity(self, authenticated_staff_client):
         Item.objects.create(

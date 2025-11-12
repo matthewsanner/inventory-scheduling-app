@@ -97,7 +97,8 @@ describe("NewItem Page", () => {
     await user.type(quantityInput, mockFormData.quantity.toString());
     await user.type(colorInput, mockFormData.color);
     await user.type(locationInput, mockFormData.location);
-    await user.selectOptions(categorySelect, mockFormData.category.toString());
+    // Select category - ensure value is a string to match HTML select option values
+    await user.selectOptions(categorySelect, String(mockFormData.category));
 
     expect(nameInput.value).toBe(mockFormData.name);
     expect(descriptionInput.value).toBe(mockFormData.description);
@@ -105,7 +106,7 @@ describe("NewItem Page", () => {
     expect(quantityInput.value).toBe(mockFormData.quantity);
     expect(colorInput.value).toBe(mockFormData.color);
     expect(locationInput.value).toBe(mockFormData.location);
-    expect(categorySelect.value).toBe(mockFormData.category.toString());
+    expect(categorySelect.value).toBe(String(mockFormData.category));
   });
 
   it("submits the form successfully and navigates to items page", async () => {
@@ -125,7 +126,7 @@ describe("NewItem Page", () => {
     await user.type(screen.getByLabelText("Image URL"), mockFormData.image);
     await user.selectOptions(
       screen.getByLabelText("Category"),
-      mockFormData.category.toString()
+      String(mockFormData.category)
     );
     await user.clear(screen.getByLabelText("Quantity"));
     await user.type(

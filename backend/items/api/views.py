@@ -6,7 +6,6 @@ from django_filters import rest_framework as filters
 from ..models import Item, Category
 from .serializers import ItemSerializer, CategorySerializer
 from core.permissions import IsManagerOrStaffReadOnly
-from rest_framework.permissions import IsAuthenticated
 
 class ItemFilter(filters.FilterSet):
     name = filters.CharFilter(lookup_expr='icontains')
@@ -30,7 +29,7 @@ class CategoryChoicesView(APIView):
     permission_classes = [IsManagerOrStaffReadOnly]
     
     def get(self, request, *args, **kwargs):
-        categories = [{"value": cat.id, "label": cat.name} for cat in Category.objects.all().order_by('name')]
+        categories = [{"value": cat.id, "label": cat.name} for cat in Category.objects.all()]
         return Response(categories, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):

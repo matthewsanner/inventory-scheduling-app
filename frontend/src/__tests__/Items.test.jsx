@@ -48,7 +48,7 @@ describe("Items Page", () => {
     vi.clearAllMocks();
   });
 
-  it("fetches and displays items with category_long in the table", async () => {
+  it("fetches and displays items with category in the table", async () => {
     renderItemsPage();
     await waitFor(() => {
       const table = screen.getByTestId("items-table");
@@ -143,8 +143,7 @@ describe("Items Page", () => {
     const page1Items = Array.from({ length: 10 }, (_, i) => ({
       id: i + 1,
       name: `Item ${i + 1}`,
-      category: 1,
-      category_long: "Costumes",
+      category: { id: 1, name: "Costumes" },
       quantity: 1,
       color: "Red",
       location: "Shelf A",
@@ -153,8 +152,7 @@ describe("Items Page", () => {
     const page2Items = Array.from({ length: 10 }, (_, i) => ({
       id: i + 11,
       name: `Item ${i + 11}`,
-      category: 2,
-      category_long: "Wigs",
+      category: { id: 2, name: "Wigs" },
       quantity: 2,
       color: "Blonde",
       location: "Shelf B",
@@ -325,8 +323,7 @@ describe("Items Page", () => {
     const page1Items = Array.from({ length: 10 }, (_, i) => ({
       id: i + 1,
       name: `Item ${i + 1}`,
-      category: 1,
-      category_long: "Costumes",
+      category: { id: 1, name: "Costumes" },
       quantity: 1,
       color: "Red",
       location: "Shelf A",
@@ -335,8 +332,7 @@ describe("Items Page", () => {
     const page2Items = Array.from({ length: 10 }, (_, i) => ({
       id: i + 11,
       name: `Item ${i + 11}`,
-      category: 2,
-      category_long: "Wigs",
+      category: { id: 2, name: "Wigs" },
       quantity: 2,
       color: "Blonde",
       location: "Shelf B",

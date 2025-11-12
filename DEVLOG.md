@@ -488,3 +488,21 @@
 - remove unused variables
 - fix redundant if statement
 - change empty category to set to null instead of blank string
+
+### SCRUM-86 switch out category_long
+
+- remove category_long field from ItemSerializer in backend/items/api/serializers.py, replace with nested CategorySerializer using to_representation() method to return full category object {id, name} instead of separate category ID and category_long fields
+- update ItemSerializer to_representation() method to return nested category object for reads while maintaining ability to accept category ID for writes via simplified to_internal_value() method that handles the actual frontend inputs (integers or null) with minimal defensive handling for empty strings
+- simplify ItemSerializer to_internal_value() method to match frontend behavior: frontend sends category as integer (when selected) or null (when not selected), removed unnecessary nested object handling and generic falsy checks
+- update all backend tests in items/tests.py to check category.id and category.name from nested category object instead of separate category and category_long fields
+- update frontend Items.jsx to use item.category?.name instead of item.category_long for displaying category in table
+- update frontend ItemDetail.jsx to use item.category?.name instead of item.category_long for displaying category in item details
+- update frontend EditItem.jsx to extract category.id from nested category object when loading item data and convert category string to number when submitting form data
+- update frontend NewItem.jsx to convert category string to number when submitting form data for consistency with EditItem
+- update frontend test utilities in testUtils.js to use nested category objects {id, name} instead of separate category and category_long fields in mockItem and mockItems
+- update all frontend tests in Items.test.jsx, EditItem.test.jsx, and NewItem.test.jsx to use nested category objects and access category.name for display assertions
+- verify that API now returns category as nested object {id, name} instead of separate category ID and category_long fields
+- verify that frontend correctly handles null categories (returns empty string for display)
+- verify that serializer correctly handles frontend inputs: integers for selected categories, null for unselected categories
+- remove order_by in CategoryChoicesView because Category model already defines ordering name
+- remove default image url which was a local image because it wasn't do anything, will allow user to enter their own image URL here or they can enter "/box.png" if they want the default image, would like to change this later to allow image upload
