@@ -18,7 +18,7 @@ class ItemFilter(filters.FilterSet):
         fields = ['name', 'category', 'color', 'location']
 
 class ItemViewSet(ModelViewSet):
-    queryset = Item.objects.all()
+    queryset = Item.objects.select_related('category').all()
     serializer_class = ItemSerializer
     filterset_class = ItemFilter
     search_fields = ['name', 'description', 'color', 'location']

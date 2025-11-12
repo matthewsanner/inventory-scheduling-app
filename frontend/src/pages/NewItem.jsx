@@ -111,7 +111,11 @@ const NewItem = () => {
             onChange={handleChange}
             disabled={submitting}
           />
-          {formErrors.name && <p className="text-red-500">{formErrors.name}</p>}
+          {formErrors.name && (
+            <p className="text-red-500" role="alert">
+              {formErrors.name}
+            </p>
+          )}
         </div>
         <div>
           <Label htmlFor="description">Description</Label>
@@ -163,7 +167,9 @@ const NewItem = () => {
             disabled={submitting}
           />
           {formErrors.quantity && (
-            <p className="text-red-500">{formErrors.quantity}</p>
+            <p className="text-red-500" role="alert">
+              {formErrors.quantity}
+            </p>
           )}
         </div>
         <div>

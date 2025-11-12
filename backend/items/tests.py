@@ -575,27 +575,23 @@ class TestItemAPI:
         assert response.data['results'][1]['location'] == "Shelf B"
         assert response.data['results'][2]['location'] == "Shelf Z"
 
-    def test_category_choices(self, authenticated_staff_client):
-        # Create some categories for the test
-        category1 = Category.objects.create(name='Accessories')
-        category2 = Category.objects.create(name='Apparatus')
-        
+    def test_category_choices(self, authenticated_staff_client, category_acc, category_app):
         url = reverse('category-choices')
         response = authenticated_staff_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         # Check that response is a list of dicts with value and label
         assert isinstance(response.data, list)
-        assert len(response.data) >= 2  # At least the categories we created
+        assert len(response.data) >= 2  # At least the categories from fixtures
         for item in response.data:
             assert 'value' in item
             assert 'label' in item
             assert isinstance(item['value'], int)  # Should be category ID
             assert isinstance(item['label'], str)  # Should be category name
         
-        # Check that our created categories are in the response
+        # Check that our fixture categories are in the response
         category_values = [item['value'] for item in response.data]
-        assert category1.id in category_values
-        assert category2.id in category_values
+        assert category_acc.id in category_values
+        assert category_app.id in category_values
 
     def test_create_category(self, authenticated_manager_client):
         url = reverse('category-choices')

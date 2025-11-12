@@ -15,7 +15,9 @@ const ErrorCard = ({ message, onBack, backLabel }) => {
   const resolvedOnBack = onBack ?? generic.onBack(navigate);
 
   return (
-    <Card className="my-6 max-w-xl mx-auto p-6 shadow-lg rounded-lg border border-red-300 bg-red-50">
+    <Card
+      className="my-6 max-w-xl mx-auto p-6 shadow-lg rounded-lg border border-red-300 bg-red-50"
+      role="alert">
       <div className="text-center">
         <HiOutlineExclamationCircle className="mx-auto mb-4 h-16 w-16 text-red-500" />
         <h2 className="text-2xl font-bold text-red-700 mb-2">Error</h2>

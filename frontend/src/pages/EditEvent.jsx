@@ -148,7 +148,11 @@ const EditEvent = () => {
             onChange={handleChange}
             disabled={submitting}
           />
-          {formErrors.name && <p className="text-red-500">{formErrors.name}</p>}
+          {formErrors.name && (
+            <p className="text-red-500" role="alert">
+              {formErrors.name}
+            </p>
+          )}
         </div>
         <div>
           <Label htmlFor="start_datetime">Start Date & Time</Label>
@@ -161,7 +165,9 @@ const EditEvent = () => {
             disabled={submitting}
           />
           {formErrors.start_datetime && (
-            <p className="text-red-500">{formErrors.start_datetime}</p>
+            <p className="text-red-500" role="alert">
+              {formErrors.start_datetime}
+            </p>
           )}
         </div>
         <div>
@@ -175,7 +181,9 @@ const EditEvent = () => {
             disabled={submitting}
           />
           {formErrors.end_datetime && (
-            <p className="text-red-500">{formErrors.end_datetime}</p>
+            <p className="text-red-500" role="alert">
+              {formErrors.end_datetime}
+            </p>
           )}
         </div>
         <div>

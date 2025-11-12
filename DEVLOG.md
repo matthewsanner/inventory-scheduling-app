@@ -506,3 +506,9 @@
 - verify that serializer correctly handles frontend inputs: integers for selected categories, null for unselected categories
 - remove order_by in CategoryChoicesView because Category model already defines ordering name
 - remove default image url which was a local image because it wasn't do anything, will allow user to enter their own image URL here or they can enter "/box.png" if they want the default image, would like to change this later to allow image upload
+
+### SCRUM-86 code clean up, accessibility
+
+- add .select_related(category) to the ItemViewSet so that items' category data are retrieved in the initial database call for items instead of one by one after the initial call
+- fix backend items test that was making it's own categories instead of using the existing fixtures
+- improve frontend error message accessibility by adding role="alert" for displayed errors or role="status" for displayed status/success messages

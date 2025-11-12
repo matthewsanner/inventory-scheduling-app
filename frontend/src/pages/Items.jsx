@@ -108,7 +108,7 @@ const Items = () => {
     setCategoryError("");
 
     if (!newCategoryName.trim()) {
-      setCategoryError("Category name is required.");
+      setCategoryError("Category name is required");
       return;
     }
 
@@ -214,7 +214,8 @@ const Items = () => {
             {categoryError && (
               <p
                 className="text-red-500 text-sm mt-1"
-                data-testid="category-error">
+                data-testid="category-error"
+                role="alert">
                 {categoryError}
               </p>
             )}

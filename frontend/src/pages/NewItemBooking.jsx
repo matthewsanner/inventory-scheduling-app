@@ -134,7 +134,9 @@ const NewItemBooking = () => {
             ))}
           </Select>
           {formErrors.event && (
-            <p className="text-red-500">{formErrors.event}</p>
+            <p className="text-red-500" role="alert">
+              {formErrors.event}
+            </p>
           )}
         </div>
         <div>
@@ -148,7 +150,9 @@ const NewItemBooking = () => {
             disabled={submitting}
           />
           {formErrors.quantity && (
-            <p className="text-red-500">{formErrors.quantity}</p>
+            <p className="text-red-500" role="alert">
+              {formErrors.quantity}
+            </p>
           )}
         </div>
         <div className="flex justify-between pt-4">

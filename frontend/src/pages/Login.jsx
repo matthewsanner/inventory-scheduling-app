@@ -54,12 +54,16 @@ const Login = () => {
         <h2 className="text-2xl font-bold mb-4">Sign In</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {success && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            <div
+              className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded"
+              role="status">
               {success}
             </div>
           )}
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
+              role="alert">
               {error}
             </div>
           )}
