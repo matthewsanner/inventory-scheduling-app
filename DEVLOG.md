@@ -537,3 +537,7 @@
 - add comprehensive backend security tests in backend/events/tests.py covering HTML tag stripping from name, location, and notes fields
 - add comprehensive backend security tests in backend/core/tests.py covering HTML tag stripping from first_name and last_name fields, and email format validation
 - add back in ability to use relative URLs for images since that is what is being used temporarily for demo purposes
+
+### SCRUM-88 adds note
+
+- was going to hide certain UI elements from unauthorized users or users signed in as staff not managers, but decided not to do so right now because in the demo it is better to be able to see directly that certain tasks are blocked under those conditions in the UI when they are attempted
