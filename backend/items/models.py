@@ -14,7 +14,7 @@ class Item(models.Model):
   name = models.CharField(max_length=200)
   description = models.CharField(max_length=2000, blank=True)
   quantity = models.PositiveSmallIntegerField(default=1)
-  image = models.CharField(blank=True, null=True) # may want to change this later
+  image = models.CharField(max_length=200, blank=True, null=True) # may want to change this later
   category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, db_index=True)
   color = models.CharField(max_length=50, blank=True)
   location = models.CharField(max_length=200, blank=True)

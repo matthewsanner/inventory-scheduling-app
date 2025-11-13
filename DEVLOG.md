@@ -564,3 +564,7 @@
 
 - add error handling in ItemBookingViewSet.create() method to catch ValidationError with default Django unique constraint message ("must make a unique set") and convert it to user-friendly error message "This item is already booked for this event." attached to the 'event' field for inline display on the frontend
 - create and apply migration for change in image field in the items model
+
+### SCRUM-88 fixes items model
+
+- add required CharField max_length restriction to item model image field
