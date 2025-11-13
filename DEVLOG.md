@@ -554,3 +554,8 @@
 
 - remove redundant fallback validation logic in getSafeImageUrl() function in frontend sanitization.js that was duplicating checks already performed by sanitizeUrl(), simplifying to single validation path
 - fix whitespace normalization issue in ItemSerializer where whitespace-only image URLs weren't being updated in data before validation check, now properly normalizes to empty strings
+
+### SCRUM-88 more code improvements
+
+- remove deprecated XSS security filter from backend/core/settings.py
+- remove redundant assignment from backend/items/api/serializers.py

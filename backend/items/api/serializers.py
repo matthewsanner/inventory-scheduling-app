@@ -77,6 +77,5 @@ class ItemSerializer(ModelSerializer):
             raise ValidationError({
               'image': 'Please enter a valid URL.'
             })
-        data['image'] = image_url
     
     return super().to_internal_value(data)

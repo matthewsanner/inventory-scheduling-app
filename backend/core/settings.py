@@ -164,9 +164,6 @@ REST_FRAMEWORK = {
 }
 
 # Security Headers
-# Enable browser's XSS filter
-SECURE_BROWSER_XSS_FILTER = True
-
 # Prevent MIME type sniffing
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
