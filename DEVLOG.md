@@ -568,3 +568,7 @@
 ### SCRUM-88 fixes items model
 
 - add required CharField max_length restriction to item model image field
+
+### SCRUM-88 improves itembookings views.py
+
+- changes unique constraint error check to look for the unique constraint code rather than the actual text of the error which would be more likely to change in the future
