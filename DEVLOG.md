@@ -549,3 +549,8 @@
 - improve parent directory traversal validation in ItemSerializer image URL validation by replacing simple string inclusion check ('..' in image_url) with regex pattern to only reject .. when it appears as a complete path segment, allowing legitimate filenames
 - improve parent directory traversal validation in frontend sanitization.js by replacing simple string inclusion check with regex pattern in sanitizeUrl() and getSafeImageUrl() functions for consistency with backend validation
 - add test_serializer_accepts_relative_url_with_dots_in_filename test case in backend/items/tests.py to verify that relative URLs with .. in filenames (not as path segments) are properly accepted
+
+### SCRUM-88 code improvements
+
+- remove redundant fallback validation logic in getSafeImageUrl() function in frontend sanitization.js that was duplicating checks already performed by sanitizeUrl(), simplifying to single validation path
+- fix whitespace normalization issue in ItemSerializer where whitespace-only image URLs weren't being updated in data before validation check, now properly normalizes to empty strings

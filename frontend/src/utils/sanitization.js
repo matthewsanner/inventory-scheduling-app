@@ -75,20 +75,5 @@ export const getSafeImageUrl = (url, fallbackUrl = "") => {
   }
 
   const validated = validateImageUrl(url);
-  if (validated.isValid) {
-    return validated.sanitizedUrl;
-  }
-
-  // For relative URLs that might not pass strict validation, allow simple paths starting with / as a fallback
-  // Use regex to only reject .. when it appears as a complete path segment
-  if (
-    typeof url === "string" &&
-    url.trim().startsWith("/") &&
-    !/(^|\/)\.\.($|\/)/.test(url.trim()) &&
-    !url.includes(":")
-  ) {
-    return url.trim();
-  }
-
-  return fallbackUrl || "";
+  return validated.isValid ? validated.sanitizedUrl : fallbackUrl || "";
 };

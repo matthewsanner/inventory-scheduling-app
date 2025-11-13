@@ -48,6 +48,7 @@ class ItemSerializer(ModelSerializer):
     # Validate and sanitize image URL
     if 'image' in data and data['image']:
       image_url = data['image'].strip()
+      data['image'] = image_url  # Update with stripped value
       if image_url:  # Only validate if not empty
         # Allow relative URLs (starting with /) for local images
         if image_url.startswith('/'):
