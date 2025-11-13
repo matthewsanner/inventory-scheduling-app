@@ -572,3 +572,7 @@
 ### SCRUM-88 improves itembookings views.py
 
 - changes unique constraint error check to look for the unique constraint code rather than the actual text of the error which would be more likely to change in the future
+
+### SCRUM-88 reverts previous change
+
+- reverts previous change to constraint error check, which it turns out was not working

@@ -30,7 +30,7 @@ class ItemBookingViewSet(ModelViewSet):
       if isinstance(e.detail, dict):
         for messages in e.detail.values():
           msg_list = messages if isinstance(messages, list) else [messages]
-          if any(getattr(msg, 'code', None) == 'unique_item_event' for msg in msg_list):
+          if any('must make a unique set' in str(msg).lower() for msg in msg_list):
             return Response({
               'event': ['This item is already booked for this event.']
             }, status=status.HTTP_400_BAD_REQUEST)
