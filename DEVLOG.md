@@ -559,3 +559,16 @@
 
 - remove deprecated XSS security filter from backend/core/settings.py
 - remove redundant assignment from backend/items/api/serializers.py
+
+### SCRUM-88 improves duplicate item booking error handling
+
+- add error handling in ItemBookingViewSet.create() method to catch ValidationError with default Django unique constraint message ("must make a unique set") and convert it to user-friendly error message "This item is already booked for this event." attached to the 'event' field for inline display on the frontend
+- create and apply migration for change in image field in the items model
+
+### SCRUM-88 fixes items model
+
+- add required CharField max_length restriction to item model image field
+
+### SCRUM-88 improves itembookings views.py
+
+- changes unique constraint error check to look for the unique constraint code rather than the actual text of the error which would be more likely to change in the future
