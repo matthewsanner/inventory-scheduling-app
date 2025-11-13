@@ -1,10 +1,21 @@
 from rest_framework.serializers import ModelSerializer, ValidationError
+import bleach
 from ..models import Event
 
 class EventSerializer(ModelSerializer):
   class Meta:
     model = Event
     fields = '__all__'
+
+  def to_internal_value(self, data):
+    data = data.copy()  # Make a mutable copy to avoid mutating original input
+    # Sanitize HTML from text fields
+    text_fields = ['name', 'location', 'notes']
+    for field in text_fields:
+      if field in data and data[field]:
+        # Strip all HTML tags and attributes
+        data[field] = bleach.clean(data[field], tags=[], strip=True)
+    return super().to_internal_value(data)
 
   def validate(self, data):
     start_datetime = data.get('start_datetime')

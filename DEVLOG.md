@@ -517,3 +517,45 @@
 
 - fix error message display issue for item booking overbooking validation errors by moving validation logic directly into ItemBookingSerializer.validate() method, raising DRF ValidationError directly with string values (matching EventSerializer pattern) instead of converting from Django ValidationError
 - simplify frontend error handling in errorHandling.js
+
+## SCRUM-87 Frontend security/auth (also backend)
+
+### SCRUM-88 input validation and XSS protection
+
+- install bleach package (bleach==6.3.0) in backend requirements.txt for HTML sanitization
+- add HTML sanitization to ItemSerializer using bleach.clean() with tags=[] and strip=True to remove all HTML tags from name, description, color, and location fields in to_internal_value() method
+- add HTML sanitization to CategorySerializer to strip HTML tags from name field
+- add HTML sanitization to EventSerializer to strip HTML tags from name, location, and notes fields
+- add HTML sanitization to UserRegistrationSerializer to strip HTML tags from first_name and last_name fields
+- add email format validation to UserRegistrationSerializer using Django's EmailValidator to ensure valid email addresses are provided during registration
+- add URL validation to ItemSerializer image field to only allow http:// and https:// protocols, reject javascript:, data:, and other dangerous protocols, and validate URL format using Django's URLValidator
+- add security headers to Django settings.py
+- create frontend/src/utils/sanitization.js utility file with functions for URL validation and sanitization
+- add URL validation to NewItem.jsx and EditItem.jsx forms using validateImageUrl() function, display error message if image URL uses invalid protocol or format
+- add URL sanitization to ItemDetail.jsx using getSafeImageUrl() function before rendering image URLs in img src attribute, prevents rendering of dangerous URLs even if they somehow bypass validation
+- add comprehensive backend security tests in backend/items/tests.py covering HTML tag stripping from all text fields, dangerous URL protocol rejection, valid URL acceptance, and invalid URL format rejection
+- add comprehensive backend security tests in backend/events/tests.py covering HTML tag stripping from name, location, and notes fields
+- add comprehensive backend security tests in backend/core/tests.py covering HTML tag stripping from first_name and last_name fields, and email format validation
+- add back in ability to use relative URLs for images since that is what is being used temporarily for demo purposes
+
+### SCRUM-88 adds note
+
+- was going to hide certain UI elements from unauthorized users or users signed in as staff not managers, but decided not to do so right now because in the demo it is better to be able to see directly that certain tasks are blocked under those conditions in the UI when they are attempted
+
+### SCRUM-88 code cleanup
+
+- remove unused import CharField from ItemSerializer
+- add data immutability protection by adding data = data.copy() at the beginning of to_internal_value() methods in CategorySerializer, ItemSerializer, EventSerializer, and UserRegistrationSerializer to avoid mutating original input data
+- improve parent directory traversal validation in ItemSerializer image URL validation by replacing simple string inclusion check ('..' in image_url) with regex pattern to only reject .. when it appears as a complete path segment, allowing legitimate filenames
+- improve parent directory traversal validation in frontend sanitization.js by replacing simple string inclusion check with regex pattern in sanitizeUrl() and getSafeImageUrl() functions for consistency with backend validation
+- add test_serializer_accepts_relative_url_with_dots_in_filename test case in backend/items/tests.py to verify that relative URLs with .. in filenames (not as path segments) are properly accepted
+
+### SCRUM-88 code improvements
+
+- remove redundant fallback validation logic in getSafeImageUrl() function in frontend sanitization.js that was duplicating checks already performed by sanitizeUrl(), simplifying to single validation path
+- fix whitespace normalization issue in ItemSerializer where whitespace-only image URLs weren't being updated in data before validation check, now properly normalizes to empty strings
+
+### SCRUM-88 more code improvements
+
+- remove deprecated XSS security filter from backend/core/settings.py
+- remove redundant assignment from backend/items/api/serializers.py

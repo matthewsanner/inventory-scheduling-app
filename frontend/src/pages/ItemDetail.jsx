@@ -17,6 +17,7 @@ import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
 import { getItem, deleteItem } from "../services/ItemDetailService";
 import { getItemBookingsByItem } from "../services/ItemBookingService";
 import { formatDateTime } from "../utils/dateFormatting";
+import { getSafeImageUrl } from "../utils/sanitization";
 
 const ItemDetail = () => {
   const { id } = useParams();
@@ -89,11 +90,14 @@ const ItemDetail = () => {
     <>
       <Card className="my-8 max-w-2xl mx-auto p-6 shadow-lg">
         <h2 className="text-4xl font-bold mb-4 text-gray-800">{item.name}</h2>
-        {item.image && (
-          <div className="flex justify-center mb-4">
-            <img src={item.image} alt={item.name} className="w-64 h-auto" />
-          </div>
-        )}
+        {(() => {
+          const safeImageUrl = getSafeImageUrl(item.image);
+          return safeImageUrl && (
+            <div className="flex justify-center mb-4">
+              <img src={safeImageUrl} alt={item.name} className="w-64 h-auto" />
+            </div>
+          );
+        })()}
         <p className="mb-4 text-gray-700 text-lg">
           {item.description ? (
             item.description

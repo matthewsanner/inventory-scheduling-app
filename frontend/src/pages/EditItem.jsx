@@ -17,6 +17,7 @@ import {
   updateItem,
 } from "../services/EditItemService";
 import { validateQuantity } from "../utils/validation";
+import { validateImageUrl } from "../utils/sanitization";
 
 const EditItem = () => {
   const navigate = useNavigate();
@@ -86,6 +87,14 @@ const EditItem = () => {
     if (!formData.name.trim()) errors.name = "Name is required.";
     const quantityError = validateQuantity(formData.quantity);
     if (quantityError) errors.quantity = quantityError;
+    
+    // Validate image URL if provided
+    if (formData.image && formData.image.trim()) {
+      const imageValidation = validateImageUrl(formData.image);
+      if (!imageValidation.isValid) {
+        errors.image = "Image URL must use http:// or https:// protocol, or be a relative path starting with /.";
+      }
+    }
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -164,6 +173,11 @@ const EditItem = () => {
             onChange={handleChange}
             disabled={submitting}
           />
+          {formErrors.image && (
+            <p className="text-red-500" role="alert">
+              {formErrors.image}
+            </p>
+          )}
         </div>
         <div>
           <Label htmlFor="category">Category</Label>

@@ -12,6 +12,7 @@ import ErrorCard from "../components/ErrorCard";
 import { ErrorKeys, ERROR_CONFIG } from "../constants/errorMessages";
 import { getCategories, createItem } from "../services/NewItemService";
 import { validateQuantity } from "../utils/validation";
+import { validateImageUrl } from "../utils/sanitization";
 
 const NewItem = () => {
   const navigate = useNavigate();
@@ -63,6 +64,14 @@ const NewItem = () => {
     if (!formData.name.trim()) errors.name = "Name is required.";
     const quantityError = validateQuantity(formData.quantity);
     if (quantityError) errors.quantity = quantityError;
+    
+    // Validate image URL if provided
+    if (formData.image && formData.image.trim()) {
+      const imageValidation = validateImageUrl(formData.image);
+      if (!imageValidation.isValid) {
+        errors.image = "Image URL must use http:// or https:// protocol, or be a relative path starting with /.";
+      }
+    }
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -137,6 +146,11 @@ const NewItem = () => {
             onChange={handleChange}
             disabled={submitting}
           />
+          {formErrors.image && (
+            <p className="text-red-500" role="alert">
+              {formErrors.image}
+            </p>
+          )}
         </div>
         <div>
           <Label htmlFor="category">Category</Label>

@@ -237,6 +237,53 @@ class TestEventSerializer:
         assert not serializer.is_valid()
         assert 'end_datetime' in serializer.errors
 
+    def test_serializer_strips_html_from_name(self):
+        # Test that HTML tags are stripped from name field
+        now = timezone.now()
+        data = {
+            'name': '<script>alert("XSS")</script>Safe Event Name',
+            'start_datetime': (now + timedelta(days=1)).isoformat(),
+            'end_datetime': (now + timedelta(days=1, hours=2)).isoformat()
+        }
+        serializer = EventSerializer(data=data)
+        assert serializer.is_valid()
+        event = serializer.save()
+        # Bleach removes HTML tags but preserves text content
+        assert '<script>' not in event.name
+        assert '</script>' not in event.name
+        assert 'Safe Event Name' in event.name
+
+    def test_serializer_strips_html_from_location(self):
+        # Test that HTML tags are stripped from location field
+        now = timezone.now()
+        data = {
+            'name': 'Test Event',
+            'start_datetime': (now + timedelta(days=1)).isoformat(),
+            'end_datetime': (now + timedelta(days=1, hours=2)).isoformat(),
+            'location': '<img src="x" onerror="alert(1)">Safe location'
+        }
+        serializer = EventSerializer(data=data)
+        assert serializer.is_valid()
+        event = serializer.save()
+        assert '<img' not in event.location
+        assert 'onerror' not in event.location
+        assert 'Safe location' in event.location
+
+    def test_serializer_strips_html_from_notes(self):
+        # Test that HTML tags are stripped from notes field
+        now = timezone.now()
+        data = {
+            'name': 'Test Event',
+            'start_datetime': (now + timedelta(days=1)).isoformat(),
+            'end_datetime': (now + timedelta(days=1, hours=2)).isoformat(),
+            'notes': '<div>Safe notes</div>'
+        }
+        serializer = EventSerializer(data=data)
+        assert serializer.is_valid()
+        event = serializer.save()
+        assert '<div>' not in event.notes
+        assert 'Safe notes' in event.notes
+
 @pytest.mark.django_db
 class TestEventAPI:
     def test_list_events(self, authenticated_staff_client, sample_event):
