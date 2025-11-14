@@ -576,3 +576,8 @@
 ### SCRUM-88 reverts previous change
 
 - reverts previous change to constraint error check, which it turns out was not working
+
+## SCRUM-89 deployment prep
+
+- add gunicorn and whitenoise to requirements.txt
+- in backend/core/settings.py- add STATIC_ROOT, add whitenoise to middleware, adjust CORS_ALLOWED_ORIGINS to look in env vars
