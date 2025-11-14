@@ -99,11 +99,30 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL')
-    )
-}
+import os
+import dj_database_url
+
+DEBUG = os.getenv("DEBUG", "True").lower() == "true"
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DEBUG:
+    # Docker development
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL
+        )
+    }
+else:
+    # Production
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True   # required for Supabase
+        )
+    }
+
 
 
 # Password validation

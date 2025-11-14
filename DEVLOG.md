@@ -581,3 +581,7 @@
 
 - add gunicorn and whitenoise to requirements.txt
 - in backend/core/settings.py- add STATIC_ROOT, add whitenoise to middleware, adjust CORS_ALLOWED_ORIGINS to look in env vars
+
+## SCRUM-89 database settings
+
+- add database settings for production with Supabase db
