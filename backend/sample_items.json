@@ -33,7 +33,7 @@
       "description": "Bronze goggles with tinted lenses.",
       "quantity": 4,
       "image": "/box.png",
-      "category": 48,
+      "category": 42,
       "color": "Bronze",
       "location": "Workshop"
     }
@@ -59,7 +59,7 @@
       "description": "Tall green feathered headdress for performances.",
       "quantity": 2,
       "image": "/box.png",
-      "category": 28,
+      "category": 22,
       "color": "Green",
       "location": "Costume Storage"
     }
@@ -72,7 +72,7 @@
       "description": "Light-up LED shoulder pads for a futuristic costume.",
       "quantity": 1,
       "image": "/box.png",
-      "category": 31,
+      "category": 25,
       "color": "White",
       "location": "Prop Closet"
     }
@@ -85,7 +85,7 @@
       "description": "Flapper-style dress with black fringe.",
       "quantity": 1,
       "image": "/box.png",
-      "category": 58,
+      "category": 52,
       "color": "Black",
       "location": "Wardrobe Rack"
     }
@@ -98,7 +98,7 @@
       "description": "Fluffy blue tutu skirt.",
       "quantity": 1,
       "image": "/box.png",
-      "category": 57,
+      "category": 51,
       "color": "Blue",
       "location": "Storage Room B"
     }
@@ -111,7 +111,7 @@
       "description": "Extra-long pants for stilt performers.",
       "quantity": 1,
       "image": "/box.png",
-      "category": 49,
+      "category": 43,
       "color": "Red",
       "location": "Workshop"
     }
@@ -124,7 +124,7 @@
       "description": "Plastic skull prop for Halloween events.",
       "quantity": 1,
       "image": "/box.png",
-      "category": 39,
+      "category": 33,
       "color": "White",
       "location": "Decor Closet"
     }
@@ -137,7 +137,7 @@
       "description": "Classic tricorn pirate hat.",
       "quantity": 1,
       "image": "/box.png",
-      "category": 27,
+      "category": 21,
       "color": "Black",
       "location": "Headwear Shelf"
     }
@@ -150,7 +150,7 @@
       "description": "Customizable LED signage.",
       "quantity": 1,
       "image": "/box.png",
-      "category": 45,
+      "category": 39,
       "color": "Multi",
       "location": "Control Room"
     }
@@ -163,7 +163,7 @@
       "description": "Elegant lace gloves for formal events.",
       "quantity": 1,
       "image": "/box.png",
-      "category": 24,
+      "category": 18,
       "color": "White",
       "location": "Accessories Drawer"
     }
@@ -176,7 +176,7 @@
       "description": "Colorful rainbow wig for festivals.",
       "quantity": 1,
       "image": "/box.png",
-      "category": 63,
+      "category": 57,
       "color": "Rainbow",
       "location": "Wig Rack"
     }
@@ -189,7 +189,7 @@
       "description": "Short sequin shrug jacket.",
       "quantity": 1,
       "image": "/box.png",
-      "category": 44,
+      "category": 38,
       "color": "Black",
       "location": "Rack 3"
     }
