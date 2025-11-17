@@ -88,7 +88,7 @@ const Events = () => {
       <div className="flex justify-between">
         <h2 className="text-3xl mb-4">Events</h2>
         <div className="flex justify-end mb-4">
-          <Button href="/events/new">Add New Event</Button>
+          <Button onClick={() => navigate("/events/new")}>Add New Event</Button>
         </div>
       </div>
 

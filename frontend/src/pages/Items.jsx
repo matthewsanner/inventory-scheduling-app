@@ -152,7 +152,7 @@ const Items = () => {
       <div className="flex justify-between">
         <h2 className="text-3xl mb-4">Items</h2>
         <div className="flex justify-end mb-4">
-          <Button href="/items/new">Add New Item</Button>
+          <Button onClick={() => navigate("/items/new")}>Add New Item</Button>
         </div>
       </div>
 
