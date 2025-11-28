@@ -2,6 +2,12 @@
 
 A Django-based web application for managing and scheduling inventory for entertainment productions, packaged with Docker for easy installation and testing
 
+## Check out the Live Demo!
+
+[InventoryFlow](https://inventory-scheduling-app-frontend.onrender.com/)
+
+Note: the backend may take up to a minute to spin up so be patient at the beginning
+
 ## Requirements
 
 **1.** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
