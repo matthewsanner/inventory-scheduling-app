@@ -8,13 +8,15 @@ A Django-based web application for managing and scheduling inventory for enterta
 
 Sign in with the test staff user or test manager user accounts to see data in the app. The test staff user is read-only whereas the test manager user also has the ability to create, update, and delete data entries.
 
-Test staff username: teststaff
-Test staff password: teststaff123
+**Test staff username:** teststaff
 
-Test manager username: testmanager
-Test manager password: testmanager123
+**Test staff password:** teststaff123
 
-Note: the backend may take up to a minute to spin up so be patient at the beginning
+**Test manager username:** testmanager
+
+**Test manager password:** testmanager123
+
+**Note:** the backend may take up to a minute to spin up so be patient at the beginning
 
 ## Requirements
 
