@@ -22,7 +22,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Navbar />
-        <div className="p-4">
+        <div className="p-2 sm:p-4">
           <ErrorBoundary>
             <Routes>
               <Route path="/" element={<Home />} />

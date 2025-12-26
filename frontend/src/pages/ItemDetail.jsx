@@ -88,13 +88,13 @@ const ItemDetail = () => {
 
   return (
     <>
-      <Card className="my-8 max-w-2xl mx-auto p-6 shadow-lg">
-        <h2 className="text-4xl font-bold mb-4 text-gray-800">{item.name}</h2>
+      <Card className="my-4 sm:my-8 max-w-2xl mx-auto p-4 sm:p-6 shadow-lg">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-gray-800">{item.name}</h2>
         {(() => {
           const safeImageUrl = getSafeImageUrl(item.image);
           return safeImageUrl && (
             <div className="flex justify-center mb-4">
-              <img src={safeImageUrl} alt={item.name} className="w-64 h-auto" />
+              <img src={safeImageUrl} alt={item.name} className="w-full max-w-64 h-auto" />
             </div>
           );
         })()}
@@ -106,8 +106,8 @@ const ItemDetail = () => {
           )}
         </p>
 
-        <div className="bg-gray-50 rounded-lg p-4 mb-6 border">
-          <ul className="grid grid-cols-2 gap-4 text-gray-700 text-sm">
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-6 border">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-gray-700 text-sm">
             <li>
               <strong className="block font-semibold">Category:</strong>
               {item.category?.name || ""}
@@ -127,17 +127,19 @@ const ItemDetail = () => {
           </ul>
         </div>
 
-        <div className="flex justify-between gap-4">
-          <Button color="red" onClick={() => setShowDeleteModal(true)}>
-            Delete Item
-          </Button>
-          <Button color="green" onClick={() => navigate(`/items/${id}/edit`)}>
-            Edit Item
-          </Button>
-          <Button color="blue" onClick={() => navigate(`/items/${id}/book`)}>
-            Book Item
-          </Button>
-          <Button color="light" onClick={() => navigate("/items")}>
+        <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-1">
+            <Button color="red" onClick={() => setShowDeleteModal(true)} className="w-full sm:w-auto">
+              Delete Item
+            </Button>
+            <Button color="green" onClick={() => navigate(`/items/${id}/edit`)} className="w-full sm:w-auto">
+              Edit Item
+            </Button>
+            <Button color="blue" onClick={() => navigate(`/items/${id}/book`)} className="w-full sm:w-auto">
+              Book Item
+            </Button>
+          </div>
+          <Button color="light" onClick={() => navigate("/items")} className="w-full sm:w-auto">
             ← Back to Items
           </Button>
         </div>
@@ -150,8 +152,8 @@ const ItemDetail = () => {
         itemName={item.name}
       />
 
-      <Card className="my-8 max-w-3xl mx-auto p-6 shadow-lg">
-        <h3 className="text-2xl font-bold mb-4 text-gray-800">Item Bookings</h3>
+      <Card className="my-4 sm:my-8 max-w-3xl mx-auto p-4 sm:p-6 shadow-lg">
+        <h3 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">Item Bookings</h3>
         {bookingsLoading ? (
           <LoadingCard message="Loading bookings..." />
         ) : bookings.length === 0 ? (

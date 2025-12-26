@@ -49,9 +49,9 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[calc(100vh-8rem)]">
-      <Card className="w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Sign In</h2>
+    <div className="flex justify-center items-center min-h-[calc(100vh-8rem)] px-2">
+      <Card className="w-full max-w-md p-4 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4">Sign In</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {success && (
             <div

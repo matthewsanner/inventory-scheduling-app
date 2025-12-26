@@ -1,10 +1,10 @@
 import { Card, Spinner } from "flowbite-react";
 
 const LoadingCard = ({ message = "Loading..." }) => (
-  <Card className="my-6 max-w-xl mx-auto p-4 shadow-lg rounded-lg">
-    <div className="text-center my-8">
+  <Card className="my-4 sm:my-6 max-w-xl mx-auto p-4 sm:p-6 shadow-lg rounded-lg">
+    <div className="text-center my-6 sm:my-8">
       <Spinner size="xl" />
-      <p className="text-md font-medium text-gray-600">{message}</p>
+      <p className="text-sm sm:text-md font-medium text-gray-600 mt-4">{message}</p>
     </div>
   </Card>
 );

@@ -1,16 +1,16 @@
 const Home = () => {
   return (
     <div
+      className="flex justify-center items-center min-h-[calc(100vh-12rem)] px-2 sm:px-4"
       style={{
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "75vh",
       }}>
       <pre
+        className="text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px]"
         style={{
           fontFamily: "'Courier New', monospace",
-          fontSize: "12px",
           lineHeight: 1.1,
           color: "black",
           whiteSpace: "pre",

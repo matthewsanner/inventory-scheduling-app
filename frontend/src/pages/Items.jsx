@@ -148,17 +148,19 @@ const Items = () => {
     ERROR_CONFIG[errorKey] || ERROR_CONFIG[ErrorKeys.GENERIC_ERROR];
 
   return (
-    <Card className="my-6 w-full max-w-[95%] md:max-w-[90%] lg:max-w-[85%] mx-auto p-2 md:p-4 shadow-lg rounded-lg">
-      <div className="flex justify-between">
-        <h2 className="text-3xl mb-4">Items</h2>
-        <div className="flex justify-end mb-4">
-          <Button onClick={() => navigate("/items/new")}>Add New Item</Button>
+    <Card className="my-4 sm:my-6 w-full max-w-[95%] md:max-w-[90%] lg:max-w-[85%] mx-auto p-2 md:p-4 shadow-lg rounded-lg">
+      <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mb-4">
+        <h2 className="text-2xl sm:text-3xl">Items</h2>
+        <div className="flex justify-end">
+          <Button onClick={() => navigate("/items/new")} className="w-full sm:w-auto">
+            Add New Item
+          </Button>
         </div>
       </div>
 
       {/* Search and Filter Form */}
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg max-w-[1200px] mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="mb-6 p-3 sm:p-4 bg-gray-50 rounded-lg max-w-[1200px] mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <div>
             <Label htmlFor="search">Search</Label>
             <TextInput
@@ -240,8 +242,8 @@ const Items = () => {
               onChange={handleFilterChange}
             />
           </div>
-          <div className="flex items-end justify-end">
-            <Button color="gray" onClick={handleClearFilters}>
+          <div className="flex items-end justify-end sm:col-span-2 lg:col-span-1">
+            <Button color="gray" onClick={handleClearFilters} className="w-full sm:w-auto">
               Clear Filters
             </Button>
           </div>
@@ -306,7 +308,7 @@ const Items = () => {
           </div>
 
           {/* Pagination Controls */}
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-center sm:justify-end mt-4 overflow-x-auto">
             <Pagination
               currentPage={currentPage}
               totalPages={pageCount}

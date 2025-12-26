@@ -94,8 +94,8 @@ const NewEvent = () => {
   }
 
   return (
-    <Card className="my-6 max-w-xl mx-auto p-4 shadow-lg rounded-lg">
-      <h2 className="text-3xl mb-4">Add New Event</h2>
+    <Card className="my-4 sm:my-6 max-w-xl mx-auto p-3 sm:p-4 shadow-lg rounded-lg">
+      <h2 className="text-2xl sm:text-3xl mb-4">Add New Event</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label htmlFor="name">Name</Label>
@@ -164,11 +164,11 @@ const NewEvent = () => {
             disabled={submitting}
           />
         </div>
-        <div className="flex justify-between pt-4">
-          <Button type="submit" disabled={submitting}>
+        <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0 pt-4">
+          <Button type="submit" disabled={submitting} className="w-full sm:w-auto">
             {submitting ? "Adding event..." : "Add Event"}
           </Button>
-          <Button color="light" onClick={() => navigate("/events")}>
+          <Button color="light" onClick={() => navigate("/events")} className="w-full sm:w-auto">
             Cancel
           </Button>
         </div>
