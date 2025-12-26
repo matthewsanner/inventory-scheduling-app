@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "flowbite-react";
 import { HiUser, HiMenu, HiX } from "react-icons/hi";
@@ -7,10 +7,12 @@ import { HiUser, HiMenu, HiX } from "react-icons/hi";
 const Navbar = () => {
   const { isAuthenticated, logout, user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     setIsMenuOpen(false);
+    navigate("/");
   };
 
   const toggleMenu = () => {
@@ -25,7 +27,7 @@ const Navbar = () => {
     <nav className="bg-blue-900 text-white p-3 md:p-4">
       <div className="flex justify-between items-center">
         <h1 className="text-lg md:text-xl font-bold">InventoryFlow</h1>
-        
+
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-4">
           <Link to="/" className="hover:underline">
